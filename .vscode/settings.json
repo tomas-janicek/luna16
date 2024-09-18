@@ -1,0 +1,51 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnType": true
+    },
+    "files.watcherExclude": {
+        "**/cache": true,
+        "**/data": true,
+        "**/data_downloaded": true,
+        "**/runs": true
+    },
+    "jupyter.notebookFileRoot": "${workspaceFolder}",
+    "markdown.copyFiles.destination": {
+        "**": "attachments/"
+    },
+    // Markdown Styles are defined only as a test if somethinh similiar could be done in Jupyter notebook
+    "markdown.styles": [
+        ".vscode/Style.css"
+    ],
+    "markdown.updateLinksOnFileMove.enabled": "prompt",
+    "markdown.validate.enabled": true,
+    "markdown.validate.fileLinks.enabled": "warning",
+    "notebook.formatOnSave.enabled": true,
+    "notebook.insertFinalNewline": false,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.exclude": [
+        "**/runs",
+        "**/cache",
+        "**/data",
+        "**/data_downloaded",
+        "**/images"
+    ],
+    // "explorer.excludeGitIgnore": true
+    "python.analysis.ignore": [
+        "**/runs",
+        "**/cache",
+        "**/data",
+        "**/data_downloaded",
+        "**/images"
+    ],
+    "python.analysis.indexing": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "python.testing.pytestArgs": [
+        "ml"
+    ],
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "ruff.lint.run": "onType"
+}

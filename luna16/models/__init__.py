@@ -1,4 +1,5 @@
-from .nodule_classfication import LunaModel
-from .nodule_segmentation import UNet, UNetNormalized
+from .base import BaseModel
+from .nodule_classification_model import NoduleClassificationModel
+from .nodule_segmentation_model import NoduleSegmentationModel
 
-__all__ = ["LunaModel", "UNet", "UNetNormalized"]
+__all__ = ["BaseModel", "NoduleClassificationModel", "NoduleSegmentationModel"]

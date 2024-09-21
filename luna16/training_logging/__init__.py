@@ -7,6 +7,8 @@ from .base import (
     TrainingProgressLoggerWrapper,
 )
 from .dto import NumberValue, Value
+from .handlers import LOG_MESSAGE_HANDLERS
+from .log_message_handler import LogMessageHandler
 from .logger_wrappers import (
     ConsoleLoggerWrapper,
     MlFlowLoggerWrapper,
@@ -28,4 +30,6 @@ __all__ = [
     "TrainingProgressLoggerWrapper",
     "NumberValue",
     "Value",
+    "LogMessageHandler",
+    "LOG_MESSAGE_HANDLERS",
 ]

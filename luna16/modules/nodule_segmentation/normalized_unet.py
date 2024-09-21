@@ -1,18 +1,36 @@
 import math
-import typing
 
 import torch
 from torch import nn as nn
+
+from luna16 import enums
 
 from .unet import UNet
 
 
 class UNetNormalized(nn.Module):
-    def __init__(self, **kwargs: typing.Any) -> None:
+    def __init__(
+        self,
+        in_channels: int,
+        n_classes: int,
+        depth: int,
+        wf: int,
+        padding: bool,
+        batch_norm: bool,
+        up_mode: enums.UpMode,
+    ) -> None:
         super().__init__()
 
-        self.input_batchnorm = nn.BatchNorm2d(num_features=kwargs["in_channels"])
-        self.unet = UNet(**kwargs)
+        self.input_batchnorm = nn.BatchNorm2d(num_features=in_channels)
+        self.unet = UNet(
+            in_channels=in_channels,
+            n_classes=n_classes,
+            depth=depth,
+            wf=wf,
+            padding=padding,
+            batch_norm=batch_norm,
+            up_mode=up_mode,
+        )
         self.final = nn.Sigmoid()
 
         self._init_weights()

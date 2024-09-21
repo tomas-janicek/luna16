@@ -32,13 +32,13 @@ from ... import enums
 class UNet(nn.Module):
     def __init__(
         self,
-        in_channels: int = 1,
-        n_classes: int = 2,
-        depth: int = 5,
-        wf: int = 6,
-        padding: bool = False,
-        batch_norm: bool = False,
-        up_mode: enums.UpMode = enums.UpMode.UP_CONV,
+        in_channels: int,
+        n_classes: int,
+        depth: int,
+        wf: int,
+        padding: bool,
+        batch_norm: bool,
+        up_mode: enums.UpMode,
     ) -> None:
         """
         Implementation of

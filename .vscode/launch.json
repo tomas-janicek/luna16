@@ -58,6 +58,24 @@
             ]
         },
         {
+            "name": "LuNA Old Segmentation Training",
+            "consoleTitle": "LuNA Old Segmentation Training",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "train_luna_segmentation_old",
+                "--batch-size=5",
+                "--epochs=2",
+                "--training-length=10",
+                // "--validation-stride=1",
+            ]
+        },
+        {
             "name": "PyTest",
             "consoleTitle": "PyTest",
             "type": "debugpy",

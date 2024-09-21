@@ -10,7 +10,7 @@ from . import base
 T = typing.TypeVar("T")
 
 
-# TODO: implementy tqdm and use it's progress bar
+# TODO: implement tqdm and use it's progress bar
 class BatchIteratorProvider(base.BaseIteratorProvider):
     def __init__(
         self,

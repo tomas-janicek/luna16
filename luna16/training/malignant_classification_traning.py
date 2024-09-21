@@ -4,18 +4,21 @@ from luna16 import (
     batch_iterators,
     datasets,
     models,
-    modules,
     services,
     trainers,
     training_logging,
 )
+from luna16.modules.nodule_classfication.models import LunaModel
+
+from . import model_saver
 
 
-def luna_classification_launcher(
+def luna_malignant_classification_launcher(
     epochs: int,
     batch_size: int,
     validation_stride: int,
     num_workers: int,
+    state_name: str,
     training_name: str,
     registry: services.ServiceContainer,
     training_length: int | None = None,
@@ -26,7 +29,12 @@ def luna_classification_launcher(
     batch_iterator = batch_iterators.BatchIteratorProvider(
         batch_loggers=classification_logger.batch_loggers
     )
-    module = modules.LunaModel()
+    classification_model_saver = model_saver.ModelSaver(
+        model_name="classification",
+    )
+    module = classification_model_saver.load_model(
+        model=LunaModel(), state_name=state_name, n_excluded_blocks=2
+    )
     model = models.NoduleClassificationModel(
         model=module,
         optimizer=torch.optim.SGD(module.parameters(), lr=0.001, momentum=0.99),

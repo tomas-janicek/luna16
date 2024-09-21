@@ -6,8 +6,10 @@ import SimpleITK as sitk
 from diskcache import FanoutCache
 from numpy import typing as np_typing
 
-from luna16 import dto, enums, utils
+from luna16 import dto, enums
 from luna16.settings import settings
+
+from . import candidates
 
 _log = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ class Ct:
         self.voxel_size = voxel_size
         self.transformation_direction = transformation_direction
 
-        self.candidates = utils.get_grouped_candidates_with_malignancy_info()[
+        self.candidates = candidates.get_grouped_candidates_with_malignancy_info()[
             self.series_uid
         ]
         self.positive_candidates = [

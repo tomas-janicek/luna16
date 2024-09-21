@@ -6,7 +6,9 @@ import torch
 import torch.nn.functional as F
 from torch.utils import data as data_utils
 
-from luna16 import augmentations, ct, dto, utils
+from luna16 import augmentations, dto
+
+from . import utils
 
 _log = logging.getLogger(__name__)
 
@@ -89,7 +91,7 @@ class LunaDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
 
         cutout_shape = dto.CoordinatesIRC(index=32, row=48, col=48)
         candidate_array, _positive_candidate_array, center_irc = (
-            ct.Ct.create_ct_and_get_raw_image(
+            utils.Ct.create_ct_and_get_raw_image(
                 series_uid=candidate_info.series_uid,
                 center=candidate_info.center,
                 cutout_shape=cutout_shape,

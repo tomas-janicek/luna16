@@ -1,14 +1,11 @@
-from .base import BaseTrainingAPI, ModelSaver
+from .malignant_classification_traning import luna_malignant_classification_launcher
+from .model_saver import ModelSaver
 from .nodule_classification_training import luna_classification_launcher
-from .nodule_classification_training_old import LunaTrainingAPI
 from .nodule_segmentation_training import luna_segmentation_launcher
-from .nodule_segmentation_training_old import SegmentationTrainingAPI
 
 __all__ = [
-    "BaseTrainingAPI",
-    "LunaTrainingAPI",
-    "SegmentationTrainingAPI",
     "ModelSaver",
     "luna_classification_launcher",
     "luna_segmentation_launcher",
+    "luna_malignant_classification_launcher",
 ]

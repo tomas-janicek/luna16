@@ -13,9 +13,6 @@ from luna16.settings import settings
 _log = logging.getLogger(__name__)
 
 
-class BaseTrainingAPI(typing.Protocol): ...
-
-
 ModuleT = typing.TypeVar("ModuleT", bound=nn.Module)
 
 

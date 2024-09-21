@@ -4,11 +4,13 @@ import typing
 
 import matplotlib
 
+from luna16.datasets import utils
+
 matplotlib.use("nbagg")
 
 import matplotlib.pyplot as plt
 
-from luna16 import ct, datasets, dto
+from luna16 import datasets, dto
 
 _log = logging.getLogger(__name__)
 
@@ -38,7 +40,7 @@ def show_candidate(series_uid: str, **kwargs: typing.Any) -> None:
     luna = datasets.LunaDataset(series_uids=[series_uid], **kwargs)
     batch_index = get_first_positive_sample(luna)
 
-    entire_ct_scan = ct.Ct.read_and_create_from_image(series_uid=series_uid)
+    entire_ct_scan = utils.Ct.read_and_create_from_image(series_uid=series_uid)
     slice_of_ct, is_nodule_tensor, series_uid, center_irc = luna[batch_index]
     slice_of_ct_image = slice_of_ct[0].numpy()
 

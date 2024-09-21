@@ -17,9 +17,6 @@ from .. import dto
 from . import base, logger_wrappers
 from . import dto as training_dto
 
-if typing.TYPE_CHECKING:
-    from .. import training
-
 T = typing.TypeVar("T")
 
 
@@ -56,7 +53,7 @@ class ClassificationLoggingAdapter:
     def log_start_training(
         self,
         *,
-        training_api: "training.BaseTrainingAPI",
+        training_api: typing.Any,
         n_epochs: int,
         batch_size: int,
         train_dl: data_utils.DataLoader[T],
@@ -175,7 +172,7 @@ class SegmentationLoggingAdapter:
     def log_start_training(
         self,
         *,
-        training_api: "training.BaseTrainingAPI",
+        training_api: typing.Any,
         n_epochs: int,
         batch_size: int,
         train_dl: data_utils.DataLoader[T],

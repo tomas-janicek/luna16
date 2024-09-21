@@ -14,7 +14,6 @@ class Trainer(base.BaseTrainer[CandidateT]):
         | training_logging.SegmentationLoggingAdapter,
     ) -> None:
         self.classification_logger = logger
-        self.n_processed_training_samples = 0
 
     def fit(
         self,

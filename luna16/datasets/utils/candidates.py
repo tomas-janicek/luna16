@@ -5,7 +5,7 @@ from diskcache import FanoutCache
 
 from luna16.settings import settings
 
-from .. import dto
+from ... import dto
 from . import utils
 
 _log = logging.getLogger(__name__)

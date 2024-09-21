@@ -5,7 +5,9 @@ import numpy as np
 import torch
 from torch.utils import data as data_utils
 
-from luna16 import ct, dto, utils
+from luna16 import dto
+
+from . import utils
 
 _log = logging.getLogger(__name__)
 
@@ -60,7 +62,7 @@ class LunaSegmentationDataset(data_utils.Dataset[dto.LunaSegmentationCandidate])
         # slices that contain any voxel marked as nodule.
         self.series_uid__slice_index: list[tuple[str, int]] = []
         for series_uid in self.series_uids:
-            n_ct_slices, positive_indexes = ct.Ct.read_and_create_from_image(
+            n_ct_slices, positive_indexes = utils.Ct.read_and_create_from_image(
                 series_uid
             ).get_sample_size()
 
@@ -112,7 +114,7 @@ class LunaSegmentationDataset(data_utils.Dataset[dto.LunaSegmentationCandidate])
     def get_full_ct_candidate(
         self, series_uid: str, slice_index: int
     ) -> dto.LunaSegmentationCandidate:
-        ct_scan = ct.Ct.read_and_create_from_image(series_uid)
+        ct_scan = utils.Ct.read_and_create_from_image(series_uid)
         candidate = torch.zeros((self.n_context_slices * 2 + 1, 512, 512))
 
         start_index = slice_index - self.n_context_slices
@@ -154,7 +156,7 @@ class LunaSegmentationDataset(data_utils.Dataset[dto.LunaSegmentationCandidate])
         We believe the whole-slice training was unstable essentially due to a class-balancing issue.
         Since each nodule is so small compared to the whole CT slice, we were right back in
         a needle-in-a-haystack situation"""
-        ct_cutout, positive_mask, center = ct.Ct.create_ct_and_get_raw_image(
+        ct_cutout, positive_mask, center = utils.Ct.create_ct_and_get_raw_image(
             series_uid=candidate_info.series_uid,
             center=candidate_info.center,
             cutout_shape=dto.CoordinatesIRC(index=7, row=96, col=96),

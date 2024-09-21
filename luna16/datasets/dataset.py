@@ -1,6 +1,6 @@
 from luna16 import augmentations, dto
 
-from .nodule_classification_rationed import LunaRationedDataset
+from .nodule_classification_rationed import LunaRationedDataset, MalignantLunaDataset
 from .nodule_segmentation import LunaSegmentationDataset
 
 
@@ -27,6 +27,39 @@ def create_pre_configured_luna_rationed(
         filters=filters,
     )
     validation = LunaRationedDataset(
+        ratio=ratio,
+        train=False,
+        validation_stride=validation_stride,
+        training_length=training_length,
+        transformations=transformations,
+        filters=filters,
+    )
+    return train, validation
+
+
+def create_pre_configured_luna_malignant(
+    validation_stride: int,
+    training_length: int | None = None,
+) -> tuple[MalignantLunaDataset, MalignantLunaDataset]:
+    transformations: list[augmentations.Transformation] = [
+        augmentations.Flip(),
+        augmentations.Offset(offset=0.1),
+        augmentations.Scale(scale=0.2),
+        augmentations.Rotate(),
+    ]
+    filters: list[augmentations.Filter] = [
+        augmentations.Noise(noise=25.0),
+    ]
+    ratio = dto.LunaMalignantRatio(benign=1, malignant=1, not_module=1)
+    train = MalignantLunaDataset(
+        ratio=ratio,
+        train=True,
+        validation_stride=validation_stride,
+        training_length=training_length,
+        transformations=transformations,
+        filters=filters,
+    )
+    validation = MalignantLunaDataset(
         ratio=ratio,
         train=False,
         validation_stride=validation_stride,

@@ -13,9 +13,6 @@ from luna16 import enums
 
 from . import base, dto
 
-if typing.TYPE_CHECKING:
-    from .. import training
-
 _log = logging.getLogger(__name__)
 
 
@@ -30,7 +27,7 @@ class ConsoleLoggerWrapper(
     def open_logger(
         self,
         *,
-        training_api: "training.BaseTrainingAPI",
+        training_api: typing.Any,
         n_epochs: int,
         batch_size: int,
         train_dl: data_utils.DataLoader[T],

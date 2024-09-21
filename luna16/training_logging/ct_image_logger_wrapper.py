@@ -7,7 +7,8 @@ from torch import nn
 from torch.utils import data as data_utils
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from luna16 import ct, enums
+from luna16 import enums
+from luna16.datasets import utils
 
 from .. import dto
 from . import base
@@ -42,7 +43,7 @@ class CtImageLoggerWrapper(base.BaseLoggerWrapper):
         # Always takes the first n CT scans so we can watch process of our training on them.
         first_12_series_uids = sorted(dataloader.dataset.series_uids)[:12]  # type: ignore
         for series_index, series_uid in enumerate(first_12_series_uids):
-            ct_scan = ct.Ct.read_and_create_from_image(series_uid)
+            ct_scan = utils.Ct.read_and_create_from_image(series_uid)
 
             # Six slices are logged because TensorBoard can visualize 12 images on one page.
             # Thus we get 6 label slices and 6 prediction slices on one page
@@ -144,7 +145,7 @@ class CtImageLoggerWrapper(base.BaseLoggerWrapper):
         self,
         dataloader: data_utils.DataLoader[dto.LunaSegmentationCandidate],
         series_uid: str,
-        ct_scan: ct.Ct,
+        ct_scan: utils.Ct,
         slice_index: int,
         model: nn.Module,
         device: torch.device,

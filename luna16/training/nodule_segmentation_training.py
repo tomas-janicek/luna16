@@ -7,6 +7,7 @@ from luna16 import (
     enums,
     models,
     modules,
+    services,
     trainers,
     training_logging,
 )
@@ -17,7 +18,8 @@ def luna_segmentation_launcher(
     batch_size: int,
     validation_stride: int,
     num_workers: int,
-    training_name: str = "Segmentation",
+    training_name: str,
+    registry: services.ServiceContainer,
     training_length: int | None = None,
 ) -> None:
     segmentation_logger = training_logging.SegmentationLoggingAdapter(

@@ -3,7 +3,7 @@ import typing
 import torch
 from torch.utils import data as data_utils
 
-from luna16.utils.utils import get_device
+from luna16.utils import get_device
 
 CandidateT = typing.TypeVar("CandidateT")
 

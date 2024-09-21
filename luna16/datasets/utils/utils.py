@@ -2,11 +2,10 @@ import functools
 import logging
 
 import pandas as pd
-import torch
 
 from luna16.settings import settings
 
-from .. import dto
+from ... import dto
 
 _log = logging.getLogger(__name__)
 
@@ -38,23 +37,3 @@ def create_annotations() -> pd.DataFrame:
 def create_annotations_with_malignancy() -> pd.DataFrame:
     annotations_path = settings.LUNA_16_DATA_DIR / "annotations_with_malignancy.csv"
     return pd.read_csv(filepath_or_buffer=annotations_path)
-
-
-def get_device() -> tuple[torch.device, int]:
-    """Function return pytorch device that can be used
-    for calculation in current running system and number of
-    GPU devices it can use.
-
-    Returns:
-        tuple[torch.device, int]: Tuple consisting from torch.device and number of available GPUs
-    """
-    if torch.cuda.is_available():
-        # `torch.cuda` device enables high-performance training on GPU
-        # Nvidia GPU.
-        return torch.device("cuda"), torch.cuda.device_count()
-    elif torch.backends.mps.is_available():
-        # `torch.backends.mps` device enables high-performance training on GPU
-        # for MacOS devices with Metal programming framework.
-        return torch.device("mps"), 1
-    else:
-        return torch.device("cpu"), 1

@@ -1,4 +1,5 @@
 import typing
+from datetime import datetime
 
 from luna16 import datasets, models, training_logging
 
@@ -10,10 +11,11 @@ CandidateT = typing.TypeVar("CandidateT")
 class Trainer(base.BaseTrainer[CandidateT]):
     def __init__(
         self,
-        logger: training_logging.ClassificationLoggingAdapter
-        | training_logging.SegmentationLoggingAdapter,
+        name: str,
+        logger: training_logging.LogMessageHandler,
     ) -> None:
-        self.classification_logger = logger
+        self.name = name
+        self.logger = logger
 
     def fit(
         self,
@@ -22,30 +24,45 @@ class Trainer(base.BaseTrainer[CandidateT]):
         epochs: int,
         data_module: datasets.DataModule[CandidateT],
     ) -> None:
-        self.classification_logger.log_start_training(
-            training_api=self,
-            n_epochs=epochs,
-            batch_size=data_module.batch_size,
-            train_dl=data_module.get_training_dataloader(),
-            validation_dl=data_module.get_validation_dataloader(),
+        self.logger.registry.call_all_creators(
+            training_name=self.name, training_start_time=datetime.now()
         )
+        log_start_training = training_logging.LogStart(training_description=str(model))
+        self.logger.handle_message(log_start_training)
 
         for epoch in range(1, epochs + 1):
             self.fit_epoch(
-                model=model,
                 epoch=epoch,
+                epochs=epochs,
+                model=model,
                 data_module=data_module,
             )
 
     def fit_epoch(
         self,
         *,
-        model: models.BaseModel[CandidateT],
         epoch: int,
+        epochs: int,
+        model: models.BaseModel[CandidateT],
         data_module: datasets.DataModule[CandidateT],
     ) -> None:
-        self.classification_logger.log_epoch(epoch=epoch)
+        log_epoch = training_logging.LogEpoch(
+            epoch=epoch,
+            n_epochs=epochs,
+            batch_size=data_module.batch_size,
+            training_length=data_module.training_len,
+            validation_length=data_module.validation_len,
+        )
+        self.logger.handle_message(log_epoch)
         train_dl = data_module.get_training_dataloader()
         validation_dl = data_module.get_validation_dataloader()
 
         model.fit_epoch(epoch=epoch, train_dl=train_dl, validation_dl=validation_dl)
+
+    def __repr__(self) -> str:
+        _repr = (
+            f"{self.__class__.__name__}("
+            f"name={self.name}, "
+            f"logger={self.logger.__class__.__name__})"
+        )
+        return _repr

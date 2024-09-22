@@ -15,7 +15,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
         model: nn.Module,
         optimizer: torch.optim.Optimizer,
         batch_iterator: BatchIteratorProvider,
-        classification_logger: training_logging.SegmentationLoggingAdapter,
+        logger: training_logging.LogMessageHandler,
         validation_cadence: int = 5,
         recall_loss_weight: float = 8,
         augmentation_model: augmentations.SegmentationAugmentation | None = None,
@@ -29,7 +29,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
         self.validation_cadence = validation_cadence
         self.batch_iterator = batch_iterator
         self.recall_loss_weight = recall_loss_weight
-        self.logger = classification_logger
+        self.logger = logger
         self.augmentation_model = augmentation_model
 
     def fit_epoch(
@@ -73,7 +73,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
             metrics=validation_metrics,
         )
 
-        self.logger.log_images(
+        val_log_images = training_logging.LogImages(
             epoch=epoch,
             mode=enums.Mode.TRAINING,
             n_processed_samples=n_processed_training_samples,
@@ -81,7 +81,8 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
             model=self.model,
             device=self.device,
         )
-        self.logger.log_images(
+        self.logger.handle_message(val_log_images)
+        train_log_images = training_logging.LogImages(
             epoch=epoch,
             mode=enums.Mode.VALIDATING,
             n_processed_samples=n_processed_training_samples,
@@ -89,6 +90,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
             model=self.model,
             device=self.device,
         )
+        self.logger.handle_message(train_log_images)
 
     def do_training(
         self,
@@ -224,7 +226,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
         mode: enums.Mode,
         metrics: dto.SegmentationBatchMetrics,
     ) -> float:
-        epoch_metric: dict[str, training_logging.NumberValue] = {}
+        epoch_metric: dict[str, dto.NumberValue] = {}
 
         n_true_positives = metrics.true_positive.sum(0).item()
         n_false_negative = metrics.false_negative.sum(0).item()
@@ -232,24 +234,24 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
         n_all_labels = (n_true_positives + n_false_negative) or 1.0
 
         loss = metrics.loss.mean().item()
-        epoch_metric["loss/all"] = training_logging.NumberValue(
+        epoch_metric["loss/all"] = dto.NumberValue(
             name="Loss", value=loss, formatted_value=f"{loss:-5.4f}"
         )
         true_positives = n_true_positives / n_all_labels
-        epoch_metric["percent_all/tp"] = training_logging.NumberValue(
+        epoch_metric["percent_all/tp"] = dto.NumberValue(
             name="True Positive",
             value=true_positives,
             formatted_value=f"{true_positives:.0%}",
         )
         false_negatives = n_false_negative / n_all_labels
-        epoch_metric["percent_all/fn"] = training_logging.NumberValue(
+        epoch_metric["percent_all/fn"] = dto.NumberValue(
             name="False Negative",
             value=false_negatives,
             formatted_value=f"{false_negatives:.0%}",
         )
 
         false_positive = n_false_positive / n_all_labels
-        epoch_metric["percent_all/fp"] = training_logging.NumberValue(
+        epoch_metric["percent_all/fp"] = dto.NumberValue(
             name="False Positive",
             value=false_positive,
             formatted_value=f"{false_positive:.0%}",
@@ -257,22 +259,23 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
 
         precision = n_true_positives / ((n_true_positives + n_false_positive) or 1)
         recall = n_true_positives / ((n_true_positives + n_false_negative) or 1)
-        epoch_metric["pr/precision"] = training_logging.NumberValue(
+        epoch_metric["pr/precision"] = dto.NumberValue(
             name="Precision", value=precision, formatted_value=f"{precision:-5.4f}"
         )
-        epoch_metric["pr/recall"] = training_logging.NumberValue(
+        epoch_metric["pr/recall"] = dto.NumberValue(
             name="Recall", value=recall, formatted_value=f"{recall:-5.4f}"
         )
         f1_score = 2 * (precision * recall) / ((precision + recall) or 1)
-        epoch_metric["pr/f1_score"] = training_logging.NumberValue(
+        epoch_metric["pr/f1_score"] = dto.NumberValue(
             name="F1 Score", value=f1_score, formatted_value=f"{f1_score:-5.4f}"
         )
 
-        self.logger.log_metrics(
+        log_metrics = training_logging.LogMetrics(
             epoch=epoch,
             mode=mode,
             n_processed_samples=n_processed_training_samples,
             values=epoch_metric,
         )
+        self.logger.handle_message(log_metrics)
 
         return recall

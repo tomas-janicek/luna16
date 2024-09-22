@@ -5,10 +5,10 @@ import typing
 
 import mlflow
 
-from luna16 import services
+from luna16 import dto, services
 from luna16.training_logging import log_messages
 
-from . import dto, utils
+from .. import utils
 
 _log = logging.getLogger(__name__)
 
@@ -153,18 +153,3 @@ def log_metrics_to_mlflow(
             value=float(value.value),
             step=message.n_processed_samples,
         )
-
-
-LOG_MESSAGE_HANDLERS: log_messages.LogMessageHandlersConfig = {
-    log_messages.LogStart: (log_start_to_console,),
-    log_messages.LogMetrics: (
-        log_metrics_to_console,
-        log_metrics_to_tensorboard,
-        log_metrics_to_mlflow,
-    ),
-    log_messages.LogEpoch: (log_epoch_to_console,),
-    log_messages.LogBatch: (log_batch_to_console,),
-    log_messages.LogBatchStart: (log_batch_start_to_console,),
-    log_messages.LogBatchEnd: (log_batch_end_to_console,),
-    log_messages.LogResult: (log_results_to_tensorboard,),
-}

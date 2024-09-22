@@ -9,13 +9,11 @@ from torch import nn
 from torch.utils import data as data_utils
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from luna16 import enums
+from luna16 import dto, enums
 from luna16.settings import settings
 from luna16.training_logging import ct_image_logger_wrapper
 
-from .. import dto
 from . import base, logger_wrappers
-from . import dto as training_dto
 
 T = typing.TypeVar("T")
 
@@ -35,9 +33,7 @@ class ClassificationLoggingAdapter:
             self.ml_flow_logger,
             self.tensor_board_logger,
         ]
-        self.metrics_loggers: list[
-            base.MetricsLoggerWrapper[training_dto.NumberValue]
-        ] = [
+        self.metrics_loggers: list[base.MetricsLoggerWrapper[dto.NumberValue]] = [
             self.console_logger,
             self.ml_flow_logger,
             self.tensor_board_logger,
@@ -101,7 +97,7 @@ class ClassificationLoggingAdapter:
     def log_metrics(
         self,
         *,
-        values: dict[str, training_dto.NumberValue],
+        values: dict[str, dto.NumberValue],
         epoch: int,
         n_processed_samples: int,
         mode: enums.Mode,
@@ -160,9 +156,7 @@ class SegmentationLoggingAdapter:
         self.training_process_loggers: list[base.TrainingProgressLoggerWrapper] = [
             self.console_logger
         ]
-        self.metrics_loggers: list[
-            base.MetricsLoggerWrapper[training_dto.NumberValue]
-        ] = [
+        self.metrics_loggers: list[base.MetricsLoggerWrapper[dto.NumberValue]] = [
             self.console_logger,
             self.ml_flow_logger,
             self.tensor_board_logger,
@@ -224,7 +218,7 @@ class SegmentationLoggingAdapter:
     def log_metrics(
         self,
         *,
-        values: dict[str, training_dto.NumberValue],
+        values: dict[str, dto.NumberValue],
         epoch: int,
         n_processed_samples: int,
         mode: enums.Mode,

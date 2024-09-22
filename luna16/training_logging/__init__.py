@@ -6,9 +6,18 @@ from .base import (
     ResultLoggerWrapper,
     TrainingProgressLoggerWrapper,
 )
-from .dto import NumberValue, Value
 from .handlers import LOG_MESSAGE_HANDLERS
 from .log_message_handler import LogMessageHandler
+from .log_messages import (
+    LogBatch,
+    LogBatchEnd,
+    LogBatchStart,
+    LogEpoch,
+    LogImages,
+    LogMetrics,
+    LogResult,
+    LogStart,
+)
 from .logger_wrappers import (
     ConsoleLoggerWrapper,
     MlFlowLoggerWrapper,
@@ -28,8 +37,15 @@ __all__ = [
     "MetricsLoggerWrapper",
     "ResultLoggerWrapper",
     "TrainingProgressLoggerWrapper",
-    "NumberValue",
-    "Value",
     "LogMessageHandler",
     "LOG_MESSAGE_HANDLERS",
+    "LogMetrics",
+    "LogStart",
+    "LogEpoch",
+    "LogBatchStart",
+    "LogBatch",
+    "LogBatchEnd",
+    "LogResult",
+    "LogImages",
+    "LogMessageHandler",
 ]

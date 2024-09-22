@@ -31,8 +31,18 @@ def create_validation_writer(
     return validation_writer
 
 
-def create_mlflow_experiment(training_name: str) -> mlflow.ActiveRun:
+def clean_tensorboard_writer(writer: SummaryWriter) -> None:
+    writer.close()
+
+
+def create_mlflow_experiment(
+    training_name: str, **kwargs: typing.Any
+) -> mlflow.ActiveRun:
     mlflow.set_tracking_uri(uri=settings.ML_FLOW_URL)
     experiment = mlflow.set_experiment(experiment_name=training_name)
     active_run = mlflow.start_run(experiment_id=experiment.experiment_id)
     return active_run
+
+
+def clean_mlflow_experiment(active_run: mlflow.ActiveRun) -> None:
+    mlflow.end_run()

@@ -1,4 +1,5 @@
 import typing
+from dataclasses import dataclass
 
 import numpy as np
 import pydantic
@@ -244,3 +245,16 @@ class ClassificationBatchMetrics:
 
     def dataset_length(self) -> int:
         return self.labels.shape[0]
+
+
+@dataclass
+class Value:
+    name: str
+    value: typing.Any
+
+
+@dataclass
+class NumberValue(Value):
+    name: str
+    value: float | np.float_
+    formatted_value: str

@@ -14,11 +14,11 @@ T = typing.TypeVar("T")
 class BatchIteratorProvider(base.BaseIteratorProvider):
     def __init__(
         self,
-        batch_loggers: list[training_logging.BatchLoggerWrapper],
+        logger: training_logging.LogMessageHandler,
         logging_backoff: int = 4,
         max_length: int | None = None,
     ) -> None:
-        self.batch_loggers = batch_loggers
+        self.logger = logger
         self.logging_backoff = logging_backoff
         self.max_length = max_length
 
@@ -27,21 +27,25 @@ class BatchIteratorProvider(base.BaseIteratorProvider):
     ) -> typing.Iterator[tuple[int, T]]:
         iteration_length = self.max_length or len(enumerable)
 
-        for logger in self.batch_loggers:
-            logger.log_bach_start(epoch=epoch, mode=mode, batch_size=iteration_length)
+        log_bach_start = training_logging.LogBatchStart(
+            epoch=epoch, mode=mode, batch_size=iteration_length
+        )
+        self.logger.handle_message(log_bach_start)
 
         started_at = time.time()
         for current_index, item in enumerate(enumerable):
             yield (current_index, item)
             if current_index % self.logging_backoff == 0:
-                for logger in self.batch_loggers:
-                    logger.log_batch(
-                        epoch=epoch,
-                        mode=mode,
-                        batch_size=iteration_length,
-                        batch_index=current_index,
-                        started_at=started_at,
-                    )
+                log_start = training_logging.LogBatch(
+                    epoch=epoch,
+                    mode=mode,
+                    batch_size=iteration_length,
+                    batch_index=current_index,
+                    started_at=started_at,
+                )
+                self.logger.handle_message(log_start)
 
-        for logger in self.batch_loggers:
-            logger.log_bach_end(epoch=epoch, mode=mode, batch_size=iteration_length)
+        log_bach_end = training_logging.LogBatchEnd(
+            epoch=epoch, mode=mode, batch_size=iteration_length
+        )
+        self.logger.handle_message(log_bach_end)

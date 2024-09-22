@@ -16,7 +16,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         model: nn.Module,
         optimizer: torch.optim.Optimizer,
         batch_iterator: BatchIteratorProvider,
-        classification_logger: training_logging.ClassificationLoggingAdapter,
+        logger: training_logging.LogMessageHandler,
         validation_cadence: int = 5,
     ) -> None:
         self.device, n_gpu_devices = utils.get_device()
@@ -27,7 +27,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         self.optimizer = optimizer
         self.validation_cadence = validation_cadence
         self.batch_iterator = batch_iterator
-        self.classification_logger = classification_logger
+        self.logger = logger
 
     def fit_epoch(
         self,
@@ -157,21 +157,21 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         false_positive_count = negative_count - true_negative_count
         false_negative_count = positive_count - true_positive_count
 
-        epoch_metric: dict[str, training_logging.NumberValue] = {}
+        epoch_metric: dict[str, dto.NumberValue] = {}
         loss = metrics.loss.mean().item()
-        epoch_metric["loss/all"] = training_logging.NumberValue(
+        epoch_metric["loss/all"] = dto.NumberValue(
             name="Loss", value=loss, formatted_value=f"{loss:-5.4f}"
         )
 
         loss_negative = metrics.loss[negative_label_mask].mean().item()
-        epoch_metric["loss/neg"] = training_logging.NumberValue(
+        epoch_metric["loss/neg"] = dto.NumberValue(
             name="Loss Negative",
             value=loss_negative,
             formatted_value=f"{loss_negative:-5.4f}",
         )
 
         loss_positive = metrics.loss[positive_label_mask].mean().item()
-        epoch_metric["loss/pos"] = training_logging.NumberValue(
+        epoch_metric["loss/pos"] = dto.NumberValue(
             name="Loss Positive",
             value=loss_positive,
             formatted_value=f"{loss_positive:-5.4f}",
@@ -180,18 +180,18 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         correct_all = (true_positive_count + true_negative_count) / np.float32(
             metrics.dataset_length()
         )
-        epoch_metric["correct/all"] = training_logging.NumberValue(
+        epoch_metric["correct/all"] = dto.NumberValue(
             name="Correct All", value=correct_all, formatted_value=f"{correct_all:.0%}"
         )
         correct_negative = true_negative_count / np.float32(negative_count)
-        epoch_metric["correct/neg"] = training_logging.NumberValue(
+        epoch_metric["correct/neg"] = dto.NumberValue(
             name="Correct Negative",
             value=correct_negative,
             formatted_value=f"{correct_negative:.0%}",
         )
 
         correct_positive = true_positive_count / np.float32(positive_count)
-        epoch_metric["correct/pos"] = training_logging.NumberValue(
+        epoch_metric["correct/pos"] = dto.NumberValue(
             name="Correct Positive",
             value=correct_positive,
             formatted_value=f"{correct_positive:.0%}",
@@ -205,29 +205,42 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         )
         f1_score = 2 * (precision * recall) / (precision + recall)
 
-        epoch_metric["pr/precision"] = training_logging.NumberValue(
+        epoch_metric["pr/precision"] = dto.NumberValue(
             name="Precision", value=precision, formatted_value=f"{precision:-5.4f}"
         )
-        epoch_metric["pr/recall"] = training_logging.NumberValue(
+        epoch_metric["pr/recall"] = dto.NumberValue(
             name="Recall", value=recall, formatted_value=f"{recall:-5.4f}"
         )
-        epoch_metric["pr/f1_score"] = training_logging.NumberValue(
+        epoch_metric["pr/f1_score"] = dto.NumberValue(
             name="F1 Score", value=f1_score, formatted_value=f"{f1_score:-5.4f}"
         )
 
-        self.classification_logger.log_metrics(
+        log_metrics = training_logging.LogMetrics(
             epoch=epoch,
             mode=mode,
             n_processed_samples=n_processed_training_samples,
             values=epoch_metric,
         )
+        self.logger.handle_message(log_metrics)
 
-        self.classification_logger.log_results(
+        log_results = training_logging.LogResult(
             epoch=epoch,
             mode=mode,
             n_processed_samples=n_processed_training_samples,
             predictions=metrics.predictions,
             labels=metrics.labels,
         )
+        self.logger.handle_message(log_results)
 
         return f1_score
+
+    def __repr__(self) -> str:
+        _repr = (
+            f"{self.__class__.__name__}("
+            f"model={self.model.__class__.__name__}, "
+            f"optimizer={self.optimizer.__class__.__name__}, "
+            f"validation_cadence={self.validation_cadence}, "
+            f"batch_iterator={self.batch_iterator.__class__.__name__}, "
+            f"logger={self.logger.__class__.__name__})"
+        )
+        return _repr

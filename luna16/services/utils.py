@@ -15,9 +15,21 @@ LogMessageHandler = training_logging.LogMessageHandler
 def create_registry() -> ServiceContainer:
     registry = ServiceContainer()
 
-    registry.register_creator(TrainingWriter, creators.create_training_writer)
-    registry.register_creator(ValidationWriter, creators.create_validation_writer)
-    registry.register_creator(MlFlowRun, creators.create_mlflow_experiment)
+    registry.register_creator(
+        type=TrainingWriter,
+        creator=creators.create_training_writer,
+        on_registry_close=creators.clean_tensorboard_writer,
+    )
+    registry.register_creator(
+        type=ValidationWriter,
+        creator=creators.create_validation_writer,
+        on_registry_close=creators.clean_tensorboard_writer,
+    )
+    registry.register_creator(
+        type=MlFlowRun,
+        creator=creators.create_mlflow_experiment,
+        on_registry_close=creators.clean_mlflow_experiment,
+    )
 
     log_message_handler = training_logging.LogMessageHandler(
         registry=registry, log_messages=training_logging.LOG_MESSAGE_HANDLERS

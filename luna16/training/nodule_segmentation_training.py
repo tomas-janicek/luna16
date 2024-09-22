@@ -9,7 +9,6 @@ from luna16 import (
     modules,
     services,
     trainers,
-    training_logging,
 )
 
 
@@ -22,12 +21,8 @@ def luna_segmentation_launcher(
     registry: services.ServiceContainer,
     training_length: int | None = None,
 ) -> None:
-    segmentation_logger = training_logging.SegmentationLoggingAdapter(
-        training_name=training_name
-    )
-    batch_iterator = batch_iterators.BatchIteratorProvider(
-        batch_loggers=segmentation_logger.batch_loggers
-    )
+    logger = registry.get_service(services.LogMessageHandler)
+    batch_iterator = batch_iterators.BatchIteratorProvider(logger=logger)
     augmentation_model = augmentations.SegmentationAugmentation(
         flip=True, offset=0.03, scale=0.2, rotate=True, noise=25.0
     )
@@ -44,10 +39,10 @@ def luna_segmentation_launcher(
         model=module,
         optimizer=torch.optim.Adam(module.parameters()),
         batch_iterator=batch_iterator,
-        classification_logger=segmentation_logger,
+        logger=logger,
         augmentation_model=augmentation_model,
     )
-    trainer = trainers.Trainer(logger=segmentation_logger)
+    trainer = trainers.Trainer(name=training_name, logger=logger)
     train, validation = datasets.create_pre_configured_luna_segmentation(
         validation_stride=validation_stride,
         training_length=training_length,

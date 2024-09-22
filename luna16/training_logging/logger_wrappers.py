@@ -9,9 +9,9 @@ from mlflow.entities import Experiment
 from torch.utils import data as data_utils
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from luna16 import enums
+from luna16 import dto, enums
 
-from . import base, dto
+from . import base
 
 _log = logging.getLogger(__name__)
 

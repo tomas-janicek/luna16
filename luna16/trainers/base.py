@@ -17,7 +17,8 @@ class BaseTrainer(typing.Protocol[CandidateT]):
     def fit_epoch(
         self,
         *,
-        model: models.BaseModel[CandidateT],
         epoch: int,
+        epochs: int,
+        model: models.BaseModel[CandidateT],
         data_module: datasets.DataModule[CandidateT],
     ) -> None: ...

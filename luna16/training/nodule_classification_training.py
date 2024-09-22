@@ -7,7 +7,6 @@ from luna16 import (
     modules,
     services,
     trainers,
-    training_logging,
 )
 
 
@@ -20,20 +19,16 @@ def luna_classification_launcher(
     registry: services.ServiceContainer,
     training_length: int | None = None,
 ) -> None:
-    classification_logger = training_logging.ClassificationLoggingAdapter(
-        training_name=training_name
-    )
-    batch_iterator = batch_iterators.BatchIteratorProvider(
-        batch_loggers=classification_logger.batch_loggers
-    )
+    logger = registry.get_service(services.LogMessageHandler)
+    batch_iterator = batch_iterators.BatchIteratorProvider(logger=logger)
     module = modules.LunaModel()
     model = models.NoduleClassificationModel(
         model=module,
         optimizer=torch.optim.SGD(module.parameters(), lr=0.001, momentum=0.99),
         batch_iterator=batch_iterator,
-        classification_logger=classification_logger,
+        logger=logger,
     )
-    trainer = trainers.Trainer(logger=classification_logger)
+    trainer = trainers.Trainer(name=training_name, logger=logger)
     train, validation = datasets.create_pre_configured_luna_rationed(
         validation_stride=validation_stride,
         training_length=training_length,

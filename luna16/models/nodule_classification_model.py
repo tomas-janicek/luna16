@@ -1,6 +1,8 @@
 import numpy as np
 import torch
 import torch.nn as nn
+from mlflow.models import infer_signature
+from mlflow.pytorch import ModelSignature
 from torch.utils import data as data_utils
 
 from luna16 import training_logging, utils
@@ -132,6 +134,18 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         )
 
         return loss.mean(), batch_metrics
+
+    def get_signature(
+        self, train_dl: data_utils.DataLoader[dto.LunaClassificationCandidate]
+    ) -> ModelSignature:
+        input = torch.unsqueeze(train_dl.dataset[0].candidate, 0)
+        input = input.to(self.device, non_blocking=True)
+        _logits, probability = self.model(input)
+        signature = infer_signature(
+            model_input=input.to("cpu").detach().numpy(),
+            model_output=probability.to("cpu").detach().numpy(),
+        )
+        return signature
 
     def log_metrics(
         self,

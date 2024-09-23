@@ -167,7 +167,11 @@ def log_model_to_mlflow(
     with open(model_summary, "w+") as f:
         f.write(str(summary(message.model)))
     mlflow.log_artifact(str(model_summary))
-    mlflow.pytorch.log_model(message.model, message.training_name)
+    mlflow.pytorch.log_model(
+        pytorch_model=message.model,
+        artifact_path=f"{message.training_name}_model",
+        registered_model_name=message.training_name,
+    )
 
 
 def log_input_to_mlflow(

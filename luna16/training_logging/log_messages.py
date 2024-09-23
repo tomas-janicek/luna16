@@ -2,6 +2,7 @@ import typing
 from dataclasses import dataclass
 
 import torch
+from mlflow.pytorch import ModelSignature
 from torch import nn
 from torch.utils import data as data_utils
 
@@ -88,12 +89,13 @@ class LogParams(LogMessage):
 @dataclass
 class LogModel(LogMessage):
     model: nn.Module
+    signature: ModelSignature
     training_name: str
 
 
 @dataclass
 class LogInput(LogMessage):
-    input: data_utils.Dataset[typing.Any]
+    signature: ModelSignature
 
 
 class LogMessageHandler(typing.Protocol):

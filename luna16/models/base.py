@@ -1,6 +1,7 @@
 import typing
 
 import torch
+from mlflow.pytorch import ModelSignature
 from torch.utils import data as data_utils
 
 CandidateT = typing.TypeVar("CandidateT")
@@ -15,3 +16,7 @@ class BaseModel(typing.Protocol[CandidateT]):  # type: ignore
     ) -> None: ...
 
     def get_module(self) -> torch.nn.Module: ...
+
+    def get_signature(
+        self, train_dl: data_utils.DataLoader[CandidateT]
+    ) -> ModelSignature: ...

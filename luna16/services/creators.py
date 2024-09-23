@@ -25,7 +25,7 @@ def create_validation_writer(
 ) -> SummaryWriter:
     hostname = socket.gethostname()
     validation_log_dir = Path(
-        f"runs/{training_name}/{training_start_time}_{hostname}-validation"
+        f"runs/{training_name}/{_get_datetime_string(training_start_time)}_{hostname}-validation"
     )
     validation_writer = SummaryWriter(log_dir=validation_log_dir)
     return validation_writer
@@ -36,12 +36,14 @@ def clean_tensorboard_writer(writer: SummaryWriter) -> None:
 
 
 def create_mlflow_experiment(
-    training_name: str, **kwargs: typing.Any
+    training_name: str, training_start_time: datetime.datetime, **kwargs: typing.Any
 ) -> mlflow.ActiveRun:
     mlflow.set_tracking_uri(uri=settings.ML_FLOW_URL)
     experiment = mlflow.set_experiment(experiment_name=training_name)
     active_run = mlflow.start_run(
         experiment_id=experiment.experiment_id,
+        run_name=f"{training_name}-{_get_datetime_string(training_start_time)}",
+        tags={"version": "0.0.1"},
         log_system_metrics=settings.MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING,
     )
     return active_run
@@ -49,3 +51,7 @@ def create_mlflow_experiment(
 
 def clean_mlflow_experiment(active_run: mlflow.ActiveRun) -> None:
     mlflow.end_run()
+
+
+def _get_datetime_string(dt: datetime.datetime) -> str:
+    return dt.strftime("%Y-%m-%dT%H:%M")

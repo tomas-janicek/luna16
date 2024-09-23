@@ -47,11 +47,6 @@ class Trainer(BaseTrainer[CandidateT]):
         log_start_training = training_logging.LogStart(training_description=str(model))
         self.logger.handle_message(log_start_training)
 
-        log_input = training_logging.LogInput(
-            data_module.get_training_dataloader().dataset
-        )
-        self.logger.handle_message(log_input)
-
         for epoch in range(1, epochs + 1):
             self.fit_epoch(
                 epoch=epoch,
@@ -61,7 +56,11 @@ class Trainer(BaseTrainer[CandidateT]):
             )
 
         log_model = training_logging.LogModel(
-            model=model.get_module(), training_name=self.name
+            model=model.get_module(),
+            training_name=self.name,
+            signature=model.get_signature(
+                train_dl=data_module.get_training_dataloader()
+            ),
         )
         self.logger.handle_message(log_model)
 
@@ -81,9 +80,9 @@ class Trainer(BaseTrainer[CandidateT]):
             validation_length=data_module.validation_len,
         )
         self.logger.handle_message(log_epoch)
+
         train_dl = data_module.get_training_dataloader()
         validation_dl = data_module.get_validation_dataloader()
-
         model.fit_epoch(epoch=epoch, train_dl=train_dl, validation_dl=validation_dl)
 
     def __repr__(self) -> str:

@@ -78,15 +78,6 @@ class LunaSegmentationDataset(data_utils.Dataset[dto.LunaSegmentationCandidate])
         self.positive_candidates_info = [
             candidate for candidate in self.candidates_info if candidate.is_nodule
         ]
-        # n_negative_candidates = len(self.candidates_info) - len(
-        #     self.positive_candidates_info
-        # )
-        # if not self.candidates_info or not n_negative_candidates:
-        #     raise ValueError(
-        #         f"LuNA dataset must have at least 1 positive and 1 negative sample "
-        #         f"and it has {len(self.positive_candidates_info)} positive and "
-        #         f"{n_negative_candidates} negative candidates."
-        #     )
 
         _log.info("%s", repr(self))
 

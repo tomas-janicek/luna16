@@ -12,7 +12,7 @@ from .. import log_messages, utils
 def log_images_to_tensorboard(
     message: log_messages.LogImages[dto.LunaSegmentationCandidate],
     registry: services.ServiceContainer,
-):
+) -> None:
     message.model.eval()
     tensorboard_writer = utils.get_tensortboard_writer(
         mode=message.mode, registry=registry

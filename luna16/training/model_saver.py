@@ -23,7 +23,7 @@ class ModelSaver:
         model_name: str,
     ) -> None:
         self.model_name = model_name
-        self.model_dir = settings.LUNA_MODELS_DIR / self.model_name
+        self.model_dir = settings.MODELS_DIR / self.model_name
 
     def save_model(
         self,

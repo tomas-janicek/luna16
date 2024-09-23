@@ -150,7 +150,9 @@ dmypy.json
 
 # MLFlow SQLite Database
 mlruns.db
+/mlruns/
 
 # Models
 /models/
+
 

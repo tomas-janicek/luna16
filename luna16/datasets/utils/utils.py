@@ -23,17 +23,17 @@ def get_series_uid_of_cts_present() -> set[str]:
 
 @functools.lru_cache(maxsize=1)
 def create_candidates() -> pd.DataFrame:
-    candidates_path = settings.LUNA_16_DATA_DIR / "candidates.csv"
+    candidates_path = settings.DATA_DIR / "candidates.csv"
     return pd.read_csv(filepath_or_buffer=candidates_path)
 
 
 @functools.lru_cache(maxsize=1)
 def create_annotations() -> pd.DataFrame:
-    annotations_path = settings.LUNA_16_DATA_DIR / "annotations.csv"
+    annotations_path = settings.DATA_DIR / "annotations.csv"
     return pd.read_csv(filepath_or_buffer=annotations_path)
 
 
 @functools.lru_cache(maxsize=1)
 def create_annotations_with_malignancy() -> pd.DataFrame:
-    annotations_path = settings.LUNA_16_DATA_DIR / "annotations_with_malignancy.csv"
+    annotations_path = settings.DATA_DIR / "annotations_with_malignancy.csv"
     return pd.read_csv(filepath_or_buffer=annotations_path)

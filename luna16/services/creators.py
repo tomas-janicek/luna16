@@ -40,7 +40,10 @@ def create_mlflow_experiment(
 ) -> mlflow.ActiveRun:
     mlflow.set_tracking_uri(uri=settings.ML_FLOW_URL)
     experiment = mlflow.set_experiment(experiment_name=training_name)
-    active_run = mlflow.start_run(experiment_id=experiment.experiment_id)
+    active_run = mlflow.start_run(
+        experiment_id=experiment.experiment_id,
+        log_system_metrics=settings.MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING,
+    )
     return active_run
 
 

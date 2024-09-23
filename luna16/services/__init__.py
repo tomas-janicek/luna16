@@ -2,6 +2,7 @@ from .service_container import (
     ServiceContainer,
 )
 from .utils import (
+    Hyperparameters,
     LogMessageHandler,
     MlFlowRun,
     TrainingWriter,
@@ -16,4 +17,5 @@ __all__ = [
     "ValidationWriter",
     "MlFlowRun",
     "LogMessageHandler",
+    "Hyperparameters",
 ]

@@ -104,6 +104,9 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         )
         return score
 
+    def get_module(self) -> torch.nn.Module:
+        return self.model
+
     def compute_batch_loss(
         self,
         batch: dto.LunaClassificationCandidate,

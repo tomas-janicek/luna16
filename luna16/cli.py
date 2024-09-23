@@ -11,7 +11,7 @@ def train_luna_classification(
     num_workers: int = 8,
     batch_size: int = 32,
     training_length: int | None = None,
-    validation_stride: int = 20,
+    validation_stride: int = 5,
 ) -> None:
     training_name = "Classification"
     registry = services.create_registry()
@@ -29,9 +29,9 @@ def train_luna_classification(
 
 @cli.command(name="train_luna_segmentation")
 def train_luna_segmentation(
+    epochs: int = 1,
     num_workers: int = 8,
     batch_size: int = 32,
-    epochs: int = 1,
     training_length: int | None = None,
     validation_stride: int = 5,
 ) -> None:
@@ -52,9 +52,9 @@ def train_luna_segmentation(
 @cli.command(name="train_luna_malignant_classification")
 def train_luna_malignant_classification(
     state_name: str,
+    epochs: int = 1,
     num_workers: int = 8,
     batch_size: int = 32,
-    epochs: int = 1,
     training_length: int | None = None,
     validation_stride: int = 5,
 ) -> None:

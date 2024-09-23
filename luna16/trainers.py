@@ -3,12 +3,29 @@ from datetime import datetime
 
 from luna16 import datasets, models, training_logging
 
-from . import base
-
 CandidateT = typing.TypeVar("CandidateT")
 
 
-class Trainer(base.BaseTrainer[CandidateT]):
+class BaseTrainer(typing.Protocol[CandidateT]):
+    def fit(
+        self,
+        *,
+        model: models.BaseModel[CandidateT],
+        epochs: int,
+        data_module: datasets.DataModule[CandidateT],
+    ) -> None: ...
+
+    def fit_epoch(
+        self,
+        *,
+        epoch: int,
+        epochs: int,
+        model: models.BaseModel[CandidateT],
+        data_module: datasets.DataModule[CandidateT],
+    ) -> None: ...
+
+
+class Trainer(BaseTrainer[CandidateT]):
     def __init__(
         self,
         name: str,
@@ -30,6 +47,11 @@ class Trainer(base.BaseTrainer[CandidateT]):
         log_start_training = training_logging.LogStart(training_description=str(model))
         self.logger.handle_message(log_start_training)
 
+        log_input = training_logging.LogInput(
+            data_module.get_training_dataloader().dataset
+        )
+        self.logger.handle_message(log_input)
+
         for epoch in range(1, epochs + 1):
             self.fit_epoch(
                 epoch=epoch,
@@ -37,6 +59,11 @@ class Trainer(base.BaseTrainer[CandidateT]):
                 model=model,
                 data_module=data_module,
             )
+
+        log_model = training_logging.LogModel(
+            model=model.get_module(), training_name=self.name
+        )
+        self.logger.handle_message(log_model)
 
     def fit_epoch(
         self,

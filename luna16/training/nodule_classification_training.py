@@ -20,6 +20,19 @@ def luna_classification_launcher(
     training_length: int | None = None,
 ) -> None:
     logger = registry.get_service(services.LogMessageHandler)
+    hyperparameters = registry.get_service(services.Hyperparameters)
+    hyperparameters.add_hyperparameters(
+        {
+            "epochs": epochs,
+            "num_workers": num_workers,
+            "batch_size": batch_size,
+            "training_length": training_length,
+            "validation_stride": validation_stride,
+            "learning_rate": 0.001,
+            "momentum": 0.99,
+            "validation_cadence": 5,
+        }
+    )
     batch_iterator = batch_iterators.BatchIteratorProvider(logger=logger)
     module = modules.LunaModel()
     model = models.NoduleClassificationModel(

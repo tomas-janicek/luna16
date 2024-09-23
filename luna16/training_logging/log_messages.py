@@ -80,6 +80,22 @@ class LogImages(LogMessage, typing.Generic[CandidateT]):
     device: torch.device
 
 
+@dataclass
+class LogParams(LogMessage):
+    params: dict[str, typing.Any]
+
+
+@dataclass
+class LogModel(LogMessage):
+    model: nn.Module
+    training_name: str
+
+
+@dataclass
+class LogInput(LogMessage):
+    input: data_utils.Dataset[typing.Any]
+
+
 class LogMessageHandler(typing.Protocol):
     def __call__(
         self, message: typing.Any, registry: services.ServiceContainer

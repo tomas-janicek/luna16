@@ -4,8 +4,10 @@ import time
 import typing
 
 import mlflow
+from torchinfo import summary
 
 from luna16 import dto, services
+from luna16.settings import settings
 from luna16.training_logging import log_messages
 
 from .. import utils
@@ -47,6 +49,8 @@ def log_epoch_to_console(
     )
 
 
+# `log_batch_to_console` is disabled because it was replaced
+# with graphical `tqdm` progress bar.
 def log_batch_to_console(
     message: log_messages.LogBatch,
     registry: services.ServiceContainer,
@@ -153,3 +157,24 @@ def log_metrics_to_mlflow(
             value=float(value.value),
             step=message.n_processed_samples,
         )
+
+
+def log_model_to_mlflow(
+    message: log_messages.LogModel,
+    registry: services.ServiceContainer,
+) -> None:
+    model_summary = settings.MODELS_DIR / "summaries" / "model_summary.txt"
+    with open(model_summary, "w+") as f:
+        f.write(str(summary(message.model)))
+    mlflow.log_artifact(str(model_summary))
+    mlflow.pytorch.log_model(message.model, message.training_name)
+
+
+def log_input_to_mlflow(
+    message: log_messages.LogInput,
+    registry: services.ServiceContainer,
+) -> None:
+    # TODO: This does not work.
+    # https://mlflow.org/docs/latest/tracking/data-api.html
+    # mlflow.log_input(message.input)
+    ...

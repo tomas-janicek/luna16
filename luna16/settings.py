@@ -1,16 +1,7 @@
-from enum import Enum
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pydantic_settings
-
-
-class Color(Enum):
-    dlblue = "#0096ff"
-    dlorange = "#FF9300"
-    dldarkred = "#C00000"
-    dlmagenta = "#FF40FF"
-    dlpurple = "#7030A0"
 
 
 class Settings(pydantic_settings.BaseSettings):
@@ -23,6 +14,7 @@ class Settings(pydantic_settings.BaseSettings):
     PYTHONPATH: str
 
     ML_FLOW_URL: str
+    MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: bool = True
 
     LOGGING_LEVEL: str = "INFO"
 
@@ -30,12 +22,8 @@ class Settings(pydantic_settings.BaseSettings):
     CACHE_DIR: Path = BASE_DIR / "cache"
     DATA_DOWNLOADED_DIR: Path = BASE_DIR / "data_downloaded"
     MODELS_DIR: Path = BASE_DIR / "models"
-    LUNA_MODELS_DIR: Path = MODELS_DIR / "luna"
     DEEP_LEARNING_STYLE: Path = BASE_DIR / "deeplearning.mplstyle"
-
     DATA_DIR: Path = BASE_DIR / "data"
-    TENSORS_DIR: Path = DATA_DIR / "tensors"
-    LUNA_16_DATA_DIR: Path = BASE_DIR / "luna16" / "data"
 
 
 settings = Settings()  # type: ignore

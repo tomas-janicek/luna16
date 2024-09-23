@@ -144,6 +144,9 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
 
         return batch_metrics
 
+    def get_module(self) -> nn.Module:
+        return self.model
+
     def compute_batch_loss(
         self,
         batch: dto.LunaSegmentationCandidate,

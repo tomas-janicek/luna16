@@ -1,8 +1,12 @@
+from functools import partial
+
 import torch
+from ray import tune
 
 from luna16 import (
     batch_iterators,
     datasets,
+    dto,
     models,
     services,
     trainers,
@@ -12,39 +16,67 @@ from luna16.modules.nodule_classfication.models import LunaModel
 from . import model_saver
 
 
-def luna_malignant_classification_launcher(
-    epochs: int,
-    batch_size: int,
-    validation_stride: int,
-    num_workers: int,
-    state_name: str,
-    training_name: str,
-    registry: services.ServiceContainer,
-    training_length: int | None = None,
-) -> None:
-    logger = registry.get_service(services.LogMessageHandler)
-    batch_iterator = batch_iterators.BatchIteratorProvider(logger=logger)
-    classification_model_saver = model_saver.ModelSaver(
-        model_name="classification",
-    )
-    module = classification_model_saver.load_model(
-        model=LunaModel(), state_name=state_name, n_excluded_blocks=2
-    )
-    model = models.NoduleClassificationModel(
-        model=module,
-        optimizer=torch.optim.SGD(module.parameters(), lr=0.001, momentum=0.99),
-        batch_iterator=batch_iterator,
-        logger=logger,
-    )
-    trainer = trainers.Trainer(name=training_name, logger=logger)
-    train, validation = datasets.create_pre_configured_luna_rationed(
-        validation_stride=validation_stride,
-        training_length=training_length,
-    )
-    data_module = datasets.DataModule(
-        batch_size=batch_size,
-        num_workers=num_workers,
-        train=train,
-        validation=validation,
-    )
-    trainer.fit(model=model, epochs=epochs, data_module=data_module)
+class LunaMalignantClassificationLauncher:
+    def __init__(
+        self,
+        validation_stride: int,
+        num_workers: int,
+        state_name: str,
+        training_name: str,
+        registry: services.ServiceContainer,
+        training_length: int | None = None,
+    ) -> None:
+        self.validation_stride = validation_stride
+        self.num_workers = num_workers
+        self.state_name = state_name
+        self.training_name = training_name
+        self.registry = registry
+        self.training_length = training_length
+        self.logger = registry.get_service(services.LogMessageHandler)
+        self.batch_iterator = batch_iterators.BatchIteratorProvider(logger=self.logger)
+
+    def fit(
+        self,
+        epochs: int,
+        batch_size: int,
+    ) -> dto.Scores:
+        classification_model_saver = model_saver.ModelSaver(
+            model_name="classification",
+        )
+        module = classification_model_saver.load_model(
+            model=LunaModel(), state_name=self.state_name, n_excluded_blocks=2
+        )
+        model = models.NoduleClassificationModel(
+            model=module,
+            optimizer=torch.optim.SGD(module.parameters(), lr=0.001, momentum=0.99),
+            batch_iterator=self.batch_iterator,
+            logger=self.logger,
+        )
+        trainer = trainers.Trainer(name=self.training_name, logger=self.logger)
+        train, validation = datasets.create_pre_configured_luna_rationed(
+            validation_stride=self.validation_stride,
+            training_length=self.training_length,
+        )
+        data_module = datasets.DataModule(
+            batch_size=batch_size,
+            num_workers=self.num_workers,
+            train=train,
+            validation=validation,
+        )
+        return trainer.fit(model=model, epochs=epochs, data_module=data_module)
+
+    def tune_parameters(
+        self,
+        epochs: int,
+    ) -> tune.ResultGrid:
+        hyperparameters = {
+            "batch_size": tune.grid_search([16, 32, 64]),
+            "learning_rate": tune.grid_search([0.0001, 0.001, 0.01]),
+            "momentum": tune.grid_search([0.97, 0.98, 0.99]),
+        }
+        self.tunable_fit = partial(
+            self.fit,
+            epochs=epochs,
+        )
+        tuner = tune.Tuner(self.tunable_fit, param_space=hyperparameters)
+        return tuner.fit()

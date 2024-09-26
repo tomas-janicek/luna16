@@ -4,6 +4,8 @@ import torch
 from mlflow.pytorch import ModelSignature
 from torch.utils import data as data_utils
 
+from luna16 import dto
+
 CandidateT = typing.TypeVar("CandidateT")
 
 
@@ -13,7 +15,7 @@ class BaseModel(typing.Protocol[CandidateT]):  # type: ignore
         epoch: int,
         train_dl: data_utils.DataLoader[CandidateT],
         validation_dl: data_utils.DataLoader[CandidateT],
-    ) -> None: ...
+    ) -> dto.Scores: ...
 
     def get_module(self) -> torch.nn.Module: ...
 

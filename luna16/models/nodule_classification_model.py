@@ -36,13 +36,13 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         epoch: int,
         train_dl: data_utils.DataLoader[dto.LunaClassificationCandidate],
         validation_dl: data_utils.DataLoader[dto.LunaClassificationCandidate],
-    ) -> None:
-        _score = self.do_training(epoch=epoch, train_dataloader=train_dl)
+    ) -> dto.Scores:
+        score = self.do_training(epoch=epoch, train_dataloader=train_dl)
 
         if epoch == 1 or epoch % self.validation_cadence:
-            _score = self.do_validation(
-                epoch=epoch, validation_dataloader=validation_dl
-            )
+            score = self.do_validation(epoch=epoch, validation_dataloader=validation_dl)
+
+        return {"score": score}
 
     def do_training(
         self,

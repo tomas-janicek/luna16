@@ -1,7 +1,7 @@
 import typing
 from datetime import datetime
 
-from luna16 import datasets, models, training_logging
+from luna16 import datasets, dto, models, training_logging
 
 CandidateT = typing.TypeVar("CandidateT")
 
@@ -13,7 +13,7 @@ class BaseTrainer(typing.Protocol[CandidateT]):
         model: models.BaseModel[CandidateT],
         epochs: int,
         data_module: datasets.DataModule[CandidateT],
-    ) -> None: ...
+    ) -> dto.Scores: ...
 
     def fit_epoch(
         self,
@@ -22,7 +22,7 @@ class BaseTrainer(typing.Protocol[CandidateT]):
         epochs: int,
         model: models.BaseModel[CandidateT],
         data_module: datasets.DataModule[CandidateT],
-    ) -> None: ...
+    ) -> dto.Scores: ...
 
 
 class Trainer(BaseTrainer[CandidateT]):
@@ -40,15 +40,16 @@ class Trainer(BaseTrainer[CandidateT]):
         model: models.BaseModel[CandidateT],
         epochs: int,
         data_module: datasets.DataModule[CandidateT],
-    ) -> None:
+    ) -> dto.Scores:
         self.logger.registry.call_all_creators(
             training_name=self.name, training_start_time=datetime.now()
         )
         log_start_training = training_logging.LogStart(training_description=str(model))
         self.logger.handle_message(log_start_training)
 
+        score = {}
         for epoch in range(1, epochs + 1):
-            self.fit_epoch(
+            score = self.fit_epoch(
                 epoch=epoch,
                 epochs=epochs,
                 model=model,
@@ -63,6 +64,7 @@ class Trainer(BaseTrainer[CandidateT]):
             ),
         )
         self.logger.handle_message(log_model)
+        return score
 
     def fit_epoch(
         self,
@@ -71,7 +73,7 @@ class Trainer(BaseTrainer[CandidateT]):
         epochs: int,
         model: models.BaseModel[CandidateT],
         data_module: datasets.DataModule[CandidateT],
-    ) -> None:
+    ) -> dto.Scores:
         log_epoch = training_logging.LogEpoch(
             epoch=epoch,
             n_epochs=epochs,
@@ -83,7 +85,9 @@ class Trainer(BaseTrainer[CandidateT]):
 
         train_dl = data_module.get_training_dataloader()
         validation_dl = data_module.get_validation_dataloader()
-        model.fit_epoch(epoch=epoch, train_dl=train_dl, validation_dl=validation_dl)
+        return model.fit_epoch(
+            epoch=epoch, train_dl=train_dl, validation_dl=validation_dl
+        )
 
     def __repr__(self) -> str:
         _repr = (

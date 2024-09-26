@@ -15,15 +15,40 @@ def train_luna_classification(
 ) -> None:
     training_name = "Classification"
     registry = services.create_registry()
-    training.luna_classification_launcher(
-        epochs=epochs,
+    training.LunaClassificationLauncher(
         num_workers=num_workers,
         registry=registry,
-        batch_size=batch_size,
         training_length=training_length,
         validation_stride=validation_stride,
         training_name=training_name,
+        validation_cadence=5,
+    ).fit(
+        epochs=epochs,
+        batch_size=batch_size,
+        lr=0.001,
+        momentum=0.99,
+        conv_channels=8,
     )
+    registry.close_all_services()
+
+
+@cli.command(name="tune_luna_classification")
+def tune_luna_classification(
+    epochs: int = 1,
+    num_workers: int = 8,
+    validation_stride: int = 5,
+    training_length: int | None = None,
+) -> None:
+    training_name = "Classification"
+    registry = services.create_registry()
+    training.LunaClassificationLauncher(
+        num_workers=num_workers,
+        registry=registry,
+        training_length=training_length,
+        validation_stride=validation_stride,
+        training_name=training_name,
+        validation_cadence=5,
+    ).tune_parameters(epochs=epochs)
     registry.close_all_services()
 
 
@@ -37,14 +62,15 @@ def train_luna_segmentation(
 ) -> None:
     training_name = "Segmentation"
     registry = services.create_registry()
-    training.luna_segmentation_launcher(
-        epochs=epochs,
+    training.LunaSegmentationLauncher(
+        training_name=training_name,
         num_workers=num_workers,
         registry=registry,
-        batch_size=batch_size,
         training_length=training_length,
         validation_stride=validation_stride,
-        training_name=training_name,
+    ).fit(
+        epochs=epochs,
+        batch_size=batch_size,
     )
     registry.close_all_services()
 
@@ -60,15 +86,16 @@ def train_luna_malignant_classification(
 ) -> None:
     training_name = "Malignant Classification"
     registry = services.create_registry()
-    training.luna_malignant_classification_launcher(
-        epochs=epochs,
+    training.LunaMalignantClassificationLauncher(
         num_workers=num_workers,
         registry=registry,
-        batch_size=batch_size,
         training_length=training_length,
         validation_stride=validation_stride,
         state_name=state_name,
         training_name=training_name,
+    ).fit(
+        epochs=epochs,
+        batch_size=batch_size,
     )
     registry.close_all_services()
 

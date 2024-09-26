@@ -39,10 +39,10 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
         epoch: int,
         train_dl: data_utils.DataLoader[dto.LunaSegmentationCandidate],
         validation_dl: data_utils.DataLoader[dto.LunaSegmentationCandidate],
-    ) -> None:
+    ) -> dto.Scores:
         dataset_length = len(train_dl.dataset)  # type: ignore
         training_metrics = self.do_training(epoch, train_dl)
-        self.log_metrics(
+        score = self.log_metrics(
             epoch=epoch,
             n_processed_training_samples=epoch * dataset_length,
             mode=enums.Mode.TRAINING,
@@ -55,6 +55,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
                 validation_dl=validation_dl,
                 epoch=epoch,
             )
+        return {"score": score}
 
     def do_validation_and_log_results(
         self,

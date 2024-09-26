@@ -107,8 +107,6 @@ exclude = [
   "node_modules",
   "site-packages",
   "venv",
-  # Specific fiels that are kept for information not execution
-  "example_luna16_submission",
 ]
 
 # Same as Black.
@@ -176,10 +174,6 @@ docstring-code-line-length = "dynamic"
 exclude = [
   "**/__pycache__",
   ".venv",
-  "**/migrations/**",
-  # Specific fiels that are kept for information not execution
-  "**/example_luna16_submission/",
-  "**/supervised_learning/utils",
 ]
 
 reportMissingImports = true

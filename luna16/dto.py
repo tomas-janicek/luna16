@@ -258,3 +258,6 @@ class NumberValue(Value):
     name: str
     value: float | np.float_
     formatted_value: str
+
+
+Scores = dict[str, float | np.float_]

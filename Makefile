@@ -11,3 +11,6 @@ lint: format
 
 mlflow-server:
 	mlflow ui --port 8080 --backend-store-uri sqlite:///mlruns.db
+
+mlflow-migrate:
+	mlflow db upgrade sqlite:///mlruns.db

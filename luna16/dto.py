@@ -256,8 +256,8 @@ class Value:
 @dataclass
 class NumberValue(Value):
     name: str
-    value: float | np.float_
+    value: float | np.float32
     formatted_value: str
 
 
-Scores = dict[str, float | np.float_]
+Scores = dict[str, float | np.float32]

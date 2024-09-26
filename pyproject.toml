@@ -1,63 +1,37 @@
-[tool.poetry]
+[project]
 name = "luna16"
 version = "0.1.0"
-description = ""
-authors = ["Tomas Janicek <tomas.janicek@redampsecurity.com>"]
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "diskcache>=5.6.3",
+    "graphviz>=0.20.3",
+    "h5py>=3.11.0",
+    "ipympl>=0.9.4",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.9.2",
+    "mlflow>=2.16.2",
+    "numpy>=2.1.1",
+    "pandas>=2.2.3",
+    "pillow>=10.4.0",
+    "plotly>=5.24.1",
+    "pydantic-settings>=2.5.2",
+    "pydantic>=2.9.2",
+    "pynvml>=11.5.3",
+    "ray[tune]>=2.37.0",
+    "scikit-learn>=1.5.2",
+    "scipy>=1.14.1",
+    "simpleitk>=2.4.0",
+    "tensorboard>=2.18.0",
+    "torch>=2.4.1",
+    "torchaudio>=2.4.1",
+    "torchinfo>=1.8.0",
+    "torchvision>=0.19.1",
+    "tqdm>=4.66.5",
+    "typer>=0.12.5",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.11.6,<3.13"
-# ML
-scikit-learn = "^1.4.1.post1"
-scipy = "^1.12.0"
-torch = "^2.2.1"
-torchvision = "^0.17.1"
-torchaudio = "^2.2.1"
-simpleitk = "^2.3.1"
-# Visualizations
-plotly = "^5.20.0"
-matplotlib = "^3.8.3"
-ipympl = "^0.9.3"
-graphviz = "^0.20.3"
-# ML Utils
-numpy = "^1.26.4"
-pandas = "^2.2.1"
-jupyter = "^1.0.0"
-pillow = "^10.2.0"
-h5py = "^3.10.0"
-tensorboard = "^2.16.2"
-# Utils
-pydantic = "^2.6.4"
-diskcache = "^5.6.3"
-typer = {extras = ["all"], version = "^0.9.0"}
-# Dependencies for HuggingFace Transformers models
-huggingface-hub = "^0.21.4"
-regex = "^2023.12.25"
-tokenizers = "^0.15.2"
-safetensors = "^0.4.2"
-sentencepiece = "^0.2.0"
-importlib-metadata = "^7.1.0"
-tqdm = "^4.66.2"
-requests = "^2.31.0"
-filelock = "^3.13.1"
-sacremoses = "^0.1.1"
-imageio = "^2.34.0"
-
-[tool.poetry.group.dev.dependencies]
-pylint = "^3.0"
-jupyterlab = "^4.0"
-ruff = "^0.2.2"
-pytest = "^8.1.1"
-diskcache-stubs = "^5.6.3.3.20240316"
-
-
-[[tool.poetry.source]]
-name = "pytorch-nightly"
-url = "https://download.pytorch.org/whl/nightly/cpu"
-priority = "explicit"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 ########################################
 # Linting and Formatting Configurations #

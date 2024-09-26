@@ -16,7 +16,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
     def __init__(
         self,
         model: nn.Module,
-        optimizer: torch.optim.Optimizer,
+        optimizer: torch.optim.optimizer.Optimizer,
         batch_iterator: BatchIteratorProvider,
         logger: training_logging.LogMessageHandler,
         validation_cadence: int = 5,

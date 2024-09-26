@@ -181,7 +181,7 @@ def _get_diameter(
     candidate_center: dto.CoordinatesXYZ,
 ) -> float:
     nodule_radius = nodule_diameter / 2
-    annotation_candidate = zip(annotation_center, candidate_center)
+    annotation_candidate = zip(annotation_center, candidate_center, strict=True)
 
     for annotation_coord, candidate_coord in annotation_candidate:
         delta_mm = abs(annotation_coord - candidate_coord)

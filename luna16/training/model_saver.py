@@ -32,7 +32,7 @@ class ModelSaver:
         n_processed_samples: int,
         training_started_at: str,
         modules: typing.Mapping[str, nn.Module],
-        optimizer: torch.optim.Optimizer,
+        optimizer: torch.optim.optimizer.Optimizer,
         is_best: bool = False,
     ) -> None:
         models_path = (

@@ -1,3 +1,4 @@
+import typing
 from functools import partial
 
 import torch
@@ -52,12 +53,14 @@ class LunaSegmentationLauncher:
         )
         model = models.NoduleSegmentationModel(
             model=module,
-            optimizer=torch.optim.Adam(module.parameters()),
+            optimizer=torch.optim.adam.Adam(module.parameters()),
             batch_iterator=self.batch_iterator,
             logger=self.logger,
             augmentation_model=augmentation_model,
         )
-        trainer = trainers.Trainer(name=self.training_name, logger=self.logger)
+        trainer = trainers.Trainer[dto.LunaSegmentationCandidate](
+            name=self.training_name, logger=self.logger
+        )
         train, validation = datasets.create_pre_configured_luna_segmentation(
             validation_stride=self.validation_stride,
             training_length=self.training_length,
@@ -74,7 +77,7 @@ class LunaSegmentationLauncher:
         self,
         epochs: int,
     ) -> tune.ResultGrid:
-        hyperparameters = {
+        hyperparameters: dict[str, typing.Any] = {
             "batch_size": tune.grid_search([16, 32, 64]),
             "learning_rate": tune.grid_search([0.0001, 0.001, 0.01]),
             "momentum": tune.grid_search([0.97, 0.98, 0.99]),

@@ -23,23 +23,7 @@
     "notebook.formatOnSave.enabled": true,
     "notebook.insertFinalNewline": false,
     "python.analysis.diagnosticMode": "workspace",
-    "python.analysis.exclude": [
-        "**/runs",
-        "**/cache",
-        "**/data",
-        "**/data_downloaded",
-        "**/images"
-    ],
-    // "explorer.excludeGitIgnore": true
-    "python.analysis.ignore": [
-        "**/runs",
-        "**/cache",
-        "**/data",
-        "**/data_downloaded",
-        "**/images"
-    ],
     "python.analysis.indexing": true,
-    "python.analysis.typeCheckingMode": "basic",
     "python.envFile": "${workspaceFolder}/.env",
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "python.testing.pytestArgs": [

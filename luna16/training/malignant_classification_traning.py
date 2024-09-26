@@ -1,3 +1,4 @@
+import typing
 from functools import partial
 
 import torch
@@ -48,11 +49,13 @@ class LunaMalignantClassificationLauncher:
         )
         model = models.NoduleClassificationModel(
             model=module,
-            optimizer=torch.optim.SGD(module.parameters(), lr=0.001, momentum=0.99),
+            optimizer=torch.optim.sgd.SGD(module.parameters(), lr=0.001, momentum=0.99),
             batch_iterator=self.batch_iterator,
             logger=self.logger,
         )
-        trainer = trainers.Trainer(name=self.training_name, logger=self.logger)
+        trainer = trainers.Trainer[dto.LunaClassificationCandidate](
+            name=self.training_name, logger=self.logger
+        )
         train, validation = datasets.create_pre_configured_luna_rationed(
             validation_stride=self.validation_stride,
             training_length=self.training_length,
@@ -69,7 +72,7 @@ class LunaMalignantClassificationLauncher:
         self,
         epochs: int,
     ) -> tune.ResultGrid:
-        hyperparameters = {
+        hyperparameters: dict[str, typing.Any] = {
             "batch_size": tune.grid_search([16, 32, 64]),
             "learning_rate": tune.grid_search([0.0001, 0.001, 0.01]),
             "momentum": tune.grid_search([0.97, 0.98, 0.99]),

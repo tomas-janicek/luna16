@@ -121,7 +121,9 @@ class Ct:
 
         origin = dto.CoordinatesXYZ(*ct_mhd_image.GetOrigin())
         voxel_size = dto.CoordinatesXYZ(*ct_mhd_image.GetSpacing())
-        transformation_direction = np.array(ct_mhd_image.GetDirection()).reshape(3, 3)
+        transformation_direction: np_typing.NDArray[np.float32] = np.array(
+            ct_mhd_image.GetDirection()
+        ).reshape(3, 3)
         return Ct(
             series_uid=series_uid,
             ct_hounsfield=ct_hounsfield,

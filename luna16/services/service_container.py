@@ -1,4 +1,7 @@
+import logging
 import typing
+
+_log = logging.getLogger(__name__)
 
 T = typing.TypeVar("T")
 
@@ -11,7 +14,7 @@ class ServiceContainer:
 
     def register_service(
         self,
-        type: typing.Type[T],
+        type: type[T],
         value: T,
         on_registry_close: typing.Callable[..., None] | None = None,
     ) -> None:
@@ -21,7 +24,7 @@ class ServiceContainer:
 
     def register_creator(
         self,
-        type: typing.Type[T],
+        type: type[T],
         creator: typing.Callable[..., T],
         on_registry_close: typing.Callable[..., None] | None = None,
     ) -> None:
@@ -33,10 +36,15 @@ class ServiceContainer:
         for type, creator in self.creators.items():
             self.services[type] = creator(**kwargs)
 
-    def get_service(self, type: typing.Type[T]) -> T:
+    def get_service(self, type: type[T]) -> T:
         return self.services[type]
 
     def close_all_services(self) -> None:
         for type, closer in self.closers.items():
-            service = self.services[type]
+            service = self.services.get(type)
+            if not service:
+                _log.info(
+                    "Service with type %s is not running and can not be closed.",
+                    type,
+                )
             closer(service)

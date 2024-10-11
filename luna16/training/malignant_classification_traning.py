@@ -8,13 +8,16 @@ from luna16 import (
     batch_iterators,
     datasets,
     dto,
+    message_handler,
     models,
-    services,
     trainers,
 )
 from luna16.modules.nodule_classfication.models import LunaModel
 
 from . import model_saver
+
+if typing.TYPE_CHECKING:
+    from luna16 import services
 
 
 class LunaMalignantClassificationLauncher:
@@ -24,7 +27,7 @@ class LunaMalignantClassificationLauncher:
         num_workers: int,
         state_name: str,
         training_name: str,
-        registry: services.ServiceContainer,
+        registry: "services.ServiceContainer",
         training_length: int | None = None,
     ) -> None:
         self.validation_stride = validation_stride
@@ -33,7 +36,7 @@ class LunaMalignantClassificationLauncher:
         self.training_name = training_name
         self.registry = registry
         self.training_length = training_length
-        self.logger = registry.get_service(services.LogMessageHandler)
+        self.logger = registry.get_service(message_handler.MessageHandler)
         self.batch_iterator = batch_iterators.BatchIteratorProvider(logger=self.logger)
 
     def fit(
@@ -49,7 +52,7 @@ class LunaMalignantClassificationLauncher:
         )
         model = models.NoduleClassificationModel(
             model=module,
-            optimizer=torch.optim.sgd.SGD(module.parameters(), lr=0.001, momentum=0.99),
+            optimizer=torch.optim.SGD(module.parameters(), lr=0.001, momentum=0.99),
             batch_iterator=self.batch_iterator,
             logger=self.logger,
         )

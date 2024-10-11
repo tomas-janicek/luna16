@@ -6,11 +6,12 @@ import typing
 import mlflow
 from torchinfo import summary
 
-from luna16 import dto, services
 from luna16.settings import settings
-from luna16.training_logging import log_messages
 
-from .. import utils
+from .. import messages, utils
+
+if typing.TYPE_CHECKING:
+    from luna16 import dto, services
 
 _log = logging.getLogger(__name__)
 
@@ -19,8 +20,8 @@ T = typing.TypeVar("T")
 
 
 def log_metrics_to_console(
-    message: log_messages.LogMetrics[dto.NumberValue],
-    registry: services.ServiceContainer,
+    message: messages.LogMetrics["dto.NumberValue"],
+    registry: "services.ServiceContainer",
 ) -> None:
     formatted_values = ", ".join(
         (
@@ -33,15 +34,15 @@ def log_metrics_to_console(
 
 
 def log_start_to_console(
-    message: log_messages.LogStart,
-    registry: services.ServiceContainer,
+    message: messages.LogStart,
+    registry: "services.ServiceContainer",
 ) -> None:
     _log.info(f"Starting {message.training_description}")
 
 
 def log_epoch_to_console(
-    message: log_messages.LogEpoch,
-    registry: services.ServiceContainer,
+    message: messages.LogEpoch,
+    registry: "services.ServiceContainer",
 ) -> None:
     _log.info(
         f"E {message.epoch:04d} of {message.n_epochs:04d}, {message.training_length}/{message.validation_length} batches of "
@@ -52,8 +53,8 @@ def log_epoch_to_console(
 # `log_batch_to_console` is disabled because it was replaced
 # with graphical `tqdm` progress bar.
 def log_batch_to_console(
-    message: log_messages.LogBatch,
-    registry: services.ServiceContainer,
+    message: messages.LogBatch,
+    registry: "services.ServiceContainer",
 ) -> None:
     estimated_duration_in_seconds = (
         (time.time() - message.started_at)
@@ -74,8 +75,8 @@ def log_batch_to_console(
 
 
 def log_batch_start_to_console(
-    message: log_messages.LogBatchStart,
-    registry: services.ServiceContainer,
+    message: messages.LogBatchStart,
+    registry: "services.ServiceContainer",
 ) -> None:
     _log.info(
         f"E {message.epoch:04d} {message.mode.value:>10} ----/{message.batch_size}, starting",
@@ -83,7 +84,7 @@ def log_batch_start_to_console(
 
 
 def log_batch_end_to_console(
-    message: log_messages.LogBatchEnd, registry: services.ServiceContainer
+    message: messages.LogBatchEnd, registry: "services.ServiceContainer"
 ) -> None:
     now_dt = str(datetime.datetime.now()).rsplit(".", 1)[0]
     _log.info(
@@ -92,8 +93,8 @@ def log_batch_end_to_console(
 
 
 def log_metrics_to_tensorboard(
-    message: log_messages.LogMetrics[dto.NumberValue],
-    registry: services.ServiceContainer,
+    message: messages.LogMetrics["dto.NumberValue"],
+    registry: "services.ServiceContainer",
 ) -> None:
     tensorboard_writer = utils.get_tensortboard_writer(
         mode=message.mode, registry=registry
@@ -109,8 +110,8 @@ def log_metrics_to_tensorboard(
 
 
 def log_results_to_tensorboard(
-    message: log_messages.LogResult,
-    registry: services.ServiceContainer,
+    message: messages.LogResult,
+    registry: "services.ServiceContainer",
 ) -> None:
     tensorboard_writer = utils.get_tensortboard_writer(
         mode=message.mode, registry=registry
@@ -148,8 +149,8 @@ def log_results_to_tensorboard(
 
 
 def log_metrics_to_mlflow(
-    message: log_messages.LogMetrics[dto.NumberValue],
-    registry: services.ServiceContainer,
+    message: messages.LogMetrics["dto.NumberValue"],
+    registry: "services.ServiceContainer",
 ) -> None:
     for codename, value in message.values.items():
         mlflow.log_metric(
@@ -160,8 +161,8 @@ def log_metrics_to_mlflow(
 
 
 def log_model_to_mlflow(
-    message: log_messages.LogModel,
-    registry: services.ServiceContainer,
+    message: messages.LogModel,
+    registry: "services.ServiceContainer",
 ) -> None:
     model_summary = settings.MODELS_DIR / "summaries" / "model_summary.txt"
     with open(model_summary, "w+") as f:
@@ -172,13 +173,3 @@ def log_model_to_mlflow(
         artifact_path=f"{message.training_name}_model",
         registered_model_name=message.training_name,
     )
-
-
-def log_input_to_mlflow(
-    message: log_messages.LogInput,
-    registry: services.ServiceContainer,
-) -> None:
-    # TODO: This does not work.
-    # https://mlflow.org/docs/latest/tracking/data-api.html
-    # mlflow.log_input(message.input)
-    ...

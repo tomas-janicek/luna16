@@ -5,8 +5,8 @@ import typing
 from datetime import datetime
 
 import torch
-import torch.nn as nn
 import torch.optim
+from torch import nn
 
 from luna16.settings import settings
 
@@ -32,7 +32,7 @@ class ModelSaver:
         n_processed_samples: int,
         training_started_at: str,
         modules: typing.Mapping[str, nn.Module],
-        optimizer: torch.optim.optimizer.Optimizer,
+        optimizer: torch.optim.Optimizer,
         is_best: bool = False,
     ) -> None:
         models_path = (

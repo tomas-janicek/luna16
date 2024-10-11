@@ -85,9 +85,9 @@ class Ct:
                 center=center, dimension=enums.DimensionIRC.COL
             )
 
-            # assert index_radius > 0, repr([candidateInfo_tup.center_xyz, center_irc, self.ct_hounsfield[ci, cr, cc]])
-            # assert row_radius > 0
-            # assert col_radius > 0
+            assert index_radius > 0
+            assert row_radius > 0
+            assert col_radius > 0
 
             bounding_box[
                 center.index - index_radius : center.index + index_radius + 1,

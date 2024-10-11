@@ -155,4 +155,9 @@ mlruns.db
 # Models
 /models/
 
+# Profiling
+chrome_trace.json
+memory_timeline.html
+stacks
+program.prof
 

@@ -1,5 +1,9 @@
 import torch
 
+CUDA_DEVICE = torch.device("cuda")
+MPS_DEVICE = torch.device("mps")
+CPU_DEVICE = torch.device("cpu")
+
 
 def get_device() -> tuple[torch.device, int]:
     """Function return pytorch device that can be used

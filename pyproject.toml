@@ -89,8 +89,14 @@ select = [
   "UP",  # pyupgrade
   "YTT", # flake8-2020
   "RUF", # Ruff-specific rules
+  "NPY",
+  "FURB",
+  "PERF",
+  "ERA",
   # These rules can be helpful and should be activated at some point 
   # "ANN", # flake8-annotations
+  # "TRY",
+  # "PL",
 ]
 ignore = ["E501"]
 
@@ -147,3 +153,8 @@ reportMissingTypeStubs = "none"
 reportUnknownMemberType = "none"
 reportUnknownArgumentType = "none"
 reportUnknownVariableType = "none"
+reportCallInDefaultInitializer = "warning"
+reportUnnecessaryTypeIgnoreComment = "warning"
+reportShadowedImports = "warning"
+reportPropertyTypeMismatch = "warning"
+reportPrivateImportUsage = "none"

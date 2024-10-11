@@ -22,6 +22,23 @@
             ]
         },
         {
+            "name": "Profiling LuNA Classification Testing",
+            "consoleTitle": "Profiling LuNA Classification Testing",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "profile_luna_classification",
+                "--epochs=1",
+                "--batch-size=2",
+                "--training-length=2",
+            ]
+        },
+        {
             "name": "LuNA Classification Training",
             "consoleTitle": "LuNA Classification Training",
             "type": "debugpy",

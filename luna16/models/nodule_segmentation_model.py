@@ -1,11 +1,10 @@
 import torch
-import torch.nn as nn
 from mlflow.models import infer_signature
 from mlflow.pytorch import ModelSignature
+from torch import nn
 from torch.utils import data as data_utils
 
-from luna16 import augmentations, training_logging, utils
-from luna16.batch_iterators.batch_iterator import BatchIteratorProvider
+from luna16 import augmentations, batch_iterators, message_handler, utils
 
 from .. import dto, enums
 from . import base
@@ -15,9 +14,9 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
     def __init__(
         self,
         model: nn.Module,
-        optimizer: torch.optim.optimizer.Optimizer,
-        batch_iterator: BatchIteratorProvider,
-        logger: training_logging.LogMessageHandler,
+        optimizer: torch.optim.Optimizer,
+        batch_iterator: batch_iterators.BatchIteratorProvider,
+        logger: message_handler.MessageHandler,
         validation_cadence: int = 5,
         recall_loss_weight: float = 8,
         augmentation_model: augmentations.SegmentationAugmentation | None = None,
@@ -76,7 +75,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
             metrics=validation_metrics,
         )
 
-        val_log_images = training_logging.LogImages(
+        val_log_images = message_handler.LogImages(
             epoch=epoch,
             mode=enums.Mode.TRAINING,
             n_processed_samples=n_processed_training_samples,
@@ -85,7 +84,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
             device=self.device,
         )
         self.logger.handle_message(val_log_images)
-        train_log_images = training_logging.LogImages(
+        train_log_images = message_handler.LogImages(
             epoch=epoch,
             mode=enums.Mode.VALIDATING,
             n_processed_samples=n_processed_training_samples,
@@ -230,10 +229,10 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
     ) -> ModelSignature:
         input = torch.unsqueeze(train_dl.dataset[0].candidate, 0)
         input = input.to(self.device, non_blocking=True)
-        _logits, probability = self.model(input)
+        predictions: torch.Tensor = self.model(input)
         signature = infer_signature(
             model_input=input.to("cpu").detach().numpy(),
-            model_output=probability.to("cpu").detach().numpy(),
+            model_output=predictions.to("cpu").detach().numpy(),
         )
         return signature
 
@@ -288,7 +287,7 @@ class NoduleSegmentationModel(base.BaseModel[dto.LunaSegmentationCandidate]):
             name="F1 Score", value=f1_score, formatted_value=f"{f1_score:-5.4f}"
         )
 
-        log_metrics = training_logging.LogMetrics(
+        log_metrics = message_handler.LogMetrics(
             epoch=epoch,
             mode=mode,
             n_processed_samples=n_processed_training_samples,

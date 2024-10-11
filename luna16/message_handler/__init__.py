@@ -1,12 +1,11 @@
 from .handlers import LOG_MESSAGE_HANDLERS
-from .log_message_handler import LogMessageHandler
-from .log_messages import (
+from .message_handler import MessageHandler
+from .messages import (
     LogBatch,
     LogBatchEnd,
     LogBatchStart,
     LogEpoch,
     LogImages,
-    LogInput,
     LogMetrics,
     LogModel,
     LogResult,
@@ -14,7 +13,7 @@ from .log_messages import (
 )
 
 __all__ = [
-    "LogMessageHandler",
+    "MessageHandler",
     "LOG_MESSAGE_HANDLERS",
     "LogMetrics",
     "LogStart",
@@ -24,7 +23,6 @@ __all__ = [
     "LogBatchEnd",
     "LogResult",
     "LogImages",
-    "LogMessageHandler",
+    "MessageHandler",
     "LogModel",
-    "LogInput",
 ]

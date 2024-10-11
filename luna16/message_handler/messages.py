@@ -6,19 +6,22 @@ from mlflow.pytorch import ModelSignature
 from torch import nn
 from torch.utils import data as data_utils
 
-from luna16 import enums, services
+from luna16 import enums
+
+if typing.TYPE_CHECKING:
+    from luna16 import services
 
 T = typing.TypeVar("T")
 CandidateT = typing.TypeVar("CandidateT")
 
 
 @dataclass
-class LogMessage:
+class Message:
     pass
 
 
 @dataclass
-class LogMetrics(LogMessage, typing.Generic[T]):
+class LogMetrics(Message, typing.Generic[T]):
     epoch: int
     mode: enums.Mode
     n_processed_samples: int
@@ -26,12 +29,12 @@ class LogMetrics(LogMessage, typing.Generic[T]):
 
 
 @dataclass
-class LogStart(LogMessage):
+class LogStart(Message):
     training_description: str
 
 
 @dataclass
-class LogEpoch(LogMessage):
+class LogEpoch(Message):
     epoch: int
     n_epochs: int
     batch_size: int
@@ -40,14 +43,14 @@ class LogEpoch(LogMessage):
 
 
 @dataclass
-class LogBatchStart(LogMessage):
+class LogBatchStart(Message):
     epoch: int
     mode: enums.Mode
     batch_size: int
 
 
 @dataclass
-class LogBatch(LogMessage):
+class LogBatch(Message):
     epoch: int
     mode: enums.Mode
     batch_size: int
@@ -56,14 +59,14 @@ class LogBatch(LogMessage):
 
 
 @dataclass
-class LogBatchEnd(LogMessage):
+class LogBatchEnd(Message):
     epoch: int
     mode: enums.Mode
     batch_size: int
 
 
 @dataclass
-class LogResult(LogMessage):
+class LogResult(Message):
     epoch: int
     mode: enums.Mode
     n_processed_samples: int
@@ -72,7 +75,7 @@ class LogResult(LogMessage):
 
 
 @dataclass
-class LogImages(LogMessage, typing.Generic[CandidateT]):
+class LogImages(Message, typing.Generic[CandidateT]):
     epoch: int
     mode: enums.Mode
     n_processed_samples: int
@@ -82,28 +85,23 @@ class LogImages(LogMessage, typing.Generic[CandidateT]):
 
 
 @dataclass
-class LogParams(LogMessage):
+class LogParams(Message):
     params: dict[str, typing.Any]
 
 
 @dataclass
-class LogModel(LogMessage):
+class LogModel(Message):
     model: nn.Module
     signature: ModelSignature
     training_name: str
 
 
-@dataclass
-class LogInput(LogMessage):
-    signature: ModelSignature
-
-
 class LogMessageHandler(typing.Protocol):
     def __call__(
-        self, message: typing.Any, registry: services.ServiceContainer
+        self, message: typing.Any, registry: "services.ServiceContainer"
     ) -> None: ...
 
 
-LogMessageHandlersConfig = typing.Mapping[
-    type[LogMessage], typing.Sequence[LogMessageHandler]
+MessageHandlersConfig = typing.Mapping[
+    type[Message], typing.Sequence[LogMessageHandler]
 ]

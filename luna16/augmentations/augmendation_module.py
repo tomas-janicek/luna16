@@ -5,6 +5,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from luna16 import utils
+
 
 class SegmentationAugmentation(nn.Module):
     def __init__(
@@ -21,6 +23,9 @@ class SegmentationAugmentation(nn.Module):
         self.scale = scale
         self.rotate = rotate
         self.noise = noise
+        self.device, _ = utils.get_device()
+        # MPS Does not support border padding for `grid_sample`
+        self.padding_mode = "border" if self.device != utils.MPS_DEVICE else "zeros"
 
     def forward(
         self, input: torch.Tensor, labels: torch.Tensor
@@ -39,13 +44,13 @@ class SegmentationAugmentation(nn.Module):
         augmented_input = F.grid_sample(
             input=input,
             grid=affine_transformation,
-            # padding_mode="border",
+            padding_mode=self.padding_mode,
             align_corners=False,
         )
         augmented_labels = F.grid_sample(
             input=labels.to(torch.float32),
             grid=affine_transformation,
-            # padding_mode="border",
+            padding_mode=self.padding_mode,
             align_corners=False,
         )
 

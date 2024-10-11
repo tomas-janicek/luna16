@@ -4,7 +4,7 @@ import typing
 from torch.utils import data as data_utils
 from tqdm import tqdm
 
-from luna16 import enums, training_logging
+from luna16 import enums, message_handler
 
 from . import base
 
@@ -14,7 +14,7 @@ T = typing.TypeVar("T")
 class BatchIteratorProvider(base.BaseIteratorProvider):
     def __init__(
         self,
-        logger: training_logging.LogMessageHandler,
+        logger: message_handler.MessageHandler,
         logging_backoff: int = 5,
     ) -> None:
         self.logger = logger
@@ -25,7 +25,7 @@ class BatchIteratorProvider(base.BaseIteratorProvider):
     ) -> typing.Iterator[tuple[int, T]]:
         batch_size = len(enumerable)
 
-        log_bach_start = training_logging.LogBatchStart(
+        log_bach_start = message_handler.LogBatchStart(
             epoch=epoch, mode=mode, batch_size=batch_size
         )
         self.logger.handle_message(log_bach_start)
@@ -37,7 +37,7 @@ class BatchIteratorProvider(base.BaseIteratorProvider):
         ):
             yield (current_index, item)
             if current_index % self.logging_backoff == 0:
-                log_start = training_logging.LogBatch(
+                log_start = message_handler.LogBatch(
                     epoch=epoch,
                     mode=mode,
                     batch_size=batch_size,
@@ -46,7 +46,7 @@ class BatchIteratorProvider(base.BaseIteratorProvider):
                 )
                 self.logger.handle_message(log_start)
 
-        log_bach_end = training_logging.LogBatchEnd(
+        log_bach_end = message_handler.LogBatchEnd(
             epoch=epoch, mode=mode, batch_size=batch_size
         )
         self.logger.handle_message(log_bach_end)

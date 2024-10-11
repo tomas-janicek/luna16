@@ -1,12 +1,11 @@
 import numpy as np
 import torch
-import torch.nn as nn
 from mlflow.models import infer_signature
 from mlflow.pytorch import ModelSignature
+from torch import nn
 from torch.utils import data as data_utils
 
-from luna16 import training_logging, utils
-from luna16.batch_iterators.batch_iterator import BatchIteratorProvider
+from luna16 import batch_iterators, message_handler, utils
 
 from .. import dto, enums
 from . import base
@@ -16,9 +15,9 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
     def __init__(
         self,
         model: nn.Module,
-        optimizer: torch.optim.optimizer.Optimizer,
-        batch_iterator: BatchIteratorProvider,
-        logger: training_logging.LogMessageHandler,
+        optimizer: torch.optim.Optimizer,
+        batch_iterator: batch_iterators.BatchIteratorProvider,
+        logger: message_handler.MessageHandler,
         validation_cadence: int = 5,
     ) -> None:
         self.device, n_gpu_devices = utils.get_device()
@@ -232,7 +231,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
             name="F1 Score", value=f1_score, formatted_value=f"{f1_score:-5.4f}"
         )
 
-        log_metrics = training_logging.LogMetrics(
+        log_metrics = message_handler.LogMetrics(
             epoch=epoch,
             mode=mode,
             n_processed_samples=n_processed_training_samples,
@@ -240,7 +239,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         )
         self.logger.handle_message(log_metrics)
 
-        log_results = training_logging.LogResult(
+        log_results = message_handler.LogResult(
             epoch=epoch,
             mode=mode,
             n_processed_samples=n_processed_training_samples,

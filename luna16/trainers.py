@@ -1,7 +1,7 @@
 import typing
 from datetime import datetime
 
-from luna16 import datasets, dto, models, training_logging
+from luna16 import datasets, dto, message_handler, models
 
 CandidateT = typing.TypeVar("CandidateT")
 
@@ -29,7 +29,7 @@ class Trainer(BaseTrainer[CandidateT]):
     def __init__(
         self,
         name: str,
-        logger: training_logging.LogMessageHandler,
+        logger: message_handler.MessageHandler,
     ) -> None:
         self.name = name
         self.logger = logger
@@ -44,7 +44,7 @@ class Trainer(BaseTrainer[CandidateT]):
         self.logger.registry.call_all_creators(
             training_name=self.name, training_start_time=datetime.now()
         )
-        log_start_training = training_logging.LogStart(training_description=str(model))
+        log_start_training = message_handler.LogStart(training_description=str(model))
         self.logger.handle_message(log_start_training)
 
         score = {}
@@ -56,7 +56,7 @@ class Trainer(BaseTrainer[CandidateT]):
                 data_module=data_module,
             )
 
-        log_model = training_logging.LogModel(
+        log_model = message_handler.LogModel(
             model=model.get_module(),
             training_name=self.name,
             signature=model.get_signature(
@@ -74,7 +74,7 @@ class Trainer(BaseTrainer[CandidateT]):
         model: models.BaseModel[CandidateT],
         data_module: datasets.DataModule[CandidateT],
     ) -> dto.Scores:
-        log_epoch = training_logging.LogEpoch(
+        log_epoch = message_handler.LogEpoch(
             epoch=epoch,
             n_epochs=epochs,
             batch_size=data_module.batch_size,

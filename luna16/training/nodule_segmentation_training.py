@@ -10,11 +10,14 @@ from luna16 import (
     datasets,
     dto,
     enums,
+    message_handler,
     models,
     modules,
-    services,
     trainers,
 )
+
+if typing.TYPE_CHECKING:
+    from luna16 import services
 
 
 class LunaSegmentationLauncher:
@@ -23,7 +26,7 @@ class LunaSegmentationLauncher:
         validation_stride: int,
         num_workers: int,
         training_name: str,
-        registry: services.ServiceContainer,
+        registry: "services.ServiceContainer",
         training_length: int | None = None,
     ) -> None:
         self.validation_stride = validation_stride
@@ -31,7 +34,7 @@ class LunaSegmentationLauncher:
         self.training_name = training_name
         self.registry = registry
         self.training_length = training_length
-        self.logger = registry.get_service(services.LogMessageHandler)
+        self.logger = registry.get_service(message_handler.MessageHandler)
         self.batch_iterator = batch_iterators.BatchIteratorProvider(logger=self.logger)
 
     def fit(
@@ -53,7 +56,7 @@ class LunaSegmentationLauncher:
         )
         model = models.NoduleSegmentationModel(
             model=module,
-            optimizer=torch.optim.adam.Adam(module.parameters()),
+            optimizer=torch.optim.Adam(module.parameters()),
             batch_iterator=self.batch_iterator,
             logger=self.logger,
             augmentation_model=augmentation_model,

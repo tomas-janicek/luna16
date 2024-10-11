@@ -1,3 +1,5 @@
+import typing
+
 import numpy as np
 import torch
 from numpy import typing as np_typing
@@ -6,12 +8,15 @@ from torch.utils.tensorboard.writer import SummaryWriter
 
 from luna16 import datasets, dto, enums, services
 
-from .. import log_messages, utils
+from .. import messages, utils
+
+if typing.TYPE_CHECKING:
+    from luna16 import services
 
 
 def log_images_to_tensorboard(
-    message: log_messages.LogImages[dto.LunaSegmentationCandidate],
-    registry: services.ServiceContainer,
+    message: messages.LogImages[dto.LunaSegmentationCandidate],
+    registry: "services.ServiceContainer",
 ) -> None:
     message.model.eval()
     tensorboard_writer = utils.get_tensortboard_writer(

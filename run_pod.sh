@@ -12,3 +12,6 @@ uv sync
 
 git config --global user.email "tomasjanicek221@gmail.com"
 git config --global user.name Tomas Janicek
+
+apt-get update
+apt-get install unzip

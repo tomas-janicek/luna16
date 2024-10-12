@@ -14,7 +14,7 @@ def create_training_writer(
 ) -> SummaryWriter:
     hostname = socket.gethostname()
     training_log_dir = Path(
-        f"runs/{training_name}/{training_start_time}_{hostname}-training"
+        f"runs/{training_name}/{_get_datetime_string(training_start_time)}_{hostname}-training"
     )
     training_writer = SummaryWriter(log_dir=training_log_dir)
     return training_writer

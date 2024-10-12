@@ -172,4 +172,5 @@ def log_model_to_mlflow(
         pytorch_model=message.model,
         artifact_path=f"{message.training_name}_model",
         registered_model_name=message.training_name,
+        signature=message.signature,
     )

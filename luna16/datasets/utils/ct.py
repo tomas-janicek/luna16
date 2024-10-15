@@ -51,7 +51,6 @@ class Ct:
         )
 
     @staticmethod
-    @cache.memoize(typed=True)
     def create_ct_and_get_raw_image(
         series_uid: str,
         center: dto.CoordinatesXYZ,
@@ -59,7 +58,7 @@ class Ct:
     ) -> tuple[
         np_typing.NDArray[np.float32], np_typing.NDArray[np.bool_], dto.CoordinatesIRC
     ]:
-        ct_scan = Ct.read_and_create_from_image(series_uid=series_uid)
+        ct_scan: Ct = Ct.read_and_create_from_image(series_uid=series_uid)
         ct_chunk, positive_chunk, center_irc = ct_scan.get_ct_cutout_from_center(
             center, cutout_shape
         )
@@ -100,6 +99,7 @@ class Ct:
         return mask
 
     @staticmethod
+    @cache.memoize(typed=True)
     @functools.lru_cache(maxsize=1, typed=True)
     def read_and_create_from_image(series_uid: str) -> "Ct":
         ct_scan_subsets = settings.DATA_DOWNLOADED_DIR / "ct_scan_subsets"
@@ -112,7 +112,7 @@ class Ct:
             ct_mhd_path = ct_mhd_files[0]
 
         ct_mhd_image = sitk.ReadImage(ct_mhd_path)
-        # ct_a is a three-dimensional array. All three dimensions are spatial,
+        # ct_hounsfield is a three-dimensional array. All three dimensions are spatial,
         # and the single intensity channel is implicit.
         ct_hounsfield = np.array(sitk.GetArrayFromImage(ct_mhd_image), dtype=np.float32)
         # We are clipping values to [-1000, 1000] because data above this range is not relevant

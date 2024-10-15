@@ -1,3 +1,5 @@
+import datetime
+
 import torch
 
 CUDA_DEVICE = torch.device("cuda")
@@ -23,3 +25,7 @@ def get_device() -> tuple[torch.device, int]:
         return torch.device("mps"), 1
     else:
         return torch.device("cpu"), 1
+
+
+def get_datetime_string(dt: datetime.datetime) -> str:
+    return dt.strftime("%Y-%m-%dT%H:%M")

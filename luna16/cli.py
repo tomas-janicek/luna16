@@ -12,6 +12,7 @@ def train_luna_classification(
     batch_size: int = 32,
     training_length: int | None = None,
     validation_stride: int = 5,
+    profile: bool = False,
 ) -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry()
@@ -28,6 +29,7 @@ def train_luna_classification(
         lr=0.001,
         momentum=0.99,
         conv_channels=8,
+        profile=profile,
     )
     registry.close_all_services()
 
@@ -49,33 +51,6 @@ def tune_luna_classification(
         training_name=training_name,
         validation_cadence=5,
     ).tune_parameters(epochs=epochs)
-    registry.close_all_services()
-
-
-@cli.command(name="profile_luna_classification")
-def profile_luna_classification(
-    epochs: int = 1,
-    num_workers: int = 8,
-    batch_size: int = 32,
-    training_length: int | None = None,
-    validation_stride: int = 5,
-) -> None:
-    training_name = "Classification"
-    registry = bootstrap.create_registry()
-    luna_launcher = training.LunaClassificationLauncher(
-        num_workers=num_workers,
-        registry=registry,
-        training_length=training_length,
-        validation_stride=validation_stride,
-        training_name=training_name,
-        validation_cadence=5,
-    )
-    luna_launcher.profile_model(
-        batch_size=batch_size,
-        lr=0.001,
-        momentum=0.99,
-        conv_channels=8,
-    )
     registry.close_all_services()
 
 

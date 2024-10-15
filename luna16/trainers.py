@@ -1,7 +1,10 @@
 import typing
 from datetime import datetime
 
-from luna16 import datasets, dto, message_handler, models
+from torch.profiler import profile
+
+from luna16 import datasets, dto, message_handler, models, utils
+from luna16.settings import settings
 
 CandidateT = typing.TypeVar("CandidateT")
 
@@ -41,20 +44,73 @@ class Trainer(BaseTrainer[CandidateT]):
         epochs: int,
         data_module: datasets.DataModule[CandidateT],
     ) -> dto.Scores:
+        training_start_time = datetime.now()
         self.logger.registry.call_all_creators(
-            training_name=self.name, training_start_time=datetime.now()
+            training_name=self.name, training_start_time=training_start_time
         )
         log_start_training = message_handler.LogStart(training_description=str(model))
         self.logger.handle_message(log_start_training)
 
         score = {}
-        for epoch in range(1, epochs + 1):
-            score = self.fit_epoch(
-                epoch=epoch,
-                epochs=epochs,
-                model=model,
-                data_module=data_module,
+        with profile(
+            record_shapes=True, profile_memory=True, with_modules=True
+        ) as prof:
+            for epoch in range(1, epochs + 1):
+                score = self.fit_epoch(
+                    epoch=epoch,
+                    epochs=epochs,
+                    model=model,
+                    data_module=data_module,
+                )
+                prof.step()
+
+        log_model = message_handler.LogModel(
+            model=model.get_module(),
+            training_name=self.name,
+            signature=model.get_signature(
+                train_dl=data_module.get_training_dataloader()
+            ),
+        )
+        self.logger.handle_message(log_model)
+        return score
+
+    def fit_profile(
+        self,
+        *,
+        model: models.BaseModel[CandidateT],
+        epochs: int,
+        data_module: datasets.DataModule[CandidateT],
+        tracing_schedule: typing.Callable[..., typing.Any],
+    ) -> dto.Scores:
+        training_start_time = datetime.now()
+        self.logger.registry.call_all_creators(
+            training_name=self.name, training_start_time=training_start_time
+        )
+        log_start_training = message_handler.LogStart(training_description=str(model))
+        self.logger.handle_message(log_start_training)
+
+        with profile(
+            schedule=tracing_schedule,
+            record_shapes=True,
+            profile_memory=True,
+            with_modules=True,
+        ) as prof:
+            score = {}
+            for epoch in range(1, epochs + 1):
+                score = self.fit_epoch(
+                    epoch=epoch,
+                    epochs=epochs,
+                    model=model,
+                    data_module=data_module,
+                )
+                prof.step()
+
+        prof.export_chrome_trace(
+            str(
+                settings.PROFILING_DIR
+                / f"trace_{self.name.lower()}_{utils.get_datetime_string(training_start_time)}.json"
             )
+        )
 
         log_model = message_handler.LogModel(
             model=model.get_module(),

@@ -156,8 +156,7 @@ mlruns.db
 /models/
 
 # Profiling
-chrome_trace.json
+profiling/trace_*.json
 memory_timeline.html
 stacks
 program.prof
-

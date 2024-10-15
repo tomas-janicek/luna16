@@ -1,29 +1,22 @@
-import mlflow
-from torch.utils.tensorboard.writer import SummaryWriter
-
 from luna16 import message_handler, services
 from luna16.hyperparameters_container import HyperparameterContainer
-
-TrainingWriter = SummaryWriter
-ValidationWriter = SummaryWriter
-MlFlowRun = mlflow.ActiveRun
 
 
 def create_registry() -> services.ServiceContainer:
     registry = services.ServiceContainer()
 
     registry.register_creator(
-        type=TrainingWriter,
+        type=services.TrainingWriter,
         creator=services.create_training_writer,
         on_registry_close=services.clean_tensorboard_writer,
     )
     registry.register_creator(
-        type=ValidationWriter,
+        type=services.ValidationWriter,
         creator=services.create_validation_writer,
         on_registry_close=services.clean_tensorboard_writer,
     )
     registry.register_creator(
-        type=MlFlowRun,
+        type=services.MlFlowRun,
         creator=services.create_mlflow_experiment,
         on_registry_close=services.clean_mlflow_experiment,
     )

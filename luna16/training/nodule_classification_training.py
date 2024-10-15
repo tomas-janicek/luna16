@@ -1,9 +1,10 @@
 import typing
+from datetime import datetime
 from functools import partial
 
 import torch
 from ray import tune
-from torch.profiler import ProfilerActivity, profile
+from torch.profiler import ProfilerActivity, profile, schedule
 
 from luna16 import (
     batch_iterators,
@@ -51,6 +52,7 @@ class LunaClassificationLauncher:
         lr: float,
         momentum: float,
         conv_channels: int,
+        profile: bool,
     ) -> dto.Scores:
         module = modules.LunaModel(
             in_channels=1,
@@ -76,6 +78,16 @@ class LunaClassificationLauncher:
             train=train,
             validation=validation,
         )
+        if profile:
+            tracing_schedule = schedule(
+                skip_first=1, wait=1, warmup=1, active=1, repeat=4
+            )
+            return trainer.fit_profile(
+                model=model,
+                epochs=epochs,
+                data_module=data_module,
+                tracing_schedule=tracing_schedule,
+            )
         return trainer.fit(model=model, epochs=epochs, data_module=data_module)
 
     def tune_parameters(
@@ -102,6 +114,9 @@ class LunaClassificationLauncher:
         conv_channels: int,
         batch_size: int,
     ) -> None:
+        self.logger.registry.call_all_creators(
+            training_name=self.training_name, training_start_time=datetime.now()
+        )
         module = modules.LunaModel(
             in_channels=1,
             conv_channels=conv_channels,
@@ -124,19 +139,16 @@ class LunaClassificationLauncher:
             validation_cadence=self.validation_cadence,
         )
         with profile(
-            activities=[
-                ProfilerActivity.CPU,
-                ProfilerActivity.CUDA,
-            ],
-            with_stack=True,
-            record_shapes=True,
-            profile_memory=True,
+            activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+            # with_stack=True,
+            # record_shapes=True,
+            # profile_memory=True,
         ) as prof:
             model.do_training(
-                epoch=0, train_dataloader=data_module.get_training_dataloader()
+                epoch=1, train_dataloader=data_module.get_training_dataloader()
             )
 
         # Chrome trace can be viewed in chrome://tracing
         prof.export_chrome_trace(str(settings.BASE_DIR / "chrome_trace.json"))
-        prof.export_memory_timeline(str(settings.BASE_DIR / "memory_timeline.html"))
-        prof.export_stacks(str(settings.BASE_DIR / "stacks"))
+        # prof.export_memory_timeline(str(settings.BASE_DIR / "memory_timeline.html"))
+        # prof.export_stacks(str(settings.BASE_DIR / "stacks"))

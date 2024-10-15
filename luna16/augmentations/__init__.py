@@ -1,5 +1,14 @@
 from .augmendation_module import SegmentationAugmentation
-from .base import Filter, Flip, Noise, Offset, Rotate, Scale, Transformation
+from .base import (
+    Filter,
+    Flip,
+    Noise,
+    Offset,
+    RandomProvider,
+    Rotate,
+    Scale,
+    Transformation,
+)
 
 __all__ = [
     "Flip",
@@ -10,4 +19,5 @@ __all__ = [
     "Transformation",
     "Filter",
     "SegmentationAugmentation",
+    "RandomProvider",
 ]

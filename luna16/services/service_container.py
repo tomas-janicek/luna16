@@ -24,7 +24,7 @@ class ServiceContainer:
 
     def register_creator(
         self,
-        type: type[T],
+        type: type[T] | typing.TypeAliasType,
         creator: typing.Callable[..., T],
         on_registry_close: typing.Callable[..., None] | None = None,
     ) -> None:

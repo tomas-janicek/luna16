@@ -6,6 +6,7 @@ from pathlib import Path
 import mlflow
 from torch.utils.tensorboard.writer import SummaryWriter
 
+from luna16 import utils
 from luna16.settings import settings
 
 
@@ -14,7 +15,7 @@ def create_training_writer(
 ) -> SummaryWriter:
     hostname = socket.gethostname()
     training_log_dir = Path(
-        f"runs/{training_name}/{_get_datetime_string(training_start_time)}_{hostname}-training"
+        f"runs/{training_name}/{utils.get_datetime_string(training_start_time)}_{hostname}-training"
     )
     training_writer = SummaryWriter(log_dir=training_log_dir)
     return training_writer
@@ -25,7 +26,7 @@ def create_validation_writer(
 ) -> SummaryWriter:
     hostname = socket.gethostname()
     validation_log_dir = Path(
-        f"runs/{training_name}/{_get_datetime_string(training_start_time)}_{hostname}-validation"
+        f"runs/{training_name}/{utils.get_datetime_string(training_start_time)}_{hostname}-validation"
     )
     validation_writer = SummaryWriter(log_dir=validation_log_dir)
     return validation_writer
@@ -42,7 +43,7 @@ def create_mlflow_experiment(
     experiment = mlflow.set_experiment(experiment_name=training_name)
     active_run = mlflow.start_run(
         experiment_id=experiment.experiment_id,
-        run_name=f"{training_name}-{_get_datetime_string(training_start_time)}",
+        run_name=f"{training_name}-{utils.get_datetime_string(training_start_time)}",
         tags={"version": "0.0.1"},
         log_system_metrics=settings.MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING,
     )
@@ -51,7 +52,3 @@ def create_mlflow_experiment(
 
 def clean_mlflow_experiment(active_run: mlflow.ActiveRun) -> None:
     mlflow.end_run()
-
-
-def _get_datetime_string(dt: datetime.datetime) -> str:
-    return dt.strftime("%Y-%m-%dT%H:%M")

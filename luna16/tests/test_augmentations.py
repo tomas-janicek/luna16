@@ -6,12 +6,15 @@ import torch
 from luna16 import augmentations
 
 
-def _fake_random_scalar(*args: typing.Any) -> float:
-    return 1.0
+class FakeRandomProvider(augmentations.RandomProvider):
+    def random_scalar(*args: typing.Any) -> float:
+        return 1.0
 
+    def random_angle(*args: typing.Any) -> float:
+        return math.pi / 2
 
-def _fake_random_angle(*args: typing.Any) -> float:
-    return math.pi / 2
+    def random_tensor_like(*args: typing.Any, tensor: torch.Tensor) -> torch.Tensor:
+        return torch.ones(tensor.shape[0])
 
 
 def test_flip() -> None:
@@ -27,8 +30,7 @@ def test_flip() -> None:
 
 def test_offset() -> None:
     transformation_matrix = torch.eye(n=4)
-    offsetter = augmentations.Offset(offset=0.5)
-    offsetter.random_provider = _fake_random_scalar
+    offsetter = augmentations.Offset(offset=0.5, random_provider=FakeRandomProvider())
     transformation_matrix = offsetter.apply_transformation(
         transformation=transformation_matrix
     )
@@ -45,8 +47,7 @@ def test_offset() -> None:
 
 def test_scale() -> None:
     transformation_matrix = torch.eye(n=4)
-    scaler = augmentations.Scale(scale=0.5)
-    scaler.random_provider = _fake_random_scalar
+    scaler = augmentations.Scale(scale=0.5, random_provider=FakeRandomProvider())
     transformation_matrix = scaler.apply_transformation(
         transformation=transformation_matrix
     )
@@ -63,8 +64,7 @@ def test_scale() -> None:
 
 def test_rotate() -> None:
     transformation_matrix = torch.eye(n=4)
-    scaler = augmentations.Rotate()
-    scaler.random_provider = _fake_random_angle
+    scaler = augmentations.Rotate(random_provider=FakeRandomProvider())
     transformation_matrix = scaler.apply_transformation(
         transformation=transformation_matrix
     )

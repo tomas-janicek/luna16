@@ -20,6 +20,7 @@ class Settings(pydantic_settings.BaseSettings):
 
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     CACHE_DIR: Path = BASE_DIR / "cache"
+    PROFILING_DIR: Path = BASE_DIR / "profiling"
     DATA_DOWNLOADED_DIR: Path = BASE_DIR / "data_downloaded"
     MODELS_DIR: Path = BASE_DIR / "models"
     DEEP_LEARNING_STYLE: Path = BASE_DIR / "deeplearning.mplstyle"

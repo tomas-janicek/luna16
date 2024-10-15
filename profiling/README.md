@@ -1,0 +1,1 @@
+Contains traces and other metadata for profiled models.

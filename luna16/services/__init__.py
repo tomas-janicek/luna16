@@ -1,3 +1,5 @@
+import typing
+
 import mlflow
 from torch.utils.tensorboard.writer import SummaryWriter
 
@@ -12,9 +14,10 @@ from .service_container import (
     ServiceContainer,
 )
 
-TrainingWriter = SummaryWriter
-ValidationWriter = SummaryWriter
-MlFlowRun = mlflow.ActiveRun
+TrainingWriter = typing.NewType("TrainingWriter", SummaryWriter)
+ValidationWriter = typing.NewType("ValidationWriter", SummaryWriter)
+MlFlowRun = typing.NewType("MlFlowRun", mlflow.ActiveRun)
+
 
 __all__ = [
     "ServiceContainer",

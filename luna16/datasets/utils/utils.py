@@ -1,4 +1,3 @@
-import functools
 import logging
 
 import pandas as pd
@@ -13,7 +12,6 @@ Diameter = float
 DiameterDict = dict[str, list[tuple[dto.CoordinatesXYZ, Diameter]]]
 
 
-@functools.lru_cache(maxsize=1)
 def get_series_uid_of_cts_present() -> set[str]:
     ct_scan_subsets = settings.DATA_DOWNLOADED_DIR / "ct_scan_subsets"
     meta_header_files = ct_scan_subsets.glob("subset*/*.mhd")
@@ -21,19 +19,16 @@ def get_series_uid_of_cts_present() -> set[str]:
     return meta_header_files_on_disc
 
 
-@functools.lru_cache(maxsize=1)
 def create_candidates() -> pd.DataFrame:
     candidates_path = settings.DATA_DIR / "candidates.csv"
     return pd.read_csv(filepath_or_buffer=candidates_path)
 
 
-@functools.lru_cache(maxsize=1)
 def create_annotations() -> pd.DataFrame:
     annotations_path = settings.DATA_DIR / "annotations.csv"
     return pd.read_csv(filepath_or_buffer=annotations_path)
 
 
-@functools.lru_cache(maxsize=1)
 def create_annotations_with_malignancy() -> pd.DataFrame:
     annotations_path = settings.DATA_DIR / "annotations_with_malignancy.csv"
     return pd.read_csv(filepath_or_buffer=annotations_path)

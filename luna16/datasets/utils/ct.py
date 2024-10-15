@@ -1,4 +1,3 @@
-import functools
 import logging
 
 import numpy as np
@@ -51,6 +50,7 @@ class Ct:
         )
 
     @staticmethod
+    @cache.memoize(typed=True)
     def create_ct_and_get_raw_image(
         series_uid: str,
         center: dto.CoordinatesXYZ,
@@ -99,8 +99,6 @@ class Ct:
         return mask
 
     @staticmethod
-    @cache.memoize(typed=True)
-    @functools.lru_cache(maxsize=1, typed=True)
     def read_and_create_from_image(series_uid: str) -> "Ct":
         ct_scan_subsets = settings.DATA_DOWNLOADED_DIR / "ct_scan_subsets"
         ct_mhd_files = list(ct_scan_subsets.glob(f"subset*/{series_uid}.mhd"))

@@ -1,4 +1,3 @@
-import functools
 import logging
 import typing
 
@@ -17,7 +16,6 @@ _log = logging.getLogger(__name__)
 clim = (-1000.0, 300)
 
 
-@functools.lru_cache(maxsize=10, typed=True)
 def get_positive_samples(
     start_at: int = 0, limit: int = 100, print_samples: bool = False
 ) -> list[tuple[int, dto.CandidateInfo]]:

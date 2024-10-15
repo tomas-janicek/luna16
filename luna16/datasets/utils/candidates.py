@@ -105,7 +105,6 @@ def get_candidates_with_malignancy_info(
     return candidates_info
 
 
-# @functools.lru_cache(maxsize=1)
 @cache.memoize(typed=True)
 def get_candidates_info(
     *, require_on_disk_bool: bool = True

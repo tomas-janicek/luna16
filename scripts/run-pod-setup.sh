@@ -5,7 +5,6 @@ set -e
 cp .env.example .env
 
 mv uv.lock uv.cpu.lock
-
 mv uv.lock.cuda uv.lock
 
 curl -LsSf https://astral.sh/uv/install.sh | sh

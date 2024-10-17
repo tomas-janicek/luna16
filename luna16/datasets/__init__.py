@@ -1,5 +1,6 @@
 from .data_module import DataModule
 from .dataset import (
+    create_pre_configured_luna_cutouts,
     create_pre_configured_luna_rationed,
     create_pre_configured_luna_segmentation,
 )
@@ -33,4 +34,5 @@ __all__ = [
     "get_candidates_with_malignancy_info",
     "get_shortened_candidates_with_malignancy_info",
     "Ct",
+    "create_pre_configured_luna_cutouts",
 ]

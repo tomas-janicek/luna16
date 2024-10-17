@@ -72,8 +72,8 @@ def get_candidates_with_malignancy_info(
         if not is_nodule:
             candidates_info.append(
                 dto.CandidateMalignancyInfo(
-                    series_uid=series_uid,
                     center=candidate_center,
+                    series_uid=series_uid,
                     diameter_mm=0.0,
                     is_nodule=False,
                     is_annotated=False,

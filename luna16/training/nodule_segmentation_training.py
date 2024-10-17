@@ -24,16 +24,12 @@ class LunaSegmentationLauncher:
     def __init__(
         self,
         validation_stride: int,
-        num_workers: int,
         training_name: str,
         registry: "services.ServiceContainer",
-        training_length: int | None = None,
     ) -> None:
         self.validation_stride = validation_stride
-        self.num_workers = num_workers
         self.training_name = training_name
         self.registry = registry
-        self.training_length = training_length
         self.logger = registry.get_service(message_handler.MessageHandler)
         self.batch_iterator = batch_iterators.BatchIteratorProvider(logger=self.logger)
 
@@ -65,12 +61,10 @@ class LunaSegmentationLauncher:
             name=self.training_name, logger=self.logger
         )
         train, validation = datasets.create_pre_configured_luna_segmentation(
-            validation_stride=self.validation_stride,
-            training_length=self.training_length,
+            validation_stride=self.validation_stride
         )
         data_module = datasets.DataModule(
             batch_size=batch_size,
-            num_workers=self.num_workers,
             train=train,
             validation=validation,
         )

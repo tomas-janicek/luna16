@@ -24,14 +24,12 @@ class LunaMalignantClassificationLauncher:
     def __init__(
         self,
         validation_stride: int,
-        num_workers: int,
         state_name: str,
         training_name: str,
         registry: "services.ServiceContainer",
         training_length: int | None = None,
     ) -> None:
         self.validation_stride = validation_stride
-        self.num_workers = num_workers
         self.state_name = state_name
         self.training_name = training_name
         self.registry = registry
@@ -61,11 +59,9 @@ class LunaMalignantClassificationLauncher:
         )
         train, validation = datasets.create_pre_configured_luna_rationed(
             validation_stride=self.validation_stride,
-            training_length=self.training_length,
         )
         data_module = datasets.DataModule(
             batch_size=batch_size,
-            num_workers=self.num_workers,
             train=train,
             validation=validation,
         )

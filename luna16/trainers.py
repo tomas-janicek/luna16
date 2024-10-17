@@ -1,3 +1,4 @@
+import time
 import typing
 from datetime import datetime
 
@@ -52,17 +53,17 @@ class Trainer(BaseTrainer[CandidateT]):
         self.logger.handle_message(log_start_training)
 
         score = {}
-        with profile(
-            record_shapes=True, profile_memory=True, with_modules=True
-        ) as prof:
-            for epoch in range(1, epochs + 1):
-                score = self.fit_epoch(
-                    epoch=epoch,
-                    epochs=epochs,
-                    model=model,
-                    data_module=data_module,
-                )
-                prof.step()
+        start_time = time.time()
+        for epoch in range(1, epochs + 1):
+            score = self.fit_epoch(
+                epoch=epoch,
+                epochs=epochs,
+                model=model,
+                data_module=data_module,
+            )
+
+        end_time = time.time()
+        print(f"Training time: {end_time - start_time} seconds.")
 
         log_model = message_handler.LogModel(
             model=model.get_module(),
@@ -96,6 +97,7 @@ class Trainer(BaseTrainer[CandidateT]):
             with_modules=True,
         ) as prof:
             score = {}
+            start_time = time.time()
             for epoch in range(1, epochs + 1):
                 score = self.fit_epoch(
                     epoch=epoch,
@@ -104,7 +106,9 @@ class Trainer(BaseTrainer[CandidateT]):
                     data_module=data_module,
                 )
                 prof.step()
+            end_time = time.time()
 
+        print(f"Training time: {end_time - start_time} seconds.")
         prof.export_chrome_trace(
             str(
                 settings.PROFILING_DIR

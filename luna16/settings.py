@@ -26,6 +26,8 @@ class Settings(pydantic_settings.BaseSettings):
     DEEP_LEARNING_STYLE: Path = BASE_DIR / "deeplearning.mplstyle"
     DATA_DIR: Path = BASE_DIR / "data"
 
+    NUM_WORKERS: int = 8
+
 
 settings = Settings()  # type: ignore
 

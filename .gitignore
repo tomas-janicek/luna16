@@ -157,6 +157,7 @@ mlruns.db
 
 # Profiling
 profiling/trace_*.json
+profiling/*.prof
 memory_timeline.html
 stacks
 program.prof

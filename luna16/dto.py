@@ -16,7 +16,30 @@ class CoordinatesXYZ(pydantic.BaseModel):
 
     def __init__(self, x: int, y: int, z: int) -> None:
         super().__init__(x=x, y=y, z=z)
-        self._array = np.array([self.x, self.y, self.z])
+        self._array = np.array([self.x, self.y, self.z], dtype=np.float32)
+
+    def __getitem__(self, index: int) -> int:
+        return self._array[index]
+
+    def __len__(self) -> int:
+        return len(self._array)
+
+    def __iter__(self) -> typing.Iterator[int]:  # type: ignore
+        return iter(self._array)
+
+    def __hash__(self) -> int:
+        return hash((self.x, self.y, self.z))
+
+    def __eq__(self, other: typing.Any) -> bool:
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
+
+    def __repr__(self) -> str:
+        _repr = (
+            f"{self.__class__.__name__}(" f"x={self.x}, " f"y={self.y}, " f"z={self.z})"
+        )
+        return _repr
 
     def get_array(self) -> np_typing.NDArray[np.float32]:
         return self._array
@@ -35,15 +58,6 @@ class CoordinatesXYZ(pydantic.BaseModel):
             index=int(coords_CRI[2]), row=int(coords_CRI[1]), col=int(coords_CRI[0])
         )
 
-    def __getitem__(self, index: int) -> int:
-        return self._array[index]
-
-    def __len__(self) -> int:
-        return len(self._array)
-
-    def __iter__(self) -> typing.Iterator[int]:  # type: ignore
-        return iter(self._array)
-
 
 class CoordinatesIRC(pydantic.BaseModel):
     index: int
@@ -52,21 +66,7 @@ class CoordinatesIRC(pydantic.BaseModel):
 
     def __init__(self, index: int, row: int, col: int) -> None:
         super().__init__(index=index, row=row, col=col)
-        self._array = np.array([self.index, self.row, self.col])
-
-    def get_array(self) -> np_typing.NDArray[np.float32]:
-        return self._array
-
-    def to_xyz(
-        self,
-        origin: "CoordinatesXYZ",
-        voxel_size: "CoordinatesXYZ",
-        transformation_direction: np_typing.NDArray[np.float32],
-    ) -> "CoordinatesXYZ":
-        x, y, z = (
-            transformation_direction @ (self._array * voxel_size.get_array())
-        ) + origin.get_array()
-        return CoordinatesXYZ(x=x, y=y, z=z)
+        self._array = np.array([self.index, self.row, self.col], dtype=np.int16)
 
     def __getitem__(self, index: int) -> int:
         return self._array[index]
@@ -74,8 +74,39 @@ class CoordinatesIRC(pydantic.BaseModel):
     def __len__(self) -> int:
         return len(self._array)
 
-    def __iter__(self) -> typing.Iterator[int]:  # type: ignore
+    def __iter__(self) -> typing.Iterator[np.int16]:  # type: ignore
         return iter(self._array)
+
+    def __hash__(self) -> int:
+        return hash((self.index, self.row, self.col))
+
+    def __eq__(self, other: typing.Any) -> bool:
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return (self.index, self.row, self.col) == (other.index, other.row, other.col)
+
+    def __repr__(self) -> str:
+        _repr = (
+            f"{self.__class__.__name__}("
+            f"index={self.index}, "
+            f"row={self.row}, "
+            f"col={self.col})"
+        )
+        return _repr
+
+    def get_array(self) -> np_typing.NDArray[np.int16]:
+        return self._array
+
+    def to_xyz(
+        self,
+        origin: "CoordinatesXYZ",
+        voxel_size: "CoordinatesXYZ",
+        transformation_direction: np_typing.NDArray[np.int16],
+    ) -> "CoordinatesXYZ":
+        x, y, z = (
+            transformation_direction @ (self._array * voxel_size.get_array())
+        ) + origin.get_array()
+        return CoordinatesXYZ(x=x, y=y, z=z)
 
     def move_dimension(
         self, *, dimension: enums.DimensionIRC, move_by: int
@@ -104,6 +135,18 @@ class CandidateMalignancyInfo(pydantic.BaseModel):
     is_malignant: bool
     diameter_mm: float
     center: CoordinatesXYZ
+
+
+class CandidateMetadata(typing.NamedTuple):
+    series_uid: str
+    is_nodule: bool
+    is_annotated: bool
+    is_malignant: bool
+    diameter_mm: float
+    file_path: str
+
+    def __hash__(self) -> int:
+        return hash(self.file_path)
 
 
 class LunaClassificationCandidate(typing.NamedTuple):

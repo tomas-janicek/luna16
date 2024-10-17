@@ -3,6 +3,7 @@ import typing
 import torch
 from torch.utils import data as data_utils
 
+from luna16.settings import settings
 from luna16.utils import get_device
 
 CandidateT = typing.TypeVar("CandidateT")
@@ -12,12 +13,10 @@ class DataModule(typing.Generic[CandidateT]):
     def __init__(
         self,
         batch_size: int,
-        num_workers: int,
         train: data_utils.Dataset[CandidateT],
         validation: data_utils.Dataset[CandidateT],
     ) -> None:
         self.batch_size = batch_size
-        self.num_workers = num_workers
 
         self.device, self.n_gpu_devices = get_device()
         self.is_using_cuda = self.device == torch.device("cuda")
@@ -46,7 +45,7 @@ class DataModule(typing.Generic[CandidateT]):
         train_dataloader = data_utils.DataLoader(
             dataset=train,
             batch_size=batch_size,
-            num_workers=self.num_workers,
+            num_workers=settings.NUM_WORKERS,
             pin_memory=self.is_using_cuda,
         )
         return train_dataloader
@@ -58,7 +57,7 @@ class DataModule(typing.Generic[CandidateT]):
         validation_dataloader = data_utils.DataLoader(
             dataset=validation,
             batch_size=batch_size,
-            num_workers=self.num_workers,
+            num_workers=settings.NUM_WORKERS,
             pin_memory=self.is_using_cuda,
         )
         return validation_dataloader

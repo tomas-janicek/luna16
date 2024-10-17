@@ -16,10 +16,11 @@
             },
             "args": [
                 "train_luna_classification",
-                "--epochs=2",
-                "--batch-size=2",
-                "--training-length=2",
-            ]
+                "--epochs=5",
+                "--batch-size=32",
+                "--profile",
+            ],
+            "justMyCode": false
         },
         {
             "name": "LuNA Classification Training",
@@ -35,7 +36,6 @@
                 "train_luna_classification",
                 "--epochs=10",
                 "--batch-size=64",
-                "--training-length=100",
             ]
         },
         {
@@ -52,7 +52,6 @@
                 "train_luna_classification",
                 "--epochs=10",
                 "--batch-size=2",
-                "--training-length=2",
                 "--profile",
             ]
         },
@@ -71,7 +70,6 @@
                 "classification_2024-06-19T13:41:33.836578.best.state",
                 "--epochs=10",
                 "--batch-size=64",
-                "--training-length=10",
             ]
         },
         {
@@ -88,7 +86,6 @@
                 "train_luna_segmentation",
                 "--epochs=2",
                 "--batch-size=5",
-                "--training-length=10",
             ]
         },
         {
@@ -111,6 +108,22 @@
                 // "-k test_scale",
                 // "-k test_rotate",
             ]
+        },
+        {
+            "name": "Create Cutouts",
+            "consoleTitle": "Create Cutouts",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "create_cutouts",
+                "--training-length=10000",
+            ],
+            "justMyCode": false
         }
     ]
 }

@@ -1,8 +1,8 @@
 import logging
+from functools import lru_cache
 
 import numpy as np
 import SimpleITK as sitk
-from diskcache import FanoutCache
 from numpy import typing as np_typing
 
 from luna16 import dto, enums
@@ -11,14 +11,6 @@ from luna16.settings import settings
 from . import candidates
 
 _log = logging.getLogger(__name__)
-
-
-cache = FanoutCache(
-    settings.CACHE_DIR / "luna16",
-    shards=64,
-    timeout=1,
-    size_limit=3e11,
-)
 
 
 class Ct:
@@ -50,7 +42,6 @@ class Ct:
         )
 
     @staticmethod
-    @cache.memoize(typed=True)
     def create_ct_and_get_raw_image(
         series_uid: str,
         center: dto.CoordinatesXYZ,
@@ -63,6 +54,40 @@ class Ct:
             center, cutout_shape
         )
         return ct_chunk, positive_chunk, center_irc
+
+    @staticmethod
+    @lru_cache(maxsize=128, typed=True)
+    def read_and_create_from_image(series_uid: str) -> "Ct":
+        ct_scan_subsets = settings.DATA_DOWNLOADED_DIR / "ct_scan_subsets"
+        ct_mhd_files = list(ct_scan_subsets.glob(f"subset*/{series_uid}.mhd"))
+        if not ct_mhd_files:
+            raise ValueError(
+                f"The dataset does not contain CT scan with series UID {series_uid}."
+            )
+        else:
+            ct_mhd_path = ct_mhd_files[0]
+
+        ct_mhd_image = sitk.ReadImage(ct_mhd_path)
+        # ct_hounsfield is a three-dimensional array. All three dimensions are spatial,
+        # and the single intensity channel is implicit.
+        ct_hounsfield = np.array(sitk.GetArrayFromImage(ct_mhd_image), dtype=np.float32)
+        # We are clipping values to [-1000, 1000] because data above this range is not relevant
+        # to finding nodules. More in data_exaploration.ipynb notebook.
+        ct_hounsfield.clip(min=-1000, max=1000, out=ct_hounsfield)
+
+        origin = dto.CoordinatesXYZ(*ct_mhd_image.GetOrigin())
+        voxel_size = dto.CoordinatesXYZ(*ct_mhd_image.GetSpacing())
+        transformation_direction: np_typing.NDArray[np.float32] = np.array(
+            ct_mhd_image.GetDirection(), dtype=np.float32
+        ).reshape(3, 3)
+
+        return Ct(
+            series_uid=series_uid,
+            ct_hounsfield=ct_hounsfield,
+            origin=origin,
+            voxel_size=voxel_size,
+            transformation_direction=transformation_direction,
+        )
 
     def get_annotation_mask(self) -> np_typing.NDArray[np.bool_]:
         bounding_box = np.zeros_like(self.ct_hounsfield, dtype=np.bool_)
@@ -97,38 +122,6 @@ class Ct:
         mask = bounding_box & (self.ct_hounsfield > self.threshold_hounsfield)
 
         return mask
-
-    @staticmethod
-    def read_and_create_from_image(series_uid: str) -> "Ct":
-        ct_scan_subsets = settings.DATA_DOWNLOADED_DIR / "ct_scan_subsets"
-        ct_mhd_files = list(ct_scan_subsets.glob(f"subset*/{series_uid}.mhd"))
-        if not ct_mhd_files:
-            raise ValueError(
-                f"The dataset does not contain CT scan with series UID {series_uid}."
-            )
-        else:
-            ct_mhd_path = ct_mhd_files[0]
-
-        ct_mhd_image = sitk.ReadImage(ct_mhd_path)
-        # ct_hounsfield is a three-dimensional array. All three dimensions are spatial,
-        # and the single intensity channel is implicit.
-        ct_hounsfield = np.array(sitk.GetArrayFromImage(ct_mhd_image), dtype=np.float32)
-        # We are clipping values to [-1000, 1000] because data above this range is not relevant
-        # to finding nodules. More in data_exaploration.ipynb notebook.
-        ct_hounsfield.clip(min=-1000, max=1000, out=ct_hounsfield)
-
-        origin = dto.CoordinatesXYZ(*ct_mhd_image.GetOrigin())
-        voxel_size = dto.CoordinatesXYZ(*ct_mhd_image.GetSpacing())
-        transformation_direction: np_typing.NDArray[np.float32] = np.array(
-            ct_mhd_image.GetDirection()
-        ).reshape(3, 3)
-        return Ct(
-            series_uid=series_uid,
-            ct_hounsfield=ct_hounsfield,
-            origin=origin,
-            voxel_size=voxel_size,
-            transformation_direction=transformation_direction,
-        )
 
     def get_sample_size(self) -> tuple[int, list[int]]:
         return self.ct_hounsfield.shape[0], self.positive_indexes
@@ -194,7 +187,7 @@ class Ct:
         return radius
 
     def _get_cutout_bounds(
-        self, cutout_shape: dto.CoordinatesIRC, axis: int, center_coord: int
+        self, cutout_shape: dto.CoordinatesIRC, axis: int, center_coord: np.int16
     ) -> tuple[int, int]:
         start_index = int(round(center_coord - cutout_shape[axis] / 2))
         end_index = int(start_index + cutout_shape[axis])
@@ -223,7 +216,7 @@ class Ct:
 
         return start_index, end_index
 
-    def _raise_if_center_out_of_bound(self, *, axis: int, center_coord: int):
+    def _raise_if_center_out_of_bound(self, *, axis: int, center_coord: np.int16):
         assert (
             center_coord >= 0 and center_coord < self.ct_hounsfield.shape[axis]
         ), repr(

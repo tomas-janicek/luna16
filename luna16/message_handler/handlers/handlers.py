@@ -4,7 +4,7 @@ import time
 import typing
 
 import mlflow
-from torchinfo import summary
+from torchinfo import Verbosity, summary
 
 from luna16.settings import settings
 
@@ -166,7 +166,7 @@ def log_model_to_mlflow(
 ) -> None:
     model_summary = settings.MODELS_DIR / "summaries" / "model_summary.txt"
     with open(model_summary, "w+") as f:
-        f.write(str(summary(message.model)))
+        f.write(str(summary(message.model, verbose=Verbosity.QUIET)))
     mlflow.log_artifact(str(model_summary))
     mlflow.pytorch.log_model(
         pytorch_model=message.model,

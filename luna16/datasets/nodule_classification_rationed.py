@@ -1,16 +1,24 @@
 import copy
+import datetime
 import logging
 import random
 
 import torch
 import torch.nn.functional as F
+from profilehooks import profile
 from torch.utils import data as data_utils
 
 from luna16 import augmentations, dto, enums
+from luna16 import utils as common_utils
+from luna16.settings import settings
 
 from . import utils
 
 _log = logging.getLogger(__name__)
+
+
+def _candidate_key(candidate: dto.CandidateMalignancyInfo) -> str:
+    return candidate.series_uid
 
 
 class LunaRationedDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
@@ -97,6 +105,12 @@ class LunaRationedDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
         random.shuffle(self.is_malignant_candidates)
         random.shuffle(self.not_malignant_candidates)
 
+    def sort_by_series_uid(self) -> None:
+        self.is_nodule_candidates.sort(key=_candidate_key)
+        self.not_nodule_candidates.sort(key=_candidate_key)
+        self.is_malignant_candidates.sort(key=_candidate_key)
+        self.not_malignant_candidates.sort(key=_candidate_key)
+
     def __len__(self) -> int:
         return (
             self.training_length if self.training_length else len(self.candidates_info)
@@ -107,6 +121,12 @@ class LunaRationedDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
 
         return self._create_luna_candidate(candidate_info)
 
+    @profile(
+        filename=settings.PROFILING_DIR
+        / f"dataloader_profile_{common_utils.get_datetime_string(datetime.datetime.now())}.prof",
+        stdout=False,
+        dirs=True,
+    )  # type: ignore
     def _create_luna_candidate(
         self, candidate_info: dto.CandidateMalignancyInfo
     ) -> dto.LunaClassificationCandidate:

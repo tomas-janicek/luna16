@@ -13,6 +13,10 @@ from . import utils
 _log = logging.getLogger(__name__)
 
 
+def _candidate_key(candidate: dto.CandidateInfo) -> str:
+    return candidate.series_uid
+
+
 class LunaDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
     def __init__(
         self,
@@ -80,6 +84,10 @@ class LunaDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
     def shuffle_candidates(self) -> None:
         random.shuffle(self.is_nodule_candidates)
         random.shuffle(self.not_nodule_candidates)
+
+    def sort_by_series_uid(self) -> None:
+        self.is_nodule_candidates.sort(key=_candidate_key)
+        self.not_nodule_candidates.sort(key=_candidate_key)
 
     def __len__(self) -> int:
         return (

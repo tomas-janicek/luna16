@@ -19,6 +19,9 @@ def create_cutouts(training_length: int | None = None) -> None:
         "string"
     )
 
+    # TODO: Exclude scas that were already created by first loading present_candidates.csv
+    # TODO: if is exists. Then create diff by seriesuid and x,y,z coords.
+
     cutout_shape = dto.CoordinatesIRC(index=32, row=48, col=48)
     candidates_by_series_uid = candidates_info.groupby("seriesuid")
     for series_uid, grouped_rows in tqdm(candidates_by_series_uid):

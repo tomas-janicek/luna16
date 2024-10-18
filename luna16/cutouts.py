@@ -45,8 +45,8 @@ def create_cutouts(training_length: int | None = None) -> None:
                 positive_chunk=positive_chunk,
                 center_irc=center_irc.get_array(),
             )
-
-    candidates_info.to_csv(luna_cache_dir / "present_candidates.csv", index=False)
+        # Update present candidatas CSV file after every new CT scan iteration
+        candidates_info.to_csv(luna_cache_dir / "present_candidates.csv", index=False)
 
 
 def _get_dataframe_of_cts_present() -> pd.DataFrame:

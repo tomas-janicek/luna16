@@ -5,6 +5,7 @@ from threading import Lock
 import numpy as np
 import pandas as pd
 from pandas.core.groupby.generic import DataFrameGroupBy
+from pandas.errors import EmptyDataError
 from tqdm import tqdm
 
 from luna16 import dto, settings
@@ -24,19 +25,9 @@ class CtCutoutService:
         self.complete_candidates_path = settings.DATA_DIR / "complete_candidates.csv"
 
     def create_cutouts(self, training_length: int | None = None) -> None:
-        # TODO: Are candidates unique on seriesuid and center pair
-        candidates_info = self._get_dataframe_of_cts_present()
-        if training_length:
-            candidates_info = candidates_info.sample(training_length)
-        candidates_info.loc[:, "file_path"] = None
-        candidates_info.loc[:, "file_path"] = candidates_info.loc[
-            :, "file_path"
-        ].astype("string")
-
-        # TODO: Exclude scans that were already created by first loading present_candidates.csv
-        # TODO: if is exists. Then create diff by seriesuid and x,y,z coords.
-
-        candidates_by_series_uid = candidates_info.groupby("seriesuid")
+        candidates_info, candidates_by_series_uid = self._get_grouped_candidates(
+            training_length
+        )
         for series_uid, grouped_rows in tqdm(candidates_by_series_uid):
             self._save_ct_cutouts(str(series_uid), candidates_info, grouped_rows)
 
@@ -44,9 +35,6 @@ class CtCutoutService:
         candidates_info, candidates_by_series_uid = self._get_grouped_candidates(
             training_length
         )
-
-        # TODO: Exclude scans that were already created by first loading present_candidates.csv
-        # TODO: if is exists. Then create diff by seriesuid and x,y,z coords.
 
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=settings.NUM_WORKERS
@@ -95,7 +83,11 @@ class CtCutoutService:
         # training_length samples from candidates for which we have CT scans.
         candidates_info = self._get_dataframe_of_cts_present()
         if training_length:
-            candidates_info = candidates_info.sample(training_length)
+            candidates_info = candidates_info.groupby("is_nodule").apply(
+                lambda class_sub_df: class_sub_df.sample(
+                    round((len(class_sub_df) / len(candidates_info)) * training_length)
+                )
+            )
         candidates_info.loc[:, "file_path"] = None
         candidates_info.loc[:, "file_path"] = candidates_info.loc[
             :, "file_path"
@@ -125,15 +117,21 @@ class CtCutoutService:
             # Should I lock before editing candidates_info or it
             # can not be shared anyway and I must do this after
             with lock:
+                _log.debug("File %s is being added to DF.", str(file_path))
                 candidates_info.at[df_index, "file_path"] = str(file_path)
-                np.savez(
-                    file_path,
-                    ct_chunk=ct_chunk,
-                    positive_chunk=positive_chunk,
-                    center_irc=center_irc.get_array(),
-                )
+            _log.debug("File %s is being created.", str(file_path))
+            np.savez(
+                file_path,
+                ct_chunk=ct_chunk,
+                positive_chunk=positive_chunk,
+                center_irc=center_irc.get_array(),
+            )
 
         # Update present candidatas CSV file after every new CT scan iteration
+        _log.debug(
+            "Present candidates are being updated after processing series uid %s.",
+            series_uid,
+        )
         candidates_info.to_csv(self.present_candidates_path, index=False)
 
     def _get_dataframe_of_cts_present(self) -> pd.DataFrame:
@@ -148,7 +146,7 @@ class CtCutoutService:
     def _get_present_candidates(self) -> pd.DataFrame | None:
         try:
             return pd.read_csv(filepath_or_buffer=self.present_candidates_path)
-        except Exception as error:
+        except (FileNotFoundError, EmptyDataError) as error:
             _log.warning(
                 "File %s could not be opened because %s",
                 self.present_candidates_path,

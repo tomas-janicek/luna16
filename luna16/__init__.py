@@ -17,7 +17,7 @@ class Settings(pydantic_settings.BaseSettings):
     ML_FLOW_URL: str
     MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: bool = True
 
-    LOGGING_LEVEL: str = "INFO"
+    LOGGING_LEVEL: str = "DEBUG"
 
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     CACHE_DIR: Path = BASE_DIR / "cache"
@@ -27,7 +27,7 @@ class Settings(pydantic_settings.BaseSettings):
     DEEP_LEARNING_STYLE: Path = BASE_DIR / "deeplearning.mplstyle"
     DATA_DIR: Path = BASE_DIR / "data"
 
-    NUM_WORKERS: int = 16
+    NUM_WORKERS: int = 8
 
 
 settings = Settings()  # type: ignore

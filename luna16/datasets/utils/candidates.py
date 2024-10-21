@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from diskcache import FanoutCache
 
-from luna16.settings import settings
+from luna16 import settings
 
 from ... import dto
 from . import utils
@@ -13,6 +13,7 @@ _log = logging.getLogger(__name__)
 Diameter = float
 DiameterDict = dict[str, list[tuple[dto.CoordinatesXYZ, Diameter]]]
 
+# TODO: Remove this whole file
 cache = FanoutCache(
     directory=settings.CACHE_DIR / "candidates",
     timeout=1,

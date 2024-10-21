@@ -6,13 +6,13 @@ import torch
 import torch.nn.functional as F
 from torch.utils import data as data_utils
 
-from luna16 import augmentations, dto, enums
-from luna16.settings import settings
+from luna16 import augmentations, dto, enums, settings
 
 _log = logging.getLogger(__name__)
 
 
 def get_present_candidates() -> pd.DataFrame:
+    # TODO: Move to utilities
     present_candidates_path = settings.CACHE_DIR / "luna16" / "present_candidates.csv"
     return pd.read_csv(filepath_or_buffer=present_candidates_path)
 
@@ -32,46 +32,58 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
         self.transformations = transformations
         self.filters = filters
 
-        self.candidates_info = get_present_candidates()
+        candidates_info = get_present_candidates()
 
-        if validation_stride <= 0 or validation_stride > len(self.candidates_info):
+        if validation_stride <= 0 or validation_stride > len(candidates_info):
             raise ValueError(
                 "Argument validation_stride must have value greater than 0 and less than "
-                f"{len(self.candidates_info)} (length of the dataset)"
+                f"{len(candidates_info)} (length of the dataset)"
             )
-
-        # 400 is in this case arbitrary number
-        if ratio.cycle <= 0 or ratio.cycle >= 400:
-            raise ValueError(
-                "Argument ratio must have value between 0 and 400 for "
-                "optimal performance."
-            )
-
-        if train:
-            self.candidates_info = self.candidates_info.drop(
-                self.candidates_info.index[::validation_stride]
-            )
-        else:
-            self.candidates_info = self.candidates_info.iloc[::validation_stride]
 
         # Split candidates into is nodule and is not nodule lists so we can control how many
         # positive candidates we use. This is necessary because our dataset does not have
         # enough positive samples for training (ration 400:1).
 
-        self.is_nodule_candidates = self.candidates_info[
-            self.candidates_info["is_nodule"] == True  # noqa: E712
+        self.is_nodule_candidates = candidates_info[
+            candidates_info["is_nodule"] == True  # noqa: E712
         ]
-        self.not_nodule_candidates = self.candidates_info[
-            self.candidates_info["is_nodule"] == False  # noqa: E712
+        self.not_nodule_candidates = candidates_info[
+            candidates_info["is_nodule"] == False  # noqa: E712
         ]
-        self.is_malignant_candidates = self.candidates_info[
-            self.candidates_info["is_malignant"] == True  # noqa: E712
+        self.is_malignant_candidates = candidates_info[
+            candidates_info["is_malignant"] == True  # noqa: E712
         ]
-        self.not_malignant_candidates = self.candidates_info[
-            self.candidates_info["is_malignant"] == False  # noqa: E712
+        self.not_malignant_candidates = candidates_info[
+            candidates_info["is_malignant"] == False  # noqa: E712
         ]
 
-        if self.is_nodule_candidates.empty or self.not_nodule_candidates.empty:
+        self.is_nodule_candidates = self.split_candidates(
+            candidates=self.is_nodule_candidates,
+            train=train,
+            validation_stride=validation_stride,
+        )
+        self.not_nodule_candidates = self.split_candidates(
+            candidates=self.not_nodule_candidates,
+            train=train,
+            validation_stride=validation_stride,
+        )
+        self.is_malignant_candidates = self.split_candidates(
+            candidates=self.is_malignant_candidates,
+            train=train,
+            validation_stride=validation_stride,
+        )
+        self.not_malignant_candidates = self.split_candidates(
+            candidates=self.not_malignant_candidates,
+            train=train,
+            validation_stride=validation_stride,
+        )
+
+        if (
+            self.is_nodule_candidates.empty
+            or self.not_nodule_candidates.empty
+            or self.is_malignant_candidates.empty
+            or self.not_malignant_candidates.empty
+        ):
             raise ValueError(
                 f"LuNA dataset must have at least 1 positive and 1 negative sample "
                 f"and it has {len(self.is_nodule_candidates)} positive and "
@@ -81,7 +93,7 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
         _log.info("%s", repr(self))
 
     def __len__(self) -> int:
-        return len(self.candidates_info)
+        return len(self.is_nodule_candidates + self.not_nodule_candidates)
 
     def __getitem__(self, index: int) -> dto.LunaClassificationCandidate:
         candidate_info = self._get_candidate_info(index)
@@ -91,7 +103,7 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
     def __repr__(self) -> str:
         _repr = (
             f"{self.__class__.__name__}("
-            f"len={len(self.candidates_info)}, "
+            f"len={len(self)}, "
             f"positive_len={len(self.is_nodule_candidates)}, "
             f"negative_len={len(self.not_nodule_candidates)}, "
             f"train={self.train}, "
@@ -137,6 +149,7 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
             case enums.LunaCandidateTypes.NEGATIVE:
                 not_nodule_index: int = typed_index % len(self.not_nodule_candidates)
                 nodule_metadata = self.not_nodule_candidates.iloc[not_nodule_index]
+
         return dto.CandidateMetadata(
             series_uid=nodule_metadata["seriesuid"],
             is_nodule=nodule_metadata["is_nodule"],
@@ -179,6 +192,14 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
                 candidate = filter.apply_filter(image=candidate)
         return candidate
 
+    def split_candidates(
+        self, candidates: pd.DataFrame, train: bool, validation_stride: int
+    ) -> pd.DataFrame:
+        if train:
+            return candidates.drop(candidates.index[::validation_stride])
+        else:
+            return candidates.iloc[::validation_stride]
+
 
 class MalignantLunaDataset(LunaCutoutsDataset):
     def __len__(self):
@@ -205,6 +226,7 @@ class MalignantLunaDataset(LunaCutoutsDataset):
             case enums.LunaMalignantCandidateTypes.NOT_NODULE:
                 not_nodule_index: int = typed_index % len(self.not_nodule_candidates)
                 nodule_metadata = self.not_nodule_candidates[not_nodule_index]
+
         return dto.CandidateMetadata(
             series_uid=nodule_metadata["seriesuid"],
             is_nodule=nodule_metadata["is_nodule"],

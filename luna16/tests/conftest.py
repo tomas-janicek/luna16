@@ -2,7 +2,7 @@
 
 # import pytest
 
-# from luna16.settings import settings
+# from luna16 import settings
 
 
 # TODO: Uncomment when I create testing data

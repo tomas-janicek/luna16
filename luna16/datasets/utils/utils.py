@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-from luna16.settings import settings
+from luna16 import settings
 
 from ... import dto
 

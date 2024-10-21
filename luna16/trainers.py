@@ -4,8 +4,7 @@ from datetime import datetime
 
 from torch.profiler import profile
 
-from luna16 import datasets, dto, message_handler, models, utils
-from luna16.settings import settings
+from luna16 import datasets, dto, message_handler, models, settings, utils
 
 CandidateT = typing.TypeVar("CandidateT")
 

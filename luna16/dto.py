@@ -121,6 +121,7 @@ class CoordinatesIRC(pydantic.BaseModel):
         return self
 
 
+# TODO: Remove
 class CandidateInfo(pydantic.BaseModel):
     series_uid: str
     is_nodule: bool
@@ -128,6 +129,7 @@ class CandidateInfo(pydantic.BaseModel):
     center: CoordinatesXYZ
 
 
+# TODO: Remove
 class CandidateMalignancyInfo(pydantic.BaseModel):
     series_uid: str
     is_nodule: bool
@@ -165,9 +167,12 @@ class LunaSegmentationCandidate(typing.NamedTuple):
 
 class Ratio:
     def __init__(self, ratios: list[int]) -> None:
+        self._validate_ratios(ratios)
+
         self.ratios = ratios
         self.cycle: int = sum(self.ratios)
         self.intervals = []
+
         start = 0
         end = 0
         for ratio in self.ratios:
@@ -185,6 +190,11 @@ class Ratio:
         raise NotImplementedError(
             "Something went wrong during getting class from ratio."
         )
+
+    def _validate_ratios(self, ratios: list[int]) -> None:
+        for ratio in ratios:
+            if ratio < 0:
+                raise ValueError("Ratio must be positive number or zero.")
 
 
 class LunaClassificationRatio(Ratio):

@@ -1,13 +1,19 @@
 import typer
 
-from luna16 import bootstrap, cutouts, training
+from luna16 import bootstrap, cutouts, settings, training
 
 cli = typer.Typer()
 
 
 @cli.command(name="create_cutouts")
 def create_cutouts(training_length: int | None = None) -> None:
-    cutouts.create_cutouts(training_length=training_length)
+    # If num workers is greated than 0, run in parallel
+    cutout_service = cutouts.CtCutoutService()
+    if settings.NUM_WORKERS:
+        cutout_service.create_cutouts_concurrent(training_length=training_length)
+    # Otherwise, run sequentially
+    else:
+        cutout_service.create_cutouts(training_length=training_length)
 
 
 @cli.command(name="train_luna_classification")

@@ -1,18 +1,17 @@
 import logging
-from functools import lru_cache
 
 import numpy as np
 import SimpleITK as sitk
 from numpy import typing as np_typing
 
-from luna16 import dto, enums
-from luna16.settings import settings
+from luna16 import dto, enums, settings
 
 from . import candidates
 
 _log = logging.getLogger(__name__)
 
 
+# TODO: Move module to data folder with cutouts
 class Ct:
     def __init__(
         self,
@@ -41,6 +40,7 @@ class Ct:
             self.positive_mask.sum(axis=(1, 2)).nonzero()[0].tolist()
         )
 
+    # TODO: Remove after refactor
     @staticmethod
     def create_ct_and_get_raw_image(
         series_uid: str,
@@ -56,7 +56,6 @@ class Ct:
         return ct_chunk, positive_chunk, center_irc
 
     @staticmethod
-    @lru_cache(maxsize=128, typed=True)
     def read_and_create_from_image(series_uid: str) -> "Ct":
         ct_scan_subsets = settings.DATA_DOWNLOADED_DIR / "ct_scan_subsets"
         ct_mhd_files = list(ct_scan_subsets.glob(f"subset*/{series_uid}.mhd"))

@@ -8,7 +8,7 @@ import torch
 import torch.optim
 from torch import nn
 
-from luna16.settings import settings
+from luna16 import settings
 
 _log = logging.getLogger(__name__)
 

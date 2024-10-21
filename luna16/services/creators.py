@@ -6,8 +6,7 @@ from pathlib import Path
 import mlflow
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from luna16 import utils
-from luna16.settings import settings
+from luna16 import settings, utils
 
 
 def create_training_writer(

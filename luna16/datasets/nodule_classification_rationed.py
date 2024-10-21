@@ -8,9 +8,8 @@ import torch.nn.functional as F
 from profilehooks import profile
 from torch.utils import data as data_utils
 
-from luna16 import augmentations, dto, enums
+from luna16 import augmentations, dto, enums, settings
 from luna16 import utils as common_utils
-from luna16.settings import settings
 
 from . import utils
 

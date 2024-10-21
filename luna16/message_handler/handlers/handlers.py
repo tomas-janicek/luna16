@@ -6,7 +6,7 @@ import typing
 import mlflow
 from torchinfo import Verbosity, summary
 
-from luna16.settings import settings
+from luna16 import settings
 
 from .. import messages, utils
 

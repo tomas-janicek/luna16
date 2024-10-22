@@ -28,6 +28,7 @@ class Ct:
         self.voxel_size = voxel_size
         self.transformation_direction = transformation_direction
 
+        # TODO: this must be replaced with dataframe
         self.candidates = candidates.get_grouped_candidates_with_malignancy_info()[
             self.series_uid
         ]
@@ -80,6 +81,8 @@ class Ct:
             ct_mhd_image.GetDirection(), dtype=np.float32
         ).reshape(3, 3)
 
+        # TODO: Make this only utility function, this does not have to work with CT class
+        # TODO: The best ides is to separate cutout and segmentation logic
         return Ct(
             series_uid=series_uid,
             ct_hounsfield=ct_hounsfield,

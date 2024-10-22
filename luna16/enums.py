@@ -22,7 +22,7 @@ class LunaCandidateTypes(enum.IntEnum):
     NEGATIVE = 1
 
 
-class LunaMalignantCandidateTypes(enum.IntEnum):
+class CandidateClass(enum.IntEnum):
     MALIGNANT = 0
     BENIGN = 1
     NOT_NODULE = 2

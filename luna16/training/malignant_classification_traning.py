@@ -57,7 +57,7 @@ class LunaMalignantClassificationLauncher:
         trainer = trainers.Trainer[dto.LunaClassificationCandidate](
             name=self.training_name, logger=self.logger
         )
-        train, validation = datasets.create_pre_configured_luna_rationed(
+        train, validation = datasets.create_pre_configured_luna_malignant(
             validation_stride=self.validation_stride,
         )
         data_module = datasets.DataModule(

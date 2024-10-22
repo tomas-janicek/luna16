@@ -141,9 +141,7 @@ class CandidateMalignancyInfo(pydantic.BaseModel):
 
 class CandidateMetadata(typing.NamedTuple):
     series_uid: str
-    is_nodule: bool
-    is_annotated: bool
-    is_malignant: bool
+    candidate_class: enums.CandidateClass
     diameter_mm: float
     file_path: str
 

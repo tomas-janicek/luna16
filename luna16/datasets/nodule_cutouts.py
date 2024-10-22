@@ -45,16 +45,18 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
         # enough positive samples for training (ration 400:1).
 
         self.is_nodule_candidates = candidates_info[
-            candidates_info["is_nodule"] == True  # noqa: E712
+            (candidates_info["class"] == enums.CandidateClass.BENIGN)
+            | (candidates_info["class"] == enums.CandidateClass.MALIGNANT)
         ]
         self.not_nodule_candidates = candidates_info[
-            candidates_info["is_nodule"] == False  # noqa: E712
+            candidates_info["class"] == enums.CandidateClass.NOT_NODULE
         ]
         self.is_malignant_candidates = candidates_info[
-            candidates_info["is_malignant"] == True  # noqa: E712
+            candidates_info["class"] == enums.CandidateClass.MALIGNANT
         ]
         self.not_malignant_candidates = candidates_info[
-            candidates_info["is_malignant"] == False  # noqa: E712
+            (candidates_info["class"] == enums.CandidateClass.BENIGN)
+            | (candidates_info["class"] == enums.CandidateClass.NOT_NODULE)
         ]
 
         self.is_nodule_candidates = self.split_candidates(
@@ -124,10 +126,12 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
         candidate_data = (
             torch.from_numpy(loaded_cutout["ct_chunk"]).to(torch.float32).unsqueeze(0)
         )
-        actual_result = torch.tensor(
-            [not candidate_metadata.is_nodule, candidate_metadata.is_nodule],
-            dtype=torch.long,
-        )
+
+        match candidate_metadata.candidate_class:
+            case enums.CandidateClass.BENIGN | enums.CandidateClass.MALIGNANT:
+                actual_result = torch.tensor([0, 1], dtype=torch.long)
+            case enums.CandidateClass.NOT_NODULE:
+                actual_result = torch.tensor([1, 0], dtype=torch.long)
 
         candidate_data = self._apply_all_transformations(candidate_data)
         candidate_data = self._apply_all_filters(candidate_data)
@@ -152,9 +156,7 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
 
         return dto.CandidateMetadata(
             series_uid=nodule_metadata["seriesuid"],
-            is_nodule=nodule_metadata["is_nodule"],
-            is_annotated=nodule_metadata["is_annotated"],
-            is_malignant=nodule_metadata["is_malignant"],
+            candidate_class=nodule_metadata["class"],
             diameter_mm=nodule_metadata["diameter_mm"],
             file_path=nodule_metadata["file_path"],
         )
@@ -212,26 +214,49 @@ class MalignantLunaDataset(LunaCutoutsDataset):
 
     def _get_candidate_info(self, index: int) -> dto.CandidateMetadata:
         candidate_type, typed_index = self.ratio.get_class(index)
-        match enums.LunaMalignantCandidateTypes(candidate_type):
-            case enums.LunaMalignantCandidateTypes.MALIGNANT:
+        match enums.CandidateClass(candidate_type):
+            case enums.CandidateClass.MALIGNANT:
                 is_malignant_index: int = typed_index % len(
                     self.is_malignant_candidates
                 )
                 nodule_metadata = self.is_malignant_candidates[is_malignant_index]
-            case enums.LunaMalignantCandidateTypes.BENIGN:
+            case enums.CandidateClass.BENIGN:
                 not_malignant_index: int = typed_index % len(
                     self.not_malignant_candidates
                 )
                 nodule_metadata = self.not_malignant_candidates[not_malignant_index]
-            case enums.LunaMalignantCandidateTypes.NOT_NODULE:
+            case enums.CandidateClass.NOT_NODULE:
                 not_nodule_index: int = typed_index % len(self.not_nodule_candidates)
                 nodule_metadata = self.not_nodule_candidates[not_nodule_index]
 
         return dto.CandidateMetadata(
             series_uid=nodule_metadata["seriesuid"],
-            is_nodule=nodule_metadata["is_nodule"],
-            is_annotated=nodule_metadata["is_annotated"],
-            is_malignant=nodule_metadata["is_malignant"],
+            candidate_class=nodule_metadata["class"],
             diameter_mm=nodule_metadata["diameter_mm"],
             file_path=nodule_metadata["file_path"],
         )
+
+    def _create_luna_candidate(
+        self, candidate_metadata: dto.CandidateMetadata
+    ) -> dto.LunaClassificationCandidate:
+        loaded_cutout = np.load(candidate_metadata.file_path)
+        candidate_data = (
+            torch.from_numpy(loaded_cutout["ct_chunk"]).to(torch.float32).unsqueeze(0)
+        )
+
+        match candidate_metadata.candidate_class:
+            case enums.CandidateClass.MALIGNANT:
+                actual_result = torch.tensor([0, 1], dtype=torch.long)
+            case enums.CandidateClass.BENIGN | enums.CandidateClass.NOT_NODULE:
+                actual_result = torch.tensor([1, 0], dtype=torch.long)
+
+        candidate_data = self._apply_all_transformations(candidate_data)
+        candidate_data = self._apply_all_filters(candidate_data)
+
+        candidate = dto.LunaClassificationCandidate(
+            series_uid=candidate_metadata.series_uid,
+            candidate=candidate_data,
+            labels=actual_result,
+            center_irc=torch.tensor(loaded_cutout["center_irc"]),
+        )
+        return candidate

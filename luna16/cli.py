@@ -1,6 +1,6 @@
 import typer
 
-from luna16 import bootstrap, cutouts, settings, training
+from luna16 import bootstrap, data_processing, settings, training
 
 cli = typer.Typer()
 
@@ -8,7 +8,7 @@ cli = typer.Typer()
 @cli.command(name="create_cutouts")
 def create_cutouts(training_length: int | None = None) -> None:
     # If num workers is greated than 0, run in parallel
-    cutout_service = cutouts.CtCutoutService()
+    cutout_service = data_processing.CtCutoutService()
     if settings.NUM_WORKERS:
         cutout_service.create_cutouts_concurrent(training_length=training_length)
     # Otherwise, run sequentially

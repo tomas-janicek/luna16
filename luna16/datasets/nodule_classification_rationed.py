@@ -225,17 +225,17 @@ class MalignantLunaDataset(LunaRationedDataset):
 
     def _get_candidate_info(self, index: int) -> dto.CandidateMalignancyInfo:
         candidate_type, typed_index = self.ratio.get_class(index)
-        match enums.LunaMalignantCandidateTypes(candidate_type):
-            case enums.LunaMalignantCandidateTypes.MALIGNANT:
+        match enums.CandidateClass(candidate_type):
+            case enums.CandidateClass.MALIGNANT:
                 is_malignant_index: int = typed_index % len(
                     self.is_malignant_candidates
                 )
                 return self.is_malignant_candidates[is_malignant_index]
-            case enums.LunaMalignantCandidateTypes.BENIGN:
+            case enums.CandidateClass.BENIGN:
                 not_malignant_index: int = typed_index % len(
                     self.not_malignant_candidates
                 )
                 return self.not_malignant_candidates[not_malignant_index]
-            case enums.LunaMalignantCandidateTypes.NOT_NODULE:
+            case enums.CandidateClass.NOT_NODULE:
                 not_nodule_index: int = typed_index % len(self.not_nodule_candidates)
                 return self.not_nodule_candidates[not_nodule_index]

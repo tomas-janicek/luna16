@@ -57,25 +57,6 @@ def tune_luna_classification(
     registry.close_all_services()
 
 
-@cli.command(name="train_luna_segmentation")
-def train_luna_segmentation(
-    epochs: int = 1,
-    batch_size: int = 32,
-    validation_stride: int = 5,
-) -> None:
-    training_name = "Segmentation"
-    registry = bootstrap.create_registry()
-    training.LunaSegmentationLauncher(
-        training_name=training_name,
-        registry=registry,
-        validation_stride=validation_stride,
-    ).fit(
-        epochs=epochs,
-        batch_size=batch_size,
-    )
-    registry.close_all_services()
-
-
 @cli.command(name="train_luna_malignant_classification")
 def train_luna_malignant_classification(
     state_name: str,

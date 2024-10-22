@@ -156,13 +156,6 @@ class LunaClassificationCandidate(typing.NamedTuple):
     center_irc: torch.Tensor
 
 
-class LunaSegmentationCandidate(typing.NamedTuple):
-    candidate: torch.Tensor
-    positive_candidate_mask: torch.Tensor
-    series_uid: str
-    slice_index: int
-
-
 class Ratio:
     def __init__(self, ratios: list[int]) -> None:
         self._validate_ratios(ratios)
@@ -203,61 +196,6 @@ class LunaClassificationRatio(Ratio):
 class LunaMalignantRatio(Ratio):
     def __init__(self, malignant: int, benign: int, not_module: int) -> None:
         super().__init__([malignant, benign, not_module])
-
-
-class SegmentationBatchMetrics:
-    def __init__(
-        self,
-        loss: torch.Tensor,
-        false_negative_loss: torch.Tensor,
-        true_positive: torch.Tensor,
-        false_negative: torch.Tensor,
-        false_positive: torch.Tensor,
-    ) -> None:
-        self.loss = loss
-        self.false_negative_loss = false_negative_loss
-        self.true_positive = true_positive
-        self.false_negative = false_negative
-        self.false_positive = false_positive
-
-    @classmethod
-    def create_empty(
-        cls, dataset_len: int, device: torch.device
-    ) -> "SegmentationBatchMetrics":
-        return cls(
-            loss=torch.tensor([]).to(device),
-            false_negative_loss=torch.tensor([]).to(device),
-            true_positive=torch.tensor([]).to(device),
-            false_negative=torch.tensor([]).to(device),
-            false_positive=torch.tensor([]).to(device),
-        )
-
-    def add_batch_metrics(
-        self,
-        loss: torch.Tensor | None = None,
-        false_negative_loss: torch.Tensor | None = None,
-        hard_true_positive: torch.Tensor | None = None,
-        hard_false_negative: torch.Tensor | None = None,
-        hard_false_positive: torch.Tensor | None = None,
-    ) -> None:
-        if loss is not None:
-            self.loss = torch.cat((self.loss, loss), dim=0)
-        if false_negative_loss is not None:
-            self.false_negative_loss = torch.cat(
-                (self.false_negative_loss, false_negative_loss), dim=0
-            )
-        if hard_true_positive is not None:
-            self.true_positive = torch.cat(
-                (self.true_positive, hard_true_positive), dim=0
-            )
-        if hard_false_negative is not None:
-            self.false_negative = torch.cat(
-                (self.false_negative, hard_false_negative), dim=0
-            )
-        if hard_false_positive is not None:
-            self.false_positive = torch.cat(
-                (self.false_positive, hard_false_positive), dim=0
-            )
 
 
 class ClassificationBatchMetrics:

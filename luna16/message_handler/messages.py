@@ -4,7 +4,6 @@ from dataclasses import dataclass
 import torch
 from mlflow.pytorch import ModelSignature
 from torch import nn
-from torch.utils import data as data_utils
 
 from luna16 import enums
 
@@ -72,16 +71,6 @@ class LogResult(Message):
     n_processed_samples: int
     labels: torch.Tensor
     predictions: torch.Tensor
-
-
-@dataclass
-class LogImages(Message, typing.Generic[CandidateT]):
-    epoch: int
-    mode: enums.Mode
-    n_processed_samples: int
-    dataloader: data_utils.DataLoader[CandidateT]
-    model: nn.Module
-    device: torch.device
 
 
 @dataclass

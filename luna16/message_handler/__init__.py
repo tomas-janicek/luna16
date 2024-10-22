@@ -5,7 +5,6 @@ from .messages import (
     LogBatchEnd,
     LogBatchStart,
     LogEpoch,
-    LogImages,
     LogMetrics,
     LogModel,
     LogResult,
@@ -22,7 +21,6 @@ __all__ = [
     "LogBatch",
     "LogBatchEnd",
     "LogResult",
-    "LogImages",
     "MessageHandler",
     "LogModel",
 ]

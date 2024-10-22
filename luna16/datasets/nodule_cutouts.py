@@ -17,7 +17,7 @@ def get_present_candidates() -> pd.DataFrame:
     return pd.read_csv(filepath_or_buffer=present_candidates_path)
 
 
-class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
+class CutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
     def __init__(
         self,
         ratio: dto.Ratio,
@@ -203,7 +203,7 @@ class LunaCutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
             return candidates.iloc[::validation_stride]
 
 
-class MalignantLunaDataset(LunaCutoutsDataset):
+class MalignantCutoutsDataset(CutoutsDataset):
     def __len__(self):
         return len(self.not_malignant_candidates + self.is_malignant_candidates)
 

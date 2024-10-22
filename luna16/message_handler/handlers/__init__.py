@@ -1,5 +1,4 @@
 from .. import messages
-from .ct_image_handlers import log_images_to_tensorboard
 from .handlers import (
     log_batch_end_to_console,
     log_batch_start_to_console,
@@ -24,7 +23,6 @@ LOG_MESSAGE_HANDLERS: messages.MessageHandlersConfig = {
     messages.LogBatchStart: (log_batch_start_to_console,),
     messages.LogBatchEnd: (log_batch_end_to_console,),
     messages.LogResult: (log_results_to_tensorboard,),
-    messages.LogImages: (log_images_to_tensorboard,),
     messages.LogModel: (log_model_to_mlflow,),
 }
 

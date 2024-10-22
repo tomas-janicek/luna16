@@ -1,6 +1,7 @@
 from luna16 import augmentations, dto
 
-from .nodule_cutouts import CutoutsDataset, MalignantCutoutsDataset
+from .malignant_cutout import MalignantCutoutsDataset
+from .nodule_cutouts import CutoutsDataset
 
 
 def create_pre_configured_luna_cutouts(

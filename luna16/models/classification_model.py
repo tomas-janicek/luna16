@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import torch
 from mlflow.models import infer_signature
@@ -10,6 +12,8 @@ from luna16 import batch_iterators, message_handler, utils
 from .. import dto, enums
 from . import base
 
+_log = logging.getLogger(__name__)
+
 
 class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate]):
     def __init__(
@@ -19,6 +23,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         batch_iterator: batch_iterators.BatchIteratorProvider,
         logger: message_handler.MessageHandler,
         validation_cadence: int = 5,
+        version: str = "latest",
     ) -> None:
         self.device, n_gpu_devices = utils.get_device()
         self.model = model
@@ -29,6 +34,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         self.validation_cadence = validation_cadence
         self.batch_iterator = batch_iterator
         self.logger = logger
+        self.version = version
 
     def fit_epoch(
         self,

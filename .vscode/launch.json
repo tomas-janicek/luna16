@@ -16,7 +16,8 @@
             },
             "args": [
                 "train_luna_classification",
-                "--epochs=5",
+                "0.0.0-test",
+                "--epochs=2",
                 "--batch-size=32",
                 "--profile",
             ],
@@ -34,6 +35,7 @@
             },
             "args": [
                 "train_luna_classification",
+                "0.0.0",
                 "--epochs=10",
                 "--batch-size=64",
             ]
@@ -50,6 +52,7 @@
             },
             "args": [
                 "train_luna_classification",
+                "0.0.0-profile",
                 "--epochs=10",
                 "--batch-size=2",
                 "--profile",
@@ -67,25 +70,11 @@
             },
             "args": [
                 "train_luna_malignant_classification",
-                "classification_2024-06-19T13:41:33.836578.best.state",
+                "0.0.0",
+                "classification",
+                "0.0.0-test",
                 "--epochs=10",
                 "--batch-size=64",
-            ]
-        },
-        {
-            "name": "LuNA Segmentation Training",
-            "consoleTitle": "LuNA Segmentation Training",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceRoot}/luna16/cli.py",
-            "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "."
-            },
-            "args": [
-                "train_luna_segmentation",
-                "--epochs=2",
-                "--batch-size=5",
             ]
         },
         {
@@ -121,7 +110,7 @@
             },
             "args": [
                 "create_cutouts",
-                "--training-length=2000",
+                "--training-length=50000",
             ],
             "justMyCode": false
         }

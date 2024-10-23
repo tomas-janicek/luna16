@@ -1,3 +1,3 @@
-from .models import LunaModel
+from .models import LunaHead, LunaModel
 
-__all__ = ["LunaModel"]
+__all__ = ["LunaModel", "LunaHead"]

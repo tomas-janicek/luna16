@@ -3,6 +3,7 @@ from functools import partial
 
 import torch
 from ray import tune
+from torch import nn
 
 from luna16 import (
     batch_iterators,
@@ -10,14 +11,11 @@ from luna16 import (
     dto,
     message_handler,
     models,
-    trainers,
+    modules,
+    services,
 )
 from luna16.modules.nodule_classfication.models import LunaModel
-
-from . import model_saver
-
-if typing.TYPE_CHECKING:
-    from luna16 import services
+from luna16.training import trainers
 
 
 class LunaMalignantClassificationLauncher:
@@ -25,12 +23,14 @@ class LunaMalignantClassificationLauncher:
         self,
         validation_stride: int,
         state_name: str,
+        state_version: str,
         training_name: str,
         registry: "services.ServiceContainer",
         training_length: int | None = None,
     ) -> None:
         self.validation_stride = validation_stride
         self.state_name = state_name
+        self.state_version = state_version
         self.training_name = training_name
         self.registry = registry
         self.training_length = training_length
@@ -41,12 +41,10 @@ class LunaMalignantClassificationLauncher:
         self,
         epochs: int,
         batch_size: int,
+        version: str,
     ) -> dto.Scores:
-        classification_model_saver = model_saver.ModelSaver(
-            model_name="classification",
-        )
-        module = classification_model_saver.load_model(
-            model=LunaModel(), state_name=self.state_name, n_excluded_blocks=2
+        module = self._prepare_for_fine_tunning_head(
+            name=self.state_name, version=self.state_version
         )
         model = models.NoduleClassificationModel(
             model=module,
@@ -55,7 +53,7 @@ class LunaMalignantClassificationLauncher:
             logger=self.logger,
         )
         trainer = trainers.Trainer[dto.LunaClassificationCandidate](
-            name=self.training_name, logger=self.logger
+            name=self.training_name, version=version, logger=self.logger
         )
         train, validation = datasets.create_pre_configured_luna_malignant(
             validation_stride=self.validation_stride,
@@ -82,3 +80,28 @@ class LunaMalignantClassificationLauncher:
         )
         tuner = tune.Tuner(self.tunable_fit, param_space=hyperparameters)
         return tuner.fit()
+
+    def _prepare_for_fine_tunning_head(self, name: str, version: str) -> nn.Module:
+        model_saver = self.registry.get_service(services.ModelSaver)
+        module = model_saver.load_model(
+            module=LunaModel(),
+            name=name,
+            version=version,
+        )
+
+        # Create new state dict by taking everything from loaded state dict
+        # except last block (the final linear part). Starting from a fully
+        # initialized model would have us begin with (almost) all nodules
+        # labeled as malignant, because that output means “nodule” in the
+        # classifier we start from.
+        module.luna_head = modules.LunaHead()
+
+        finetune_blocks = ("luna_head",)
+
+        # We to gather gradient only for blocks we will be fine-tuning.
+        # This results in training only modifying parameters of finetune blocks.
+        for name, parameter in module.named_parameters():
+            if name.split(".")[0] not in finetune_blocks:
+                parameter.requires_grad_(False)
+
+        return module

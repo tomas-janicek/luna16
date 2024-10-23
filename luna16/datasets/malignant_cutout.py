@@ -12,7 +12,11 @@ _log = logging.getLogger(__name__)
 
 class MalignantCutoutsDataset(CutoutsDataset):
     def __len__(self):
-        return len(self.not_malignant_candidates + self.is_malignant_candidates)
+        return len(
+            self.not_malignant_candidates
+            + self.is_malignant_candidates
+            + self.not_nodule_candidates
+        )
 
     def __getitem__(self, index: int) -> dto.LunaClassificationCandidate:
         candidate_info = self._get_candidate_info(index)
@@ -26,15 +30,17 @@ class MalignantCutoutsDataset(CutoutsDataset):
                 is_malignant_index: int = typed_index % len(
                     self.is_malignant_candidates
                 )
-                nodule_metadata = self.is_malignant_candidates[is_malignant_index]
+                nodule_metadata = self.is_malignant_candidates.iloc[is_malignant_index]
             case enums.CandidateClass.BENIGN:
                 not_malignant_index: int = typed_index % len(
                     self.not_malignant_candidates
                 )
-                nodule_metadata = self.not_malignant_candidates[not_malignant_index]
+                nodule_metadata = self.not_malignant_candidates.iloc[
+                    not_malignant_index
+                ]
             case enums.CandidateClass.NOT_NODULE:
                 not_nodule_index: int = typed_index % len(self.not_nodule_candidates)
-                nodule_metadata = self.not_nodule_candidates[not_nodule_index]
+                nodule_metadata = self.not_nodule_candidates.iloc[not_nodule_index]
 
         return dto.CandidateMetadata(
             series_uid=nodule_metadata["seriesuid"],

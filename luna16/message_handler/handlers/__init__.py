@@ -9,6 +9,7 @@ from .handlers import (
     log_model_to_mlflow,
     log_results_to_tensorboard,
     log_start_to_console,
+    save_model,
 )
 
 LOG_MESSAGE_HANDLERS: messages.MessageHandlersConfig = {
@@ -23,7 +24,7 @@ LOG_MESSAGE_HANDLERS: messages.MessageHandlersConfig = {
     messages.LogBatchStart: (log_batch_start_to_console,),
     messages.LogBatchEnd: (log_batch_end_to_console,),
     messages.LogResult: (log_results_to_tensorboard,),
-    messages.LogModel: (log_model_to_mlflow,),
+    messages.LogModel: (log_model_to_mlflow, save_model),
 }
 
 __all__ = ["LOG_MESSAGE_HANDLERS"]

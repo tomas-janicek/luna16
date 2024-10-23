@@ -18,6 +18,7 @@ def create_cutouts(training_length: int | None = None) -> None:
 
 @cli.command(name="train_luna_classification")
 def train_luna_classification(
+    version: str,
     epochs: int = 1,
     batch_size: int = 32,
     validation_stride: int = 5,
@@ -37,6 +38,7 @@ def train_luna_classification(
         momentum=0.99,
         conv_channels=8,
         profile=profile,
+        version=version,
     )
     registry.close_all_services()
 
@@ -59,7 +61,9 @@ def tune_luna_classification(
 
 @cli.command(name="train_luna_malignant_classification")
 def train_luna_malignant_classification(
+    version: str,
     state_name: str,
+    state_version: str,
     epochs: int = 1,
     batch_size: int = 32,
     validation_stride: int = 5,
@@ -70,10 +74,12 @@ def train_luna_malignant_classification(
         registry=registry,
         validation_stride=validation_stride,
         state_name=state_name,
+        state_version=state_version,
         training_name=training_name,
     ).fit(
         epochs=epochs,
         batch_size=batch_size,
+        version=version,
     )
     registry.close_all_services()
 

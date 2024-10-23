@@ -32,9 +32,11 @@ class Trainer(BaseTrainer[CandidateT]):
     def __init__(
         self,
         name: str,
+        version: str,
         logger: message_handler.MessageHandler,
     ) -> None:
         self.name = name
+        self.version = version
         self.logger = logger
 
     def fit(
@@ -70,6 +72,7 @@ class Trainer(BaseTrainer[CandidateT]):
             signature=model.get_signature(
                 train_dl=data_module.get_training_dataloader()
             ),
+            version=self.version,
         )
         self.logger.handle_message(log_model)
         return score
@@ -82,6 +85,9 @@ class Trainer(BaseTrainer[CandidateT]):
         data_module: datasets.DataModule[CandidateT],
         tracing_schedule: typing.Callable[..., typing.Any],
     ) -> dto.Scores:
+        if epochs < 2:
+            raise ValueError("Profiling requires at least two epochs!")
+
         training_start_time = datetime.now()
         self.logger.registry.call_all_creators(
             training_name=self.name, training_start_time=training_start_time
@@ -121,6 +127,7 @@ class Trainer(BaseTrainer[CandidateT]):
             signature=model.get_signature(
                 train_dl=data_module.get_training_dataloader()
             ),
+            version=self.version,
         )
         self.logger.handle_message(log_model)
         return score

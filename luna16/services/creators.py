@@ -8,13 +8,15 @@ from torch.utils.tensorboard.writer import SummaryWriter
 
 from luna16 import settings, utils
 
+from . import model_saver
+
 
 def create_training_writer(
     training_name: str, training_start_time: datetime.datetime, **kwargs: typing.Any
 ) -> SummaryWriter:
     hostname = socket.gethostname()
     training_log_dir = Path(
-        f"runs/{training_name}/{utils.get_datetime_string(training_start_time)}_{hostname}-training"
+        f"runs/{training_name.lower()}/{utils.get_datetime_string(training_start_time)}_{hostname}-training"
     )
     training_writer = SummaryWriter(log_dir=training_log_dir)
     return training_writer
@@ -25,7 +27,7 @@ def create_validation_writer(
 ) -> SummaryWriter:
     hostname = socket.gethostname()
     validation_log_dir = Path(
-        f"runs/{training_name}/{utils.get_datetime_string(training_start_time)}_{hostname}-validation"
+        f"runs/{training_name.lower()}/{utils.get_datetime_string(training_start_time)}_{hostname}-validation"
     )
     validation_writer = SummaryWriter(log_dir=validation_log_dir)
     return validation_writer
@@ -51,3 +53,7 @@ def create_mlflow_experiment(
 
 def clean_mlflow_experiment(active_run: mlflow.ActiveRun) -> None:
     mlflow.end_run()
+
+
+def create_model_saver(**kwargs: typing.Any) -> model_saver.BaseModelSaver:
+    return model_saver.ModelSaver()

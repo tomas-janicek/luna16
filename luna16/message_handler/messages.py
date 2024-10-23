@@ -83,6 +83,7 @@ class LogModel(Message):
     model: nn.Module
     signature: ModelSignature
     training_name: str
+    version: str
 
 
 class LogMessageHandler(typing.Protocol):

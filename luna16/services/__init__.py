@@ -10,6 +10,7 @@ from .creators import (
     create_training_writer,
     create_validation_writer,
 )
+from .model_saver import BaseModelSaver, ModelSaver
 from .service_container import (
     ServiceContainer,
 )
@@ -29,4 +30,6 @@ __all__ = [
     "TrainingWriter",
     "ValidationWriter",
     "MlFlowRun",
+    "ModelSaver",
+    "BaseModelSaver",
 ]

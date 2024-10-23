@@ -13,8 +13,8 @@ from luna16 import (
     message_handler,
     models,
     modules,
-    trainers,
 )
+from luna16.training import trainers
 
 if typing.TYPE_CHECKING:
     from luna16 import services
@@ -47,12 +47,14 @@ class LunaClassificationLauncher:
         momentum: float,
         conv_channels: int,
         profile: bool,
+        version: str,
     ) -> dto.Scores:
         module = modules.LunaModel(
             in_channels=1,
             conv_channels=conv_channels,
         )
         model = models.NoduleClassificationModel(
+            version="1",
             model=module,
             optimizer=torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum),
             batch_iterator=self.batch_iterator,
@@ -60,7 +62,7 @@ class LunaClassificationLauncher:
             validation_cadence=self.validation_cadence,
         )
         trainer = trainers.Trainer[dto.LunaClassificationCandidate](
-            name=self.training_name, logger=self.logger
+            name=self.training_name, version=version, logger=self.logger
         )
         train, validation = datasets.create_pre_configured_luna_cutouts(
             validation_stride=self.validation_stride

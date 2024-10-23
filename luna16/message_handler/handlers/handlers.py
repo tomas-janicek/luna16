@@ -6,12 +6,10 @@ import typing
 import mlflow
 from torchinfo import Verbosity, summary
 
-from luna16 import settings
+from luna16 import dto, services, settings
 
-from .. import messages, utils
-
-if typing.TYPE_CHECKING:
-    from luna16 import dto, services
+from .. import messages
+from .. import utils as message_utils
 
 _log = logging.getLogger(__name__)
 
@@ -96,7 +94,7 @@ def log_metrics_to_tensorboard(
     message: messages.LogMetrics["dto.NumberValue"],
     registry: "services.ServiceContainer",
 ) -> None:
-    tensorboard_writer = utils.get_tensortboard_writer(
+    tensorboard_writer = message_utils.get_tensortboard_writer(
         mode=message.mode, registry=registry
     )
     for key, value in message.values.items():
@@ -113,7 +111,7 @@ def log_results_to_tensorboard(
     message: messages.LogResult,
     registry: "services.ServiceContainer",
 ) -> None:
-    tensorboard_writer = utils.get_tensortboard_writer(
+    tensorboard_writer = message_utils.get_tensortboard_writer(
         mode=message.mode, registry=registry
     )
 
@@ -164,13 +162,29 @@ def log_model_to_mlflow(
     message: messages.LogModel,
     registry: "services.ServiceContainer",
 ) -> None:
-    model_summary = settings.MODELS_DIR / "summaries" / "model_summary.txt"
-    with open(model_summary, "w+") as f:
-        f.write(str(summary(message.model, verbose=Verbosity.QUIET)))
-    mlflow.log_artifact(str(model_summary))
+    summaries_path = settings.MODELS_DIR / "summaries"
+    summaries_path.mkdir(exist_ok=True, parents=True)
+    model_summary_path = (
+        summaries_path / f"{message.training_name.lower()}_model_summary.txt"
+    )
+    with open(model_summary_path, "w+") as f:
+        # Verbosity quiet is set so model summary is not printed to stdout
+        model_summary = summary(message.model, verbose=Verbosity.QUIET)
+        f.write(str(model_summary))
+    mlflow.log_artifact(str(model_summary_path))
     mlflow.pytorch.log_model(
         pytorch_model=message.model,
-        artifact_path=f"{message.training_name}_model",
+        artifact_path=f"{message.training_name.lower()}_model",
         registered_model_name=message.training_name,
         signature=message.signature,
+    )
+
+
+def save_model(
+    message: messages.LogModel,
+    registry: "services.ServiceContainer",
+) -> None:
+    model_saver = registry.get_service(services.ModelSaver)
+    model_saver.save_model(
+        name=message.training_name, module=message.model, version=message.version
     )

@@ -5,7 +5,9 @@ from torch import nn
 
 
 class LunaModel(nn.Module):
-    def __init__(self, in_channels: int = 1, conv_channels: int = 8) -> None:
+    def __init__(
+        self, in_channels: int = 1, conv_channels: int = 8, out_features: int = 2
+    ) -> None:
         super().__init__()
 
         # Tail
@@ -30,8 +32,7 @@ class LunaModel(nn.Module):
         )
 
         # Head
-        self.head_linear = nn.Linear(in_features=1152, out_features=2)
-        self.head_softmax = nn.Softmax(dim=1)
+        self.luna_head = LunaHead(in_features=1152, out_features=out_features)
 
         self._init_weights()
 
@@ -59,7 +60,7 @@ class LunaModel(nn.Module):
                     bound = 1 / math.sqrt(fan_out)
                     nn.init.normal_(tensor=m.bias, mean=-bound, std=bound)
 
-    def forward(self, input_batch: torch.Tensor):
+    def forward(self, input_batch: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         bn_output = self.tail_batchnorm(input_batch)
 
         block_out = self.block1(bn_output)
@@ -67,13 +68,7 @@ class LunaModel(nn.Module):
         block_out = self.block3(block_out)
         block_out = self.block4(block_out)
 
-        conv_flat = block_out.view(
-            block_out.size(0),
-            -1,
-        )
-        linear_output = self.head_linear(conv_flat)
-
-        return linear_output, self.head_softmax(linear_output)
+        return self.luna_head(block_out)
 
 
 class LunaBlock(nn.Module):
@@ -100,6 +95,8 @@ class LunaBlock(nn.Module):
 
         self.maxpool = nn.MaxPool3d(kernel_size=2, stride=2)
 
+        # TODO: Add initialization
+
     def forward(self, input_batch: torch.Tensor) -> torch.Tensor:
         block_out = self.conv1(input_batch)
         block_out = self.relu1(block_out)
@@ -107,3 +104,22 @@ class LunaBlock(nn.Module):
         block_out = self.relu2(block_out)
 
         return self.maxpool(block_out)
+
+
+class LunaHead(nn.Module):
+    def __init__(self, in_features: int = 1152, out_features: int = 2) -> None:
+        super().__init__()
+
+        self.head_linear = nn.Linear(in_features=in_features, out_features=out_features)
+        self.head_softmax = nn.Softmax(dim=1)
+
+        # TODO: Add initialization
+
+    def forward(self, input_batch: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        conv_flat = input_batch.view(
+            input_batch.size(0),
+            -1,
+        )
+        linear_output = self.head_linear(conv_flat)
+
+        return linear_output, self.head_softmax(linear_output)

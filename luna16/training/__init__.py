@@ -1,9 +1,10 @@
 from .malignant_classification_traning import LunaMalignantClassificationLauncher
-from .model_saver import ModelSaver
 from .nodule_classification_training import LunaClassificationLauncher
+from .trainers import BaseTrainer, Trainer
 
 __all__ = [
-    "ModelSaver",
+    "BaseTrainer",
+    "Trainer",
     "LunaClassificationLauncher",
     "LunaMalignantClassificationLauncher",
 ]

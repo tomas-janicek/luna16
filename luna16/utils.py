@@ -29,3 +29,7 @@ def get_device() -> tuple[torch.device, int]:
 
 def get_datetime_string(dt: datetime.datetime) -> str:
     return dt.strftime("%Y-%m-%dT%H:%M")
+
+
+def get_model_state_name(name: str, version: str) -> str:
+    return f"{name}_{version}.state"

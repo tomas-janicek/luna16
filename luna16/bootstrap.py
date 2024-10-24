@@ -24,6 +24,10 @@ def create_registry() -> services.ServiceContainer:
         type=services.ModelSaver,
         value=services.ModelSaver(),
     )
+    registry.register_service(
+        type=services.MLFlowModelSaver,
+        value=services.MLFlowModelSaver(),
+    )
 
     hyperparameters = HyperparameterContainer()
     registry.register_service(HyperparameterContainer, hyperparameters)

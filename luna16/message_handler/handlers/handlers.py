@@ -4,9 +4,8 @@ import time
 import typing
 
 import mlflow
-from torchinfo import Verbosity, summary
 
-from luna16 import dto, services, settings
+from luna16 import dto, services
 
 from .. import messages
 from .. import utils as message_utils
@@ -162,21 +161,9 @@ def log_model_to_mlflow(
     message: messages.LogModel,
     registry: "services.ServiceContainer",
 ) -> None:
-    summaries_path = settings.MODELS_DIR / "summaries"
-    summaries_path.mkdir(exist_ok=True, parents=True)
-    model_summary_path = (
-        summaries_path / f"{message.training_name.lower()}_model_summary.txt"
-    )
-    with open(model_summary_path, "w+") as f:
-        # Verbosity quiet is set so model summary is not printed to stdout
-        model_summary = summary(message.module, verbose=Verbosity.QUIET)
-        f.write(str(model_summary))
-    mlflow.log_artifact(str(model_summary_path))
-    mlflow.pytorch.log_model(
-        pytorch_model=message.module,
-        artifact_path=f"{message.training_name.lower()}_model",
-        registered_model_name=message.training_name,
-        signature=message.signature,
+    model_saver = registry.get_service(services.MLFlowModelSaver)
+    model_saver.save_model(
+        name=message.training_name, module=message.module, signature=message.signature
     )
 
 

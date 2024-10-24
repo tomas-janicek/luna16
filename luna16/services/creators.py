@@ -8,8 +8,6 @@ from torch.utils.tensorboard.writer import SummaryWriter
 
 from luna16 import settings, utils
 
-from . import model_saver
-
 
 def create_training_writer(
     training_name: str, training_start_time: datetime.datetime, **kwargs: typing.Any
@@ -40,7 +38,6 @@ def clean_tensorboard_writer(writer: SummaryWriter) -> None:
 def create_mlflow_experiment(
     training_name: str, training_start_time: datetime.datetime, **kwargs: typing.Any
 ) -> mlflow.ActiveRun:
-    mlflow.set_tracking_uri(uri=settings.ML_FLOW_URL)
     experiment = mlflow.set_experiment(experiment_name=training_name)
     active_run = mlflow.start_run(
         experiment_id=experiment.experiment_id,
@@ -53,7 +50,3 @@ def create_mlflow_experiment(
 
 def clean_mlflow_experiment(active_run: mlflow.ActiveRun) -> None:
     mlflow.end_run()
-
-
-def create_model_saver(**kwargs: typing.Any) -> model_saver.BaseModelSaver:
-    return model_saver.ModelSaver()

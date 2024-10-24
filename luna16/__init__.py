@@ -2,6 +2,7 @@ import logging.config
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import mlflow
 import pydantic_settings
 
 
@@ -32,6 +33,8 @@ class Settings(pydantic_settings.BaseSettings):
 
 
 settings = Settings()  # type: ignore
+
+mlflow.set_tracking_uri(uri=settings.ML_FLOW_URL)
 
 
 LOGGING = {

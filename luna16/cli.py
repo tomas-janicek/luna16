@@ -1,3 +1,5 @@
+import os
+
 import typer
 
 from luna16 import bootstrap, data_processing, settings, training
@@ -14,6 +16,12 @@ def create_cutouts(training_length: int | None = None) -> None:
     # Otherwise, run sequentially
     else:
         cutout_service.create_cutouts(training_length=training_length)
+
+
+@cli.command(name="get_recommended_num_workers")
+def get_recommended_num_workers() -> None:
+    max_workers = min(32, (os.cpu_count() or 1))
+    print(f"Recommendation for max number of workers is {max_workers}. ")
 
 
 @cli.command(name="train_luna_classification")

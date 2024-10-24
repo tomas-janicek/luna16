@@ -167,6 +167,21 @@
                 "--training-length=50000",
             ],
             "justMyCode": false
+        },
+        {
+            "name": "Max Num Workers",
+            "consoleTitle": "Max Num Workers",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "get_recommended_num_workers"
+            ],
+            "justMyCode": false
         }
     ]
 }

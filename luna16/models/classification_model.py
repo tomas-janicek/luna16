@@ -18,17 +18,17 @@ _log = logging.getLogger(__name__)
 class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate]):
     def __init__(
         self,
-        model: nn.Module,
+        module: nn.Module,
         optimizer: torch.optim.Optimizer,
         batch_iterator: batch_iterators.BatchIteratorProvider,
         logger: message_handler.MessageHandler,
         validation_cadence: int = 5,
     ) -> None:
         self.device, n_gpu_devices = utils.get_device()
-        self.model = model
+        self.module = module
         if n_gpu_devices > 1:
-            self.model = nn.DataParallel(module=self.model)
-        self.model = self.model.to(self.device)
+            self.module = nn.DataParallel(module=self.module)
+        self.module = self.module.to(self.device)
         self.optimizer = optimizer
         self.validation_cadence = validation_cadence
         self.batch_iterator = batch_iterator
@@ -39,13 +39,13 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         # initialized model would have us begin with (almost) all nodules
         # labeled as malignant, because that output means “nodule” in the
         # classifier we start from.
-        self.model.luna_head = modules.LunaHead()
+        self.module.luna_head = modules.LunaHead()
 
         finetune_blocks = ("luna_head",)
 
         # We to gather gradient only for blocks we will be fine-tuning.
         # This results in training only modifying parameters of finetune blocks.
-        for name, parameter in self.model.named_parameters():
+        for name, parameter in self.module.named_parameters():
             if name.split(".")[0] not in finetune_blocks:
                 parameter.requires_grad_(False)
 
@@ -67,7 +67,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         epoch: int,
         train_dataloader: data_utils.DataLoader[dto.LunaClassificationCandidate],
     ) -> np.float32:
-        self.model.train()
+        self.module.train()
         dataset_length = len(train_dataloader.dataset)  # type: ignore
         batch_metrics = dto.ClassificationBatchMetrics.create_empty(
             dataset_len=dataset_length, device=self.device
@@ -104,7 +104,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         validation_dataloader: data_utils.DataLoader[dto.LunaClassificationCandidate],
     ) -> np.float32:
         with torch.no_grad():
-            self.model.eval()
+            self.module.eval()
             dataset_length = len(validation_dataloader.dataset)  # type: ignore
             batch_metrics = dto.ClassificationBatchMetrics.create_empty(
                 dataset_len=dataset_length, device=self.device
@@ -130,7 +130,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         return score
 
     def get_module(self) -> torch.nn.Module:
-        return self.model
+        return self.module
 
     def compute_batch_loss(
         self,
@@ -140,7 +140,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         input = batch.candidate.to(self.device, non_blocking=True)
         labels = batch.labels.to(self.device, non_blocking=True)
 
-        logits, probability = self.model(input)
+        logits, probability = self.module(input)
 
         cross_entropy_loss = nn.CrossEntropyLoss(reduction="none")
         # Because redaction is set to `none`, we get tensor not single value
@@ -163,7 +163,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
     ) -> ModelSignature:
         input = torch.unsqueeze(train_dl.dataset[0].candidate, 0)
         input = input.to(self.device, non_blocking=True)
-        _logits, probability = self.model(input)
+        _logits, probability = self.module(input)
         signature = infer_signature(
             model_input=input.to("cpu").detach().numpy(),
             model_output=probability.to("cpu").detach().numpy(),
@@ -277,7 +277,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
     def __repr__(self) -> str:
         _repr = (
             f"{self.__class__.__name__}("
-            f"model={self.model.__class__.__name__}, "
+            f"model={self.module.__class__.__name__}, "
             f"optimizer={self.optimizer.__class__.__name__}, "
             f"validation_cadence={self.validation_cadence}, "
             f"batch_iterator={self.batch_iterator.__class__.__name__}, "

@@ -80,7 +80,7 @@ class LogParams(Message):
 
 @dataclass
 class LogModel(Message):
-    model: nn.Module
+    module: nn.Module
     signature: ModelSignature
     training_name: str
     version: str

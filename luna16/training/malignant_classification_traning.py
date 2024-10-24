@@ -43,7 +43,7 @@ class LunaMalignantClassificationLauncher:
     ) -> dto.Scores:
         module = modules.LunaModel()
         model = models.NoduleClassificationModel(
-            model=module,
+            module=module,
             optimizer=torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum),
             batch_iterator=self.batch_iterator,
             logger=self.logger,
@@ -90,7 +90,7 @@ class LunaMalignantClassificationLauncher:
             name=from_name, version=from_version, module_class=modules.LunaModel
         )
         model = models.NoduleClassificationModel(
-            model=module,
+            module=module,
             optimizer=torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum),
             batch_iterator=self.batch_iterator,
             logger=self.logger,

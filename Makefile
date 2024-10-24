@@ -15,7 +15,7 @@ mlflow-migrate:
 	mlflow db upgrade sqlite:///mlruns.db
 
 tensorboard-classification:
-	tensorboard --logdir=runs/Classification
+	tensorboard --logdir="runs/classification"
 
-tensorboard-segmentation:
-	tensorboard --logdir=runs/Segmentation
+tensorboard-malignant-classification:
+	tensorboard --logdir="runs/malignant classification"

@@ -169,11 +169,11 @@ def log_model_to_mlflow(
     )
     with open(model_summary_path, "w+") as f:
         # Verbosity quiet is set so model summary is not printed to stdout
-        model_summary = summary(message.model, verbose=Verbosity.QUIET)
+        model_summary = summary(message.module, verbose=Verbosity.QUIET)
         f.write(str(model_summary))
     mlflow.log_artifact(str(model_summary_path))
     mlflow.pytorch.log_model(
-        pytorch_model=message.model,
+        pytorch_model=message.module,
         artifact_path=f"{message.training_name.lower()}_model",
         registered_model_name=message.training_name,
         signature=message.signature,
@@ -186,5 +186,5 @@ def save_model(
 ) -> None:
     model_saver = registry.get_service(services.ModelSaver)
     model_saver.save_model(
-        name=message.training_name, module=message.model, version=message.version
+        name=message.training_name, module=message.module, version=message.version
     )

@@ -67,7 +67,7 @@ class Trainer(BaseTrainer[CandidateT]):
         print(f"Training time: {end_time - start_time} seconds.")
 
         log_model = message_handler.LogModel(
-            model=model.get_module(),
+            module=model.get_module(),
             training_name=self.name,
             signature=model.get_signature(
                 train_dl=data_module.get_training_dataloader()
@@ -122,7 +122,7 @@ class Trainer(BaseTrainer[CandidateT]):
         )
 
         log_model = message_handler.LogModel(
-            model=model.get_module(),
+            module=model.get_module(),
             training_name=self.name,
             signature=model.get_signature(
                 train_dl=data_module.get_training_dataloader()

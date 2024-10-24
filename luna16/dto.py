@@ -121,24 +121,6 @@ class CoordinatesIRC(pydantic.BaseModel):
         return self
 
 
-# TODO: Remove
-class CandidateInfo(pydantic.BaseModel):
-    series_uid: str
-    is_nodule: bool
-    diameter_mm: float
-    center: CoordinatesXYZ
-
-
-# TODO: Remove
-class CandidateMalignancyInfo(pydantic.BaseModel):
-    series_uid: str
-    is_nodule: bool
-    is_annotated: bool
-    is_malignant: bool
-    diameter_mm: float
-    center: CoordinatesXYZ
-
-
 class CandidateMetadata(typing.NamedTuple):
     series_uid: str
     candidate_class: enums.CandidateClass

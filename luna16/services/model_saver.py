@@ -16,8 +16,8 @@ class BaseModelSaver(typing.Protocol):
     def save_model(self, *, name: str, module: nn.Module, version: str) -> None: ...
 
     def load_model(
-        self, *, name: str, module: nn.Module, version: str
-    ) -> nn.Module: ...
+        self, *, name: str, module_class: type[ModuleT], version: str
+    ) -> ModuleT: ...
 
 
 class ModelSaver(BaseModelSaver):
@@ -40,8 +40,11 @@ class ModelSaver(BaseModelSaver):
 
         _log.debug(f"Saved model params to {models_path}")
 
-    def load_model(self, *, name: str, module: ModuleT, version: str) -> ModuleT:
+    def load_model(
+        self, *, name: str, module_class: type[ModuleT], version: str
+    ) -> ModuleT:
         state_dict = self.load_state_dict(name, version)
+        module = module_class()
         module.load_state_dict(
             state_dict=state_dict,
             # Strict is set to False because we are not providing state dict with the same

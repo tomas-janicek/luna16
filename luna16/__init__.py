@@ -27,6 +27,7 @@ class Settings(pydantic_settings.BaseSettings):
     DEEP_LEARNING_STYLE: Path = BASE_DIR / "deeplearning.mplstyle"
     DATA_DIR: Path = BASE_DIR / "data"
 
+    PRESENT_CANDIDATES_FILE: str = "present_candidates.csv"
     NUM_WORKERS: int = 8
 
 

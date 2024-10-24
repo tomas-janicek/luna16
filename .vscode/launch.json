@@ -35,9 +35,28 @@
             },
             "args": [
                 "train_luna_classification",
+                "0.0.1",
+                "--epochs=5",
+                "--batch-size=256",
+            ]
+        },
+        {
+            "name": "Continue LuNA Classification Training",
+            "consoleTitle": "Continue LuNA Classification Training",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "load_train_luna_classification",
+                "0.0.1",
+                "classification",
                 "0.0.0",
-                "--epochs=10",
-                "--batch-size=64",
+                "--epochs=5",
+                "--batch-size=256",
             ]
         },
         {
@@ -53,8 +72,8 @@
             "args": [
                 "train_luna_classification",
                 "0.0.0-profile",
-                "--epochs=10",
-                "--batch-size=2",
+                "--epochs=5",
+                "--batch-size=256",
                 "--profile",
             ]
         },
@@ -70,11 +89,46 @@
             },
             "args": [
                 "train_luna_malignant_classification",
-                "0.0.0",
+                "0.0.1",
+                "--epochs=5",
+                "--batch-size=256",
+            ]
+        },
+        {
+            "name": "Continue LuNA Malignant Classification Training",
+            "consoleTitle": "Continue LuNA Malignant Classification Training",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "load_train_luna_malignant_classification",
+                "0.0.1",
                 "classification",
-                "0.0.0-test",
+                "0.0.0",
+                "--epochs=5",
+                "--batch-size=256",
+            ]
+        },
+        {
+            "name": "Profiling LuNA Malignant Classification Training",
+            "consoleTitle": "Profiling LuNA Malignant Classification Training",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "train_luna_malignant_classification",
+                "0.0.0-profile",
                 "--epochs=10",
-                "--batch-size=64",
+                "--batch-size=256",
+                "--profile",
             ]
         },
         {

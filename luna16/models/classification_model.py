@@ -7,7 +7,7 @@ from mlflow.pytorch import ModelSignature
 from torch import nn
 from torch.utils import data as data_utils
 
-from luna16 import batch_iterators, message_handler, utils
+from luna16 import batch_iterators, message_handler, modules, utils
 
 from .. import dto, enums
 from . import base
@@ -23,7 +23,6 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         batch_iterator: batch_iterators.BatchIteratorProvider,
         logger: message_handler.MessageHandler,
         validation_cadence: int = 5,
-        version: str = "latest",
     ) -> None:
         self.device, n_gpu_devices = utils.get_device()
         self.model = model
@@ -34,7 +33,21 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         self.validation_cadence = validation_cadence
         self.batch_iterator = batch_iterator
         self.logger = logger
-        self.version = version
+
+    def prepare_for_fine_tuning_head(self) -> None:
+        # Replace only luna head. Starting from a fully
+        # initialized model would have us begin with (almost) all nodules
+        # labeled as malignant, because that output means “nodule” in the
+        # classifier we start from.
+        self.model.luna_head = modules.LunaHead()
+
+        finetune_blocks = ("luna_head",)
+
+        # We to gather gradient only for blocks we will be fine-tuning.
+        # This results in training only modifying parameters of finetune blocks.
+        for name, parameter in self.model.named_parameters():
+            if name.split(".")[0] not in finetune_blocks:
+                parameter.requires_grad_(False)
 
     def fit_epoch(
         self,
@@ -63,6 +76,8 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         batch_iter = self.batch_iterator.enumerate_batches(
             train_dataloader, epoch=epoch, mode=enums.Mode.TRAINING
         )
+        score = np.float32(0.0)
+        n_processed_training_samples = (epoch - 1) * dataset_length
         for _batch_index, batch in batch_iter:
             self.optimizer.zero_grad()
 
@@ -74,12 +89,13 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
             loss.backward()
             self.optimizer.step()
 
-        score = self.log_metrics(
-            epoch=epoch,
-            n_processed_training_samples=epoch * dataset_length,
-            mode=enums.Mode.TRAINING,
-            metrics=batch_metrics,
-        )
+            score = self.log_metrics(
+                epoch=epoch,
+                n_processed_training_samples=n_processed_training_samples,
+                mode=enums.Mode.TRAINING,
+                metrics=batch_metrics,
+            )
+            n_processed_training_samples += len(batch.candidate)
         return score
 
     def do_validation(
@@ -97,18 +113,20 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
             batch_iter = self.batch_iterator.enumerate_batches(
                 validation_dataloader, epoch=epoch, mode=enums.Mode.VALIDATING
             )
+            score = np.float32(0.0)
+            n_processed_training_samples = (epoch - 1) * dataset_length
             for _batch_index, batch in batch_iter:
                 _, batch_metrics = self.compute_batch_loss(
                     batch=batch,
                     batch_metrics=batch_metrics,
                 )
-
-        score = self.log_metrics(
-            epoch=epoch,
-            n_processed_training_samples=epoch * dataset_length,
-            mode=enums.Mode.VALIDATING,
-            metrics=batch_metrics,
-        )
+                score = self.log_metrics(
+                    epoch=epoch,
+                    n_processed_training_samples=n_processed_training_samples,
+                    mode=enums.Mode.VALIDATING,
+                    metrics=batch_metrics,
+                )
+                n_processed_training_samples += len(batch.candidate)
         return score
 
     def get_module(self) -> torch.nn.Module:

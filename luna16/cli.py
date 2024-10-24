@@ -36,7 +36,6 @@ def train_luna_classification(
         batch_size=batch_size,
         lr=0.001,
         momentum=0.99,
-        conv_channels=8,
         profile=profile,
         version=version,
     )
@@ -62,24 +61,55 @@ def tune_luna_classification(
 @cli.command(name="train_luna_malignant_classification")
 def train_luna_malignant_classification(
     version: str,
-    state_name: str,
-    state_version: str,
     epochs: int = 1,
     batch_size: int = 32,
     validation_stride: int = 5,
+    profile: bool = False,
 ) -> None:
     training_name = "Malignant Classification"
     registry = bootstrap.create_registry()
     training.LunaMalignantClassificationLauncher(
         registry=registry,
         validation_stride=validation_stride,
-        state_name=state_name,
-        state_version=state_version,
         training_name=training_name,
+        validation_cadence=5,
     ).fit(
+        version=version,
         epochs=epochs,
         batch_size=batch_size,
+        lr=0.001,
+        momentum=0.99,
+        profile=profile,
+    )
+    registry.close_all_services()
+
+
+@cli.command(name="load_train_luna_malignant_classification")
+def load_train_luna_malignant_classification(
+    version: str,
+    from_name: str,
+    from_version: str,
+    epochs: int = 1,
+    batch_size: int = 32,
+    validation_stride: int = 5,
+    profile: bool = False,
+) -> None:
+    training_name = "Malignant Classification"
+    registry = bootstrap.create_registry()
+    training.LunaMalignantClassificationLauncher(
+        registry=registry,
+        validation_stride=validation_stride,
+        training_name=training_name,
+        validation_cadence=5,
+    ).load_fit(
         version=version,
+        epochs=epochs,
+        batch_size=batch_size,
+        from_name=from_name,
+        from_version=from_version,
+        lr=0.001,
+        momentum=0.99,
+        profile=profile,
     )
     registry.close_all_services()
 

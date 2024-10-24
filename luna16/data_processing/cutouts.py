@@ -20,10 +20,12 @@ lock = Lock()
 
 class CtCutoutService:
     def __init__(self):
-        self.luna_cache_dir = settings.CACHE_DIR / "luna16"
+        self.luna_cache_dir = settings.CACHE_DIR
         self.luna_cache_dir.mkdir(exist_ok=True, parents=True)
         self.cutout_shape = dto.CoordinatesIRC(index=32, row=48, col=48)
-        self.present_candidates_path = self.luna_cache_dir / "present_candidates.csv"
+        self.present_candidates_path = (
+            self.luna_cache_dir / settings.PRESENT_CANDIDATES_FILE
+        )
         self.complete_candidates_path = settings.DATA_DIR / "complete_candidates.csv"
 
     def create_cutouts(self, training_length: int | None = None) -> None:

@@ -1,12 +1,12 @@
-from luna16 import message_handler, training
-from luna16.datasets.data_module import DataModule
-from luna16.tests import fakes
+from luna16 import datasets, message_handler, training
+
+from . import fakes
 
 
 def test_trainer(
     fake_model: fakes.FakeModel,
     fake_message_handler: fakes.FakeMessageHandler,
-    fake_data_module: DataModule[fakes.SimpleCandidate],
+    fake_data_module: datasets.DataModule[fakes.SimpleCandidate],
 ) -> None:
     trainer = training.Trainer(
         name="Test Trainer", version="0.0.0-test", logger=fake_message_handler

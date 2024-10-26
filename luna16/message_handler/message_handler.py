@@ -10,6 +10,8 @@ _log = logging.getLogger(__name__)
 
 
 class BaseMessageHandler(typing.Protocol):
+    registry: "services.ServiceContainer"
+
     def handle_message(self, message: messages.Message) -> None: ...
 
 

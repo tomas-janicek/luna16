@@ -33,11 +33,11 @@ class Trainer(BaseTrainer[CandidateT]):
         self,
         name: str,
         version: str,
-        logger: message_handler.MessageHandler,
+        logger: message_handler.BaseMessageHandler,
     ) -> None:
         self.name = name
         self.version = version
-        self.logger = logger
+        self.message_handler = logger
 
     def fit(
         self,
@@ -47,11 +47,11 @@ class Trainer(BaseTrainer[CandidateT]):
         data_module: datasets.DataModule[CandidateT],
     ) -> dto.Scores:
         training_start_time = datetime.now()
-        self.logger.registry.call_all_creators(
+        self.message_handler.registry.call_all_creators(
             training_name=self.name, training_start_time=training_start_time
         )
         log_start_training = message_handler.LogStart(training_description=str(model))
-        self.logger.handle_message(log_start_training)
+        self.message_handler.handle_message(log_start_training)
 
         score = {}
         start_time = time.time()
@@ -74,7 +74,7 @@ class Trainer(BaseTrainer[CandidateT]):
             ),
             version=self.version,
         )
-        self.logger.handle_message(log_model)
+        self.message_handler.handle_message(log_model)
         return score
 
     def fit_profile(
@@ -89,11 +89,11 @@ class Trainer(BaseTrainer[CandidateT]):
             raise ValueError("Profiling requires at least two epochs!")
 
         training_start_time = datetime.now()
-        self.logger.registry.call_all_creators(
+        self.message_handler.registry.call_all_creators(
             training_name=self.name, training_start_time=training_start_time
         )
         log_start_training = message_handler.LogStart(training_description=str(model))
-        self.logger.handle_message(log_start_training)
+        self.message_handler.handle_message(log_start_training)
 
         with profile(
             schedule=tracing_schedule,
@@ -129,7 +129,7 @@ class Trainer(BaseTrainer[CandidateT]):
             ),
             version=self.version,
         )
-        self.logger.handle_message(log_model)
+        self.message_handler.handle_message(log_model)
         return score
 
     def fit_epoch(
@@ -147,7 +147,7 @@ class Trainer(BaseTrainer[CandidateT]):
             training_length=data_module.training_len,
             validation_length=data_module.validation_len,
         )
-        self.logger.handle_message(log_epoch)
+        self.message_handler.handle_message(log_epoch)
 
         train_dl = data_module.get_training_dataloader()
         validation_dl = data_module.get_validation_dataloader()
@@ -159,6 +159,6 @@ class Trainer(BaseTrainer[CandidateT]):
         _repr = (
             f"{self.__class__.__name__}("
             f"name={self.name}, "
-            f"logger={self.logger.__class__.__name__})"
+            f"logger={self.message_handler.__class__.__name__})"
         )
         return _repr

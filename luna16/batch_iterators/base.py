@@ -14,8 +14,9 @@ T = typing.TypeVar("T")
 class BaseIteratorProvider:
     def enumerate_batches(
         self,
-        enumerable: data_utils.DataLoader[T],
+        enumerable: data_utils.DataLoader[typing.Any],
         *,
         epoch: int,
         mode: enums.Mode,
+        candidate_batch_type: type[T],
     ) -> typing.Iterator[tuple[int, T]]: ...

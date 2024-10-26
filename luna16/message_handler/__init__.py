@@ -1,5 +1,5 @@
 from .handlers import LOG_MESSAGE_HANDLERS
-from .message_handler import MessageHandler
+from .message_handler import BaseMessageHandler, MessageHandler
 from .messages import (
     LogBatch,
     LogBatchEnd,
@@ -9,11 +9,13 @@ from .messages import (
     LogModel,
     LogResult,
     LogStart,
+    Message,
 )
 
 __all__ = [
     "MessageHandler",
     "LOG_MESSAGE_HANDLERS",
+    "Message",
     "LogMetrics",
     "LogStart",
     "LogEpoch",
@@ -21,6 +23,7 @@ __all__ = [
     "LogBatch",
     "LogBatchEnd",
     "LogResult",
+    "BaseMessageHandler",
     "MessageHandler",
     "LogModel",
 ]

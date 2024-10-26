@@ -30,6 +30,7 @@ class Settings(pydantic_settings.BaseSettings):
 
     PRESENT_CANDIDATES_FILE: str = "present_candidates.csv"
     NUM_WORKERS: int = 8
+    LOG_EVERY_N_EXAMPLES: int = 1000
 
 
 settings = Settings()  # type: ignore

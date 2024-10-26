@@ -30,7 +30,7 @@ class CutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
 
         candidates_info = utils.get_present_candidates()
 
-        if validation_stride <= 0 or validation_stride > len(candidates_info):
+        if validation_stride <= 1 or validation_stride > len(candidates_info):
             raise ValueError(
                 "Argument validation_stride must have value greater than 0 and less than "
                 f"{len(candidates_info)} (length of the dataset)"
@@ -76,11 +76,15 @@ class CutoutsDataset(data_utils.Dataset[dto.LunaClassificationCandidate]):
             validation_stride=validation_stride,
         )
 
+        benign_candidates = candidates_info[
+            (candidates_info["class"] == enums.CandidateClass.BENIGN)
+        ]
         if (
             self.is_nodule_candidates.empty
             or self.not_nodule_candidates.empty
             or self.is_malignant_candidates.empty
             or self.not_malignant_candidates.empty
+            or benign_candidates.empty
         ):
             raise ValueError(
                 f"LuNA dataset must have at least 1 positive and 1 negative sample "

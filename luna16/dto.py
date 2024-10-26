@@ -138,6 +138,13 @@ class LunaClassificationCandidate(typing.NamedTuple):
     center_irc: torch.Tensor
 
 
+class LunaClassificationCandidateBatch(typing.NamedTuple):
+    candidate: torch.Tensor
+    labels: torch.Tensor
+    series_uid: torch.Tensor
+    center_irc: torch.Tensor
+
+
 class Ratio:
     def __init__(self, ratios: list[int]) -> None:
         self._validate_ratios(ratios)

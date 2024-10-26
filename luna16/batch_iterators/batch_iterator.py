@@ -14,14 +14,19 @@ T = typing.TypeVar("T")
 class BatchIteratorProvider(base.BaseIteratorProvider):
     def __init__(
         self,
-        logger: message_handler.MessageHandler,
+        logger: message_handler.BaseMessageHandler,
         logging_backoff: int = 5,
     ) -> None:
         self.logger = logger
         self.logging_backoff = logging_backoff
 
     def enumerate_batches(
-        self, enumerable: data_utils.DataLoader[T], *, epoch: int, mode: enums.Mode
+        self,
+        enumerable: data_utils.DataLoader[typing.Any],
+        *,
+        epoch: int,
+        mode: enums.Mode,
+        candidate_batch_type: type[T],
     ) -> typing.Iterator[tuple[int, T]]:
         batch_size = len(enumerable)
 
@@ -37,14 +42,14 @@ class BatchIteratorProvider(base.BaseIteratorProvider):
         ):
             yield (current_index, item)
             if current_index % self.logging_backoff == 0:
-                log_start = message_handler.LogBatch(
+                log_batch = message_handler.LogBatch(
                     epoch=epoch,
                     mode=mode,
                     batch_size=batch_size,
                     batch_index=current_index,
                     started_at=started_at,
                 )
-                self.logger.handle_message(log_start)
+                self.logger.handle_message(log_batch)
 
         log_bach_end = message_handler.LogBatchEnd(
             epoch=epoch, mode=mode, batch_size=batch_size

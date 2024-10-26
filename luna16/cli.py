@@ -46,6 +46,7 @@ def train_luna_classification(
         momentum=0.99,
         profile=profile,
         version=version,
+        log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )
     registry.close_all_services()
 
@@ -88,6 +89,7 @@ def train_luna_malignant_classification(
         lr=0.001,
         momentum=0.99,
         profile=profile,
+        log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )
     registry.close_all_services()
 
@@ -118,6 +120,7 @@ def load_train_luna_malignant_classification(
         lr=0.001,
         momentum=0.99,
         profile=profile,
+        log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )
     registry.close_all_services()
 

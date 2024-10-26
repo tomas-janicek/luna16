@@ -73,7 +73,7 @@
             "args": [
                 "train_luna_classification",
                 "0.0.0-profile",
-                "--epochs=5",
+                "--epochs=10",
                 "--batch-size=256",
                 "--profile",
             ],
@@ -181,7 +181,7 @@
             "program": "${workspaceRoot}/luna16/cli.py",
             "console": "integratedTerminal",
             "env": {
-                "PYTHONPATH": "."
+                "PYTHONPATH": ".",
             },
             "args": [
                 "get_recommended_num_workers"

@@ -9,6 +9,10 @@ if typing.TYPE_CHECKING:
 _log = logging.getLogger(__name__)
 
 
+class BaseMessageHandler(typing.Protocol):
+    def handle_message(self, message: messages.Message) -> None: ...
+
+
 class MessageHandler:
     def __init__(
         self,

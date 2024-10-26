@@ -1,5 +1,3 @@
-import logging
-
 import numpy as np
 import torch
 from mlflow.models import infer_signature
@@ -12,8 +10,6 @@ from luna16 import batch_iterators, message_handler, modules, utils
 from .. import dto, enums
 from . import base
 
-_log = logging.getLogger(__name__)
-
 
 class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate]):
     def __init__(
@@ -22,6 +18,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         optimizer: torch.optim.Optimizer,
         batch_iterator: batch_iterators.BatchIteratorProvider,
         logger: message_handler.MessageHandler,
+        log_every_n_examples: int,
         validation_cadence: int = 5,
     ) -> None:
         self.device, n_gpu_devices = utils.get_device()
@@ -33,6 +30,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         self.validation_cadence = validation_cadence
         self.batch_iterator = batch_iterator
         self.logger = logger
+        self.log_every_n_examples = log_every_n_examples
 
     def prepare_for_fine_tuning_head(self) -> None:
         # Replace only luna head. Starting from a fully
@@ -74,8 +72,12 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         )
 
         batch_iter = self.batch_iterator.enumerate_batches(
-            train_dataloader, epoch=epoch, mode=enums.Mode.TRAINING
+            train_dataloader,
+            epoch=epoch,
+            mode=enums.Mode.TRAINING,
+            candidate_batch_type=dto.LunaClassificationCandidateBatch,
         )
+        n_logged = 0
         score = np.float32(0.0)
         n_processed_training_samples = (epoch - 1) * dataset_length
         for _batch_index, batch in batch_iter:
@@ -88,14 +90,22 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
 
             loss.backward()
             self.optimizer.step()
-
-            score = self.log_metrics(
-                epoch=epoch,
-                n_processed_training_samples=n_processed_training_samples,
-                mode=enums.Mode.TRAINING,
-                metrics=batch_metrics,
-            )
+            if n_processed_training_samples > self.log_every_n_examples * n_logged:
+                score = self.log_metrics(
+                    epoch=epoch,
+                    n_processed_training_samples=n_processed_training_samples,
+                    mode=enums.Mode.TRAINING,
+                    metrics=batch_metrics,
+                )
+                n_logged += 1
             n_processed_training_samples += len(batch.candidate)
+
+        score = self.log_metrics(
+            epoch=epoch,
+            n_processed_training_samples=n_processed_training_samples,
+            mode=enums.Mode.TRAINING,
+            metrics=batch_metrics,
+        )
         return score
 
     def do_validation(
@@ -111,8 +121,12 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
             )
 
             batch_iter = self.batch_iterator.enumerate_batches(
-                validation_dataloader, epoch=epoch, mode=enums.Mode.VALIDATING
+                validation_dataloader,
+                epoch=epoch,
+                mode=enums.Mode.VALIDATING,
+                candidate_batch_type=dto.LunaClassificationCandidateBatch,
             )
+            n_logged = 0
             score = np.float32(0.0)
             n_processed_training_samples = (epoch - 1) * dataset_length
             for _batch_index, batch in batch_iter:
@@ -120,13 +134,21 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
                     batch=batch,
                     batch_metrics=batch_metrics,
                 )
-                score = self.log_metrics(
-                    epoch=epoch,
-                    n_processed_training_samples=n_processed_training_samples,
-                    mode=enums.Mode.VALIDATING,
-                    metrics=batch_metrics,
-                )
+                if n_processed_training_samples > self.log_every_n_examples * n_logged:
+                    score = self.log_metrics(
+                        epoch=epoch,
+                        n_processed_training_samples=n_processed_training_samples,
+                        mode=enums.Mode.VALIDATING,
+                        metrics=batch_metrics,
+                    )
+                    n_logged += 1
                 n_processed_training_samples += len(batch.candidate)
+            score = self.log_metrics(
+                epoch=epoch,
+                n_processed_training_samples=n_processed_training_samples,
+                mode=enums.Mode.VALIDATING,
+                metrics=batch_metrics,
+            )
         return score
 
     def get_module(self) -> torch.nn.Module:
@@ -134,7 +156,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
 
     def compute_batch_loss(
         self,
-        batch: dto.LunaClassificationCandidate,
+        batch: dto.LunaClassificationCandidateBatch,
         batch_metrics: dto.ClassificationBatchMetrics,
     ) -> tuple[torch.Tensor, dto.ClassificationBatchMetrics]:
         input = batch.candidate.to(self.device, non_blocking=True)

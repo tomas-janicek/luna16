@@ -46,6 +46,7 @@ class LunaClassificationLauncher:
         batch_size: int,
         lr: float,
         momentum: float,
+        log_every_n_examples: int,
         profile: bool = False,
     ) -> dto.Scores:
         module = modules.LunaModel()
@@ -55,6 +56,7 @@ class LunaClassificationLauncher:
             batch_iterator=self.batch_iterator,
             logger=self.logger,
             validation_cadence=self.validation_cadence,
+            log_every_n_examples=log_every_n_examples,
         )
         trainer = trainers.Trainer[dto.LunaClassificationCandidate](
             name=self.training_name, version=version, logger=self.logger
@@ -90,6 +92,7 @@ class LunaClassificationLauncher:
         lr: float,
         momentum: float,
         profile: bool = False,
+        log_every_n_examples: int,
         finetune: bool = False,
     ) -> dto.Scores:
         model_saver = self.registry.get_service(services.MLFlowModelSaver)
@@ -101,6 +104,7 @@ class LunaClassificationLauncher:
             optimizer=torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum),
             batch_iterator=self.batch_iterator,
             logger=self.logger,
+            log_every_n_examples=log_every_n_examples,
         )
         if finetune:
             model.prepare_for_fine_tuning_head()

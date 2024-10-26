@@ -26,8 +26,7 @@ class Ct:
 
     @staticmethod
     def read_and_create_from_image(series_uid: str) -> "Ct":
-        ct_scan_subsets = settings.DATA_DOWNLOADED_DIR / "ct_scan_subsets"
-        ct_mhd_files = list(ct_scan_subsets.glob(f"subset*/{series_uid}.mhd"))
+        ct_mhd_files = list(settings.DATA_DOWNLOADED_DIR.glob(f"**/{series_uid}.mhd"))
         if not ct_mhd_files:
             raise ValueError(
                 f"The dataset does not contain CT scan with series UID {series_uid}."

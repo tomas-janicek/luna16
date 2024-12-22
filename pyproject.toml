@@ -33,7 +33,6 @@ dependencies = [
   "typer>=0.12.5",
 ]
 
-
 [tool.uv]
 dev-dependencies = [
   "coverage>=7.6.3",
@@ -41,6 +40,17 @@ dev-dependencies = [
   "pytest>=8.3.3",
   "ruff>=0.6.9",
 ]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu124", marker = "platform_system == 'Linux'" }]
+torchvision = [
+  { index = "pytorch-cu124", marker = "platform_system == 'Linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
 
 
 #########################################

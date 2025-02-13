@@ -18,7 +18,7 @@ By integrating these technologies, Luna 16 aims to push the boundaries of medica
 
 ## 🎯 Motivation
 
-TBD: This project serves mainly for educational purposes to go though entire process of model development. Very important is that it contains infrastructure like MLFlow and TensorBoard for monitoring and logging. It also contains Docker for reproducibility and Ray for hyperparameter tuning. It is designed so modular parts like models, datasets, trainers, loss functions, etc. can be easily replaced. Thus, it can be used as starting point for any other machine learning project I will be working on.
+This project primarily serves educational purposes, guiding users through the entire process of model development. It emphasizes the importance of infrastructure components like MLFlow and TensorBoard for monitoring and logging, which are beneficial for any machine learning project. Additionally, it incorporates Docker for reproducibility and Ray for hyperparameter tuning. The project is designed with modularity in mind, allowing easy replacement of components such as models, datasets, trainers, and loss functions. As a result, it can serve as a starting point for any other machine learning project, particularly those focused on experimentation. Essentially, it acts as a template for any machine learning project, providing a robust foundation for future work.
 
 ## ✨ Features
 
@@ -30,10 +30,13 @@ TBD: This project serves mainly for educational purposes to go though entire pro
 
 ## 🚀 Next Steps
 
-TBD: Explain this project is still in progress.
-It was prepared for experimenting with different models but right now it only implements most basic "real" model.
-- Missing segmentation of CT scans.
-- Missing baseline and other models. I would especially like to add Zero Rule Baseline and non neural network models. Also, other neural network models with different architectures and convolutions with other techniques.
+This project is still in progress and was initially prepared for experimenting with different models. Currently, it only implements the most basic "real" model. Several key components are missing, including:
+
+- Segmentation of CT scans. The project currently focuses on classification tasks, using cutouts of CT scans. However, adding segmentation capabilities to extract nodules from CT scans directly is planned.
+- Baseline and other models. I would particularly like to add a Zero Rule Baseline and non-neural network models. Additionally, incorporating other neural network models with different architectures and convolution techniques is planned.
+- Hyperparameter tuning. The project aims to integrate Ray for distributed hyperparameter tuning to optimize model performance.
+- Cloud deployment. The project will include tools and scripts for deploying models to cloud platforms for inference and production use.
+- Additional datasets. The project will include more datasets for training and validation, covering a wider range of medical imaging tasks and modalities.
 
 ## Architecture
 
@@ -218,19 +221,27 @@ Monitoring and logging are essential components of the Luna 16 project, providin
 
 ### Message Handler
 
-TBD
+The `BaseMessageHandler` and `MessageHandler` classes in Luna 16 are used to log, monitor, and track metrics during the training and validation processes. These handlers facilitate communication between different components of the system through a structured messaging protocol.
 
-### Logs
+#### BaseMessageHandler
 
-TBD
+The `BaseMessageHandler` is a protocol that defines the essential method `handle_message` which any message handler implementation should have. This method takes a `message` of type `Message` and a `registry` of type `services.ServiceContainer`. The protocol ensures that all message handlers adhere to a consistent interface, making it easier to manage and extend the logging and monitoring functionalities.
 
-### Metrics
+#### MessageHandler
 
-TBD
+The `MessageHandler` class implements the `BaseMessageHandler` protocol and provides the concrete logic for handling messages. The `handle_message` method processes incoming messages by invoking the appropriate handlers based on the message type.
+
+#### How It Works
+
+1. **Message Dataclasses**: The project defines various message dataclasses in `messages.py`, such as `LogMetrics`, `LogStart`, `LogEpoch`, `LogBatchStart`, `LogBatch`, `LogBatchEnd`, `LogResult`, `LogParams`, and `LogModel`. These dataclasses encapsulate different types of information that need to be logged and monitored during the training process.
+2. **Logging and Monitoring**: When a specific event occurs (e.g., the start of training, the end of a batch, or the computation of metrics), an instance of the corresponding message dataclass is created and passed to the `handle_message` method of the `MessageHandler`. The handler then processes the message by invoking the appropriate registered handlers, which log the information to the desired logging and monitoring tools (e.g., MLFlow, TensorBoard).
+3. **Usage in Models**: In the `BaseModel` classes, the `MessageHandler` is used to log metrics and results during training and validation. For example, the `log_metrics` method creates instances of `LogMetrics` and `LogResult` messages and passes them to the `handle_message` method of the `MessageHandler`. This ensures that all relevant information is logged and monitored consistently throughout the training process.
+
+By using the `MessageHandler` classes, Luna 16 ensures that logging and monitoring are modular, extensible, and easy to manage. The structured messaging protocol allows for clear and consistent communication between different components, facilitating effective tracking of metrics and system performance.
 
 ### Dashboards
 
-TBD
+Luna 16 provides integrated dashboards for monitoring and visualizing training metrics, model performance, and system statistics. These dashboards leverage tools such as MLFlow and TensorBoard to provide real-time insights into the training process.
 
 ## 📦 Installation
 
@@ -250,37 +261,121 @@ PYTHONPATH=. uv run pytest luna16/tests/
 
 ## 📘 Usage
 
-TBD
+Luna 16 provides a command-line interface (CLI) for running various tasks related to model training, evaluation, and experimentation.
 
 ### Training & Continuing Training
 
+Luna 16 supports training models from scratch as well as continuing training from a saved state. The training process can be customized with parameters such as the number of epochs, batch size, and learning rate.
+
 #### Training from Scratch
 
-TBD
+To train a model (set to version 0.0.1) from scratch, use the following command:
+
+```sh
+uv run python -m luna16.cli \
+                train_luna_classification \
+                0.0.1 \
+                --epochs=5 \
+                --batch-size=256
+```
+
+The same variant can be used for malignant classification:
+
+```sh
+uv run python -m luna16.cli \
+                train_luna_malignant_classification \
+                0.0.1 \
+                --epochs=5 \
+                --batch-size=256
+```
 
 #### Continuing Training
 
-TBD
+To continue training a model (set to version 0.0.2) from a saved state (file loader will load classification model with version 0.0.1), use the following command:
+
+```sh
+uv run python -m luna16.cli \
+                load_train_luna_classification \
+                0.0.1 \
+                file \
+                classification \
+                0.0.1 \
+                --epochs=5 \
+                --batch-size=256
+```
+
+The same variant can be used for malignant classification:
+
+```sh
+uv run python -m luna16.cli \
+                load_train_luna_malignant_classification \
+                0.0.1 \
+                file \
+                classification \
+                0.0.1 \
+                --epochs=5 \
+                --batch-size=256
+```
+
 
 ### Monitoring & Dashboards
 
-TBD
+Luna 16 provides integrated monitoring and dashboards for tracking training metrics, model performance, and system statistics. The dashboards can be accessed through tools such as MLFlow and TensorBoard.
 
 #### MLFlow
 
-TBD
+To start the MLFlow server and access the tracking UI, use the following command:
+
+```sh
+make mlflow-migrate
+make mlflow-server
+```
 
 #### TensorBoard
 
-TBD
+To start the TensorBoard server and access the visualization dashboard, use the following command:
+
+```sh
+make tensorboard-classification
+```
+
+The same variant can be used for malignant classification:
+
+```sh
+make tensorboard-malignant-classification
+```
 
 ### Profiling
 
-TBD
+Luna 16 supports profiling the training process to optimize performance and resource utilization. The profiling tools can be used to identify bottlenecks, optimize hyperparameters, and improve training efficiency.
+
+#### Profiling with PyTorch Profiler
+
+To profile the training process using PyTorch Profiler, use the following command:
+
+```sh
+uv run python -m luna16.cli \
+                train_luna_classification \
+                0.0.0-profile \
+                --epochs=10 \
+                --batch-size=256 \
+                --profile
+```
+
+The same variant can be used for malignant classification:
+
+```sh
+uv run python -m luna16.cli \
+                train_luna_malignant_classification \
+                0.0.0-profile \
+                --epochs=10 \
+                --batch-size=256 \
+                --profile
+```
 
 ### Hyperparameter Tuning
 
-TBD: This is not finished yet. I would like to add Ray for hyperparameter tuning.
+Hyperparameter tuning using Ray is not yet fully functional.
 
 ## ☁️ Cloud Experiment
 

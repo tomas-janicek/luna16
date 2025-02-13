@@ -1,7 +1,6 @@
 import logging.config
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import mlflow
 import pydantic_settings
 
@@ -25,7 +24,6 @@ class Settings(pydantic_settings.BaseSettings):
     PROFILING_DIR: Path = BASE_DIR / "profiling"
     DATA_DOWNLOADED_DIR: Path = BASE_DIR / "data_downloaded"
     MODELS_DIR: Path = BASE_DIR / "models"
-    DEEP_LEARNING_STYLE: Path = BASE_DIR / "deeplearning.mplstyle"
     DATA_DIR: Path = BASE_DIR / "data"
 
     PRESENT_CANDIDATES_FILE: str = "present_candidates.csv"
@@ -37,31 +35,39 @@ settings = Settings()  # type: ignore
 
 mlflow.set_tracking_uri(uri=settings.ML_FLOW_URL)
 
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "default": {"format": "[%(asctime)s][%(levelname)s]: %(message)s"},
+        "rich": {"format": "%(message)s", "datefmt": "[%x %X]"},
     },
     "handlers": {
         "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "default",
             "level": settings.LOGGING_LEVEL,
-            "stream": "ext://sys.stdout",
+            "class": "rich.logging.RichHandler",
+            "formatter": "rich",
+            "markup": True,
+            "show_path": True,
+        },
+        "file": {
+            "level": settings.LOGGING_LEVEL,
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "formatter": "default",
+            "backupCount": 1,
+            "filename": "logs/app.log",
         },
     },
     "loggers": {
         "root": {
-            "handlers": ["console"],
             "level": settings.LOGGING_LEVEL,
+            "handlers": ["console", "file"],
         },
     },
 }
-logging.config.dictConfig(config=LOGGING)
 
-plt.style.use(settings.DEEP_LEARNING_STYLE)
+
+logging.config.dictConfig(config=LOGGING)
 
 
 __all__ = ["settings"]

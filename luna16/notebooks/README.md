@@ -3,7 +3,6 @@
 Notebooks:
 1. luna16.ipynb
 2. data_exploration.ipynb
-3. training.ipynb
-4. improving_training.ipynb
-5. segmentation.ipynb
-6. end_to_end_detection.ipynb
+3. malignancy_data_exploration.ipynb
+4. training.ipynb
+5. improving_training.ipynb

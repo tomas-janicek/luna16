@@ -13,17 +13,17 @@ from .messages import (
 )
 
 __all__ = [
-    "MessageHandler",
     "LOG_MESSAGE_HANDLERS",
-    "Message",
-    "LogMetrics",
-    "LogStart",
-    "LogEpoch",
-    "LogBatchStart",
+    "BaseMessageHandler",
     "LogBatch",
     "LogBatchEnd",
-    "LogResult",
-    "BaseMessageHandler",
-    "MessageHandler",
+    "LogBatchStart",
+    "LogEpoch",
+    "LogMetrics",
     "LogModel",
+    "LogResult",
+    "LogStart",
+    "Message",
+    "MessageHandler",
+    "MessageHandler",
 ]

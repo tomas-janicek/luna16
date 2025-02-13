@@ -13,11 +13,9 @@ from luna16 import (
     message_handler,
     models,
     modules,
+    services,
 )
 from luna16.training import trainers
-
-if typing.TYPE_CHECKING:
-    from luna16 import services
 
 
 class LunaClassificationLauncher:
@@ -25,7 +23,7 @@ class LunaClassificationLauncher:
         self,
         training_name: str,
         validation_stride: int,
-        registry: "services.ServiceContainer",
+        registry: services.ServiceContainer,
         validation_cadence: int,
     ) -> None:
         self.training_name = training_name
@@ -95,7 +93,7 @@ class LunaClassificationLauncher:
         log_every_n_examples: int,
         finetune: bool = False,
     ) -> dto.Scores:
-        model_saver = self.registry.get_service(services.MLFlowModelSaver)
+        model_saver = self.registry.get_service(services.BaseModelSaver)
         module = model_saver.load_model(
             name=from_name, version=from_version, module_class=modules.LunaModel
         )

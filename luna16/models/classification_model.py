@@ -199,7 +199,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         mode: enums.Mode,
         metrics: dto.ClassificationBatchMetrics,
         classification_threshold: float = 0.5,
-    ) -> np.float32:
+    ) -> np.floating:
         negative_label_mask = metrics.labels == 0
         negative_prediction_mask = metrics.predictions <= classification_threshold
 

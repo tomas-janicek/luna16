@@ -5,12 +5,17 @@ _log = logging.getLogger(__name__)
 
 T = typing.TypeVar("T")
 
+ServiceType = type
+Service = typing.Any
+CreatorCallable = typing.Callable[..., Service]
+ClosingCallable = typing.Callable[[Service], None]
+
 
 class ServiceContainer:
     def __init__(self) -> None:
-        self.services = {}
-        self.creators = {}
-        self.closers = {}
+        self.services: dict[ServiceType, Service] = {}
+        self.creators: dict[ServiceType, CreatorCallable] = {}
+        self.closers: dict[ServiceType, ClosingCallable] = {}
 
     def register_service(
         self,

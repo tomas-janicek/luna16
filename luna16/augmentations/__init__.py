@@ -10,12 +10,12 @@ from .base import (
 )
 
 __all__ = [
-    "Flip",
-    "Offset",
-    "Scale",
-    "Rotate",
-    "Noise",
-    "Transformation",
     "Filter",
+    "Flip",
+    "Noise",
+    "Offset",
     "RandomProvider",
+    "Rotate",
+    "Scale",
+    "Transformation",
 ]

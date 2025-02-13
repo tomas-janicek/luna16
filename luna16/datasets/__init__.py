@@ -7,8 +7,8 @@ from .malignant_cutout import MalignantCutoutsDataset
 from .nodule_cutouts import CutoutsDataset
 
 __all__ = [
-    "DataModule",
     "CutoutsDataset",
+    "DataModule",
     "MalignantCutoutsDataset",
     "create_pre_configured_luna_cutouts",
     "create_pre_configured_luna_malignant",

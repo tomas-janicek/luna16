@@ -88,7 +88,7 @@ class LunaMalignantClassificationLauncher:
         log_every_n_examples: int,
         finetune: bool = False,
     ) -> dto.Scores:
-        model_saver = self.registry.get_service(services.MLFlowModelSaver)
+        model_saver = self.registry.get_service(services.BaseModelSaver)
         module = model_saver.load_model(
             name=from_name, version=from_version, module_class=modules.LunaModel
         )

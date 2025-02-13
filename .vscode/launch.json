@@ -5,24 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "LuNA Classification Testing",
-            "consoleTitle": "LuNA Classification Testing",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceRoot}/luna16/cli.py",
-            "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "."
-            },
-            "args": [
-                "train_luna_classification",
-                "0.0.0-test",
-                "--epochs=1",
-                "--batch-size=128",
-            ],
-            "justMyCode": false
-        },
-        {
             "name": "LuNA Classification Training",
             "consoleTitle": "LuNA Classification Training",
             "type": "debugpy",
@@ -34,7 +16,7 @@
             },
             "args": [
                 "train_luna_classification",
-                "0.0.1",
+                "0.0.1", // model version
                 "--epochs=5",
                 "--batch-size=256",
             ],
@@ -52,9 +34,10 @@
             },
             "args": [
                 "load_train_luna_classification",
-                "0.0.1",
-                "classification",
-                "0.0.0",
+                "0.0.2", // model version
+                "file", // model loader
+                "classification", // start form model name
+                "0.0.1", // start form model version
                 "--epochs=5",
                 "--batch-size=256",
             ],
@@ -72,7 +55,7 @@
             },
             "args": [
                 "train_luna_classification",
-                "0.0.0-profile",
+                "0.0.0-profile", // model version
                 "--epochs=10",
                 "--batch-size=256",
                 "--profile",
@@ -91,7 +74,7 @@
             },
             "args": [
                 "train_luna_malignant_classification",
-                "0.0.1",
+                "0.0.1", // model version
                 "--epochs=5",
                 "--batch-size=256",
             ],
@@ -109,9 +92,10 @@
             },
             "args": [
                 "load_train_luna_malignant_classification",
-                "0.0.1",
-                "Classification",
-                "7",
+                "0.0.2", // model version
+                "file", // model loader
+                "classification", // start form model name
+                "0.0.1", // start form model name
                 "--epochs=5",
                 "--batch-size=256",
             ],
@@ -129,7 +113,7 @@
             },
             "args": [
                 "train_luna_malignant_classification",
-                "0.0.0-profile",
+                "0.0.0-profile", // model version
                 "--epochs=10",
                 "--batch-size=256",
                 "--profile",
@@ -147,13 +131,7 @@
                 "PYTHONPATH": "."
             },
             "args": [
-                "ml/luna16/tests",
-                // "-k test_luna16_create_from_seriesuid_defaults",
-                // "-k test_get_item_from_luna",
-                // "-k test_flip",
-                // "-k test_offset",
-                // "-k test_scale",
-                // "-k test_rotate",
+                "luna16/tests"
             ],
             "justMyCode": false,
         },

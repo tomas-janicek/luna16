@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import pydantic
 import torch
+from numpy import floating
 from numpy import typing as np_typing
 
 from luna16 import enums
@@ -234,7 +235,7 @@ class Value:
 @dataclass
 class NumberValue(Value):
     name: str
-    value: float | np.float32
+    value: float | np.float32 | floating
     formatted_value: str
 
 

@@ -26,3 +26,8 @@ class CandidateClass(enum.IntEnum):
     MALIGNANT = 0
     BENIGN = 1
     NOT_NODULE = 2
+
+
+class ModelLoader(enum.Enum):
+    ML_FLOW = "mlflow"
+    FILE = "file"

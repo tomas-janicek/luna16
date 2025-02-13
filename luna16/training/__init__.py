@@ -4,7 +4,7 @@ from .trainers import BaseTrainer, Trainer
 
 __all__ = [
     "BaseTrainer",
-    "Trainer",
     "LunaClassificationLauncher",
     "LunaMalignantClassificationLauncher",
+    "Trainer",
 ]

@@ -1,10 +1,8 @@
 import typing
 
-import torch
 from torch.utils import data as data_utils
 
-from luna16 import settings
-from luna16.utils import get_device
+from luna16 import settings, utils
 
 CandidateT = typing.TypeVar("CandidateT")
 
@@ -18,8 +16,8 @@ class DataModule(typing.Generic[CandidateT]):
     ) -> None:
         self.batch_size = batch_size
 
-        self.device, self.n_gpu_devices = get_device()
-        self.is_using_cuda = self.device == torch.device("cuda")
+        self.device, self.n_gpu_devices = utils.get_device()
+        self.is_using_cuda = self.device == utils.CUDA_DEVICE
 
         self.training_len = len(train)  # type: ignore
         self.validation_len = len(validation)  # type: ignore

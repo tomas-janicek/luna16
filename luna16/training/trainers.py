@@ -2,9 +2,19 @@ import time
 import typing
 from datetime import datetime
 
+import torch
 from torch.profiler import profile
 
-from luna16 import datasets, dto, message_handler, models, settings, utils
+from luna16 import (
+    datasets,
+    dto,
+    enums,
+    message_handler,
+    models,
+    services,
+    settings,
+    utils,
+)
 
 CandidateT = typing.TypeVar("CandidateT")
 
@@ -162,3 +172,22 @@ class Trainer(BaseTrainer[CandidateT]):
             f"logger={self.message_handler.__class__.__name__})"
         )
         return _repr
+
+
+def load_module(
+    registry: services.ServiceContainer,
+    loader: enums.ModelLoader,
+    name: str,
+    version: str,
+    module_class: type[torch.nn.Module],
+) -> torch.nn.Module:
+    match loader:
+        case enums.ModelLoader.ML_FLOW:
+            model_loader = registry.get_service(services.MLFlowModelSaver)
+        case enums.ModelLoader.FILE:
+            model_loader = registry.get_service(services.ModelSaver)
+
+    module = model_loader.load_model(
+        name=name, version=version, module_class=module_class
+    )
+    return module

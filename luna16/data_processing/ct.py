@@ -111,13 +111,13 @@ class Ct:
     def _raise_if_center_out_of_bound(
         self, *, axis: int, center_coord: np.int16
     ) -> None:
-        assert (
-            center_coord >= 0 and center_coord < self.ct_hounsfield.shape[axis]
-        ), repr(
-            [
-                self.series_uid,
-                self.origin,
-                self.voxel_size,
-                axis,
-            ]
+        assert center_coord >= 0 and center_coord < self.ct_hounsfield.shape[axis], (
+            repr(
+                [
+                    self.series_uid,
+                    self.origin,
+                    self.voxel_size,
+                    axis,
+                ]
+            )
         )

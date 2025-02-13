@@ -9,13 +9,15 @@ from luna16 import (
     batch_iterators,
     datasets,
     dto,
+    enums,
     hyperparameters_container,
     message_handler,
     models,
     modules,
     services,
 )
-from luna16.training import trainers
+
+from . import trainers
 
 
 class LunaClassificationLauncher:
@@ -85,6 +87,7 @@ class LunaClassificationLauncher:
         version: str,
         epochs: int,
         batch_size: int,
+        from_saver: enums.ModelLoader,
         from_name: str,
         from_version: str,
         lr: float,
@@ -93,10 +96,14 @@ class LunaClassificationLauncher:
         log_every_n_examples: int,
         finetune: bool = False,
     ) -> dto.Scores:
-        model_saver = self.registry.get_service(services.BaseModelSaver)
-        module = model_saver.load_model(
-            name=from_name, version=from_version, module_class=modules.LunaModel
+        module = trainers.load_module(
+            registry=self.registry,
+            loader=from_saver,
+            name=from_name,
+            version=from_version,
+            module_class=modules.LunaModel,
         )
+
         model = models.NoduleClassificationModel(
             module=module,
             optimizer=torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum),

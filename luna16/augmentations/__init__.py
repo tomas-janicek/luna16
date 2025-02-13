@@ -1,4 +1,4 @@
-from .base import (
+from .image_augmentations import (
     Filter,
     Flip,
     Noise,

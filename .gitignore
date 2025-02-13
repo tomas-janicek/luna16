@@ -161,3 +161,6 @@ profiling/*.prof
 memory_timeline.html
 stacks
 program.prof
+
+# Logging
+*.log*

@@ -48,7 +48,7 @@ class LunaModel(nn.Module):
             }:
                 # TODO: Explain why I used kaiming initialization
                 nn.init.kaiming_normal_(
-                    tensor=m.weight.data,
+                    tensor=m.weight.data,  # type: ignore
                     a=0,
                     mode="fan_out",
                     nonlinearity="relu",
@@ -58,7 +58,11 @@ class LunaModel(nn.Module):
                         tensor=m.weight.data
                     )
                     bound = 1 / math.sqrt(fan_out)
-                    nn.init.normal_(tensor=m.bias, mean=-bound, std=bound)
+                    nn.init.normal_(
+                        tensor=m.bias,  # type: ignore
+                        mean=-bound,
+                        std=bound,
+                    )
 
     def forward(self, input_batch: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         bn_output = self.tail_batchnorm(input_batch)

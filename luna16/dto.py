@@ -37,9 +37,7 @@ class CoordinatesXYZ(pydantic.BaseModel):
         return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __repr__(self) -> str:
-        _repr = (
-            f"{self.__class__.__name__}(" f"x={self.x}, " f"y={self.y}, " f"z={self.z})"
-        )
+        _repr = f"{self.__class__.__name__}(x={self.x}, y={self.y}, z={self.z})"
         return _repr
 
     def get_array(self) -> np_typing.NDArray[np.float32]:

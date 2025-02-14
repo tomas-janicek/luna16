@@ -263,6 +263,14 @@ PYTHONPATH=. uv run pytest luna16/tests/
 
 Luna 16 provides a command-line interface (CLI) for running various tasks related to model training, evaluation, and experimentation.
 
+### Creating Cutouts from CT images
+
+TBD
+
+```sh
+uv run python -m luna16.cli create_cutouts
+```
+
 ### 🏋️ Training & Continuing Training
 
 Luna 16 supports training models from scratch as well as continuing training from a saved state. The training process can be customized with parameters such as the number of epochs, batch size, and learning rate.

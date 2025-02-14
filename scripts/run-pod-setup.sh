@@ -2,14 +2,9 @@
 
 set -e
 
-cp .env.example .env
-
-mv uv.lock uv.cpu.lock
-mv uv.lock.cuda uv.lock
-
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-source $HOME/.cargo/env 
+source $HOME/.local/bin/env
 
 uv sync
 

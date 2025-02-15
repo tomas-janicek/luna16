@@ -147,7 +147,7 @@
             },
             "args": [
                 "create_cutouts",
-                "--training-length=50000",
+                "--training-length=8000",
             ],
             "justMyCode": false
         },

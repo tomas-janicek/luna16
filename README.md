@@ -247,8 +247,16 @@ Luna 16 provides integrated dashboards for monitoring and visualizing training m
 
 To install Luna16, you can use `uv`:
 
+For CPU version:
+
 ```sh
-uv sync
+uv sync --extra cpu
+```
+
+For CUDA version:
+
+```sh
+uv sync --extra cu124
 ```
 
 ## 🧪 Running Tests

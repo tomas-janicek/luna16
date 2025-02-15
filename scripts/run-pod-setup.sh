@@ -6,7 +6,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 source $HOME/.local/bin/env
 
-uv sync
+uv sync --extra cu124
 
 git config --global user.email "tomasjanicek221@gmail.com"
 git config --global user.name Tomas Janicek

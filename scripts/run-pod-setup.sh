@@ -14,7 +14,7 @@ git config --global user.name Tomas Janicek
 apt-get update
 apt-get install unzip
 
-echo -e >> .env
+cp .env.example .env
 echo -e "NUM_WORKERS=64" >> .env
 echo -e "CACHE_DIR=/workspace/cache" >> .env
 echo -e "DATA_DOWNLOADED_DIR=/workspace/data_downloaded" >> .env

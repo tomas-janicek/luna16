@@ -186,25 +186,28 @@ class LunaMalignantRatio(Ratio):
         super().__init__([malignant, benign, not_module])
 
 
-class ClassificationBatchMetrics:
+class ClassificationMetrics:
     def __init__(
         self,
         loss: torch.Tensor,
         labels: torch.Tensor,
         predictions: torch.Tensor,
+        device: torch.device,
     ) -> None:
         self.loss = loss
         self.labels = labels
         self.predictions = predictions
+        self.device = device
 
     @classmethod
     def create_empty(
         cls, dataset_len: int, device: torch.device
-    ) -> "ClassificationBatchMetrics":
+    ) -> "ClassificationMetrics":
         return cls(
             loss=torch.tensor([]).to(device),
             labels=torch.tensor([]).to(device),
             predictions=torch.tensor([]).to(device),
+            device=device,
         )
 
     def add_batch_metrics(

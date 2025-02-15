@@ -67,7 +67,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
     ) -> np.float32:
         self.module.train()
         dataset_length = len(train_dataloader.dataset)  # type: ignore
-        batch_metrics = dto.ClassificationBatchMetrics.create_empty(
+        epoch_metrics = dto.ClassificationMetrics.create_empty(
             dataset_len=dataset_length, device=self.device
         )
 
@@ -83,10 +83,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         for _batch_index, batch in batch_iter:
             self.optimizer.zero_grad()
 
-            loss, batch_metrics = self.compute_batch_loss(
-                batch=batch,
-                batch_metrics=batch_metrics,
-            )
+            loss, batch_metrics = self.compute_batch_loss(batch=batch)
 
             loss.backward()
             self.optimizer.step()
@@ -98,13 +95,18 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
                     metrics=batch_metrics,
                 )
                 n_logged += 1
+                epoch_metrics.add_batch_metrics(
+                    loss=batch_metrics.loss,
+                    labels=batch_metrics.labels,
+                    predictions=batch_metrics.predictions,
+                )
             n_processed_training_samples += len(batch.candidate)
 
         score = self.log_metrics(
             epoch=epoch,
             n_processed_training_samples=n_processed_training_samples,
             mode=enums.Mode.TRAINING,
-            metrics=batch_metrics,
+            metrics=epoch_metrics,
         )
         return score
 
@@ -116,7 +118,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         with torch.no_grad():
             self.module.eval()
             dataset_length = len(validation_dataloader.dataset)  # type: ignore
-            batch_metrics = dto.ClassificationBatchMetrics.create_empty(
+            epoch_metrics = dto.ClassificationMetrics.create_empty(
                 dataset_len=dataset_length, device=self.device
             )
 
@@ -130,10 +132,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
             score = np.float32(0.0)
             n_processed_training_samples = (epoch - 1) * dataset_length
             for _batch_index, batch in batch_iter:
-                _, batch_metrics = self.compute_batch_loss(
-                    batch=batch,
-                    batch_metrics=batch_metrics,
-                )
+                _, batch_metrics = self.compute_batch_loss(batch=batch)
                 if n_processed_training_samples > self.log_every_n_examples * n_logged:
                     score = self.log_metrics(
                         epoch=epoch,
@@ -142,12 +141,17 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
                         metrics=batch_metrics,
                     )
                     n_logged += 1
+                    epoch_metrics.add_batch_metrics(
+                        loss=batch_metrics.loss,
+                        labels=batch_metrics.labels,
+                        predictions=batch_metrics.predictions,
+                    )
                 n_processed_training_samples += len(batch.candidate)
             score = self.log_metrics(
                 epoch=epoch,
                 n_processed_training_samples=n_processed_training_samples,
                 mode=enums.Mode.VALIDATING,
-                metrics=batch_metrics,
+                metrics=epoch_metrics,
             )
         return score
 
@@ -155,10 +159,8 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         return self.module
 
     def compute_batch_loss(
-        self,
-        batch: dto.LunaClassificationCandidateBatch,
-        batch_metrics: dto.ClassificationBatchMetrics,
-    ) -> tuple[torch.Tensor, dto.ClassificationBatchMetrics]:
+        self, batch: dto.LunaClassificationCandidateBatch
+    ) -> tuple[torch.Tensor, dto.ClassificationMetrics]:
         input = batch.candidate.to(self.device, non_blocking=True)
         labels = batch.labels.to(self.device, non_blocking=True)
 
@@ -174,8 +176,11 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         true_probability = probability[:, 1]
         loss: torch.Tensor = cross_entropy_loss(input=logits, target=true_labels)
 
-        batch_metrics.add_batch_metrics(
-            loss=loss, labels=true_labels, predictions=true_probability
+        batch_metrics = dto.ClassificationMetrics(
+            loss=loss,
+            labels=true_labels,
+            predictions=true_probability,
+            device=self.device,
         )
 
         return loss.mean(), batch_metrics
@@ -197,7 +202,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         epoch: int,
         n_processed_training_samples: int,
         mode: enums.Mode,
-        metrics: dto.ClassificationBatchMetrics,
+        metrics: dto.ClassificationMetrics,
         classification_threshold: float = 0.5,
     ) -> np.floating:
         negative_label_mask = metrics.labels == 0

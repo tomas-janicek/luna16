@@ -268,7 +268,7 @@ Luna 16 provides a command-line interface (CLI) for running various tasks relate
 TBD
 
 ```sh
-uv run python -m luna16.cli create_cutouts
+PYTHONPATH=. uv run python -m luna16.cli create_cutouts
 ```
 
 ### 🏋️ Training & Continuing Training
@@ -280,7 +280,7 @@ Luna 16 supports training models from scratch as well as continuing training fro
 To train a model (set to version 0.0.1) from scratch, use the following command:
 
 ```sh
-uv run python -m luna16.cli \
+PYTHONPATH=. uv run python -m luna16.cli \
                 train_luna_classification \
                 0.0.1 \
                 --epochs=5 \
@@ -290,7 +290,7 @@ uv run python -m luna16.cli \
 The same variant can be used for malignant classification:
 
 ```sh
-uv run python -m luna16.cli \
+PYTHONPATH=. uv run python -m luna16.cli \
                 train_luna_malignant_classification \
                 0.0.1 \
                 --epochs=5 \
@@ -302,7 +302,7 @@ uv run python -m luna16.cli \
 To continue training a model (set to version 0.0.2) from a saved state (file loader will load classification model with version 0.0.1), use the following command:
 
 ```sh
-uv run python -m luna16.cli \
+PYTHONPATH=. uv run python -m luna16.cli \
                 load_train_luna_classification \
                 0.0.1 \
                 file \
@@ -315,7 +315,7 @@ uv run python -m luna16.cli \
 The same variant can be used for malignant classification:
 
 ```sh
-uv run python -m luna16.cli \
+PYTHONPATH=. uv run python -m luna16.cli \
                 load_train_luna_malignant_classification \
                 0.0.1 \
                 file \
@@ -362,7 +362,7 @@ Luna 16 supports profiling the training process to optimize performance and reso
 To profile the training process using PyTorch Profiler, use the following command:
 
 ```sh
-uv run python -m luna16.cli \
+PYTHONPATH=. uv run python -m luna16.cli \
                 train_luna_classification \
                 0.0.0-profile \
                 --epochs=10 \
@@ -373,7 +373,7 @@ uv run python -m luna16.cli \
 The same variant can be used for malignant classification:
 
 ```sh
-uv run python -m luna16.cli \
+PYTHONPATH=. uv run python -m luna16.cli \
                 train_luna_malignant_classification \
                 0.0.0-profile \
                 --epochs=10 \

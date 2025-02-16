@@ -38,6 +38,10 @@ This project is still in progress and was initially prepared for experimenting w
 - Cloud deployment. The project will include tools and scripts for deploying models to cloud platforms for inference and production use.
 - Additional datasets. The project will include more datasets for training and validation, covering a wider range of medical imaging tasks and modalities.
 
+Current model improvements:
+- Add gradient clipping.
+
+
 ## 🏛️ Architecture
 
 The Luna 16 project is designed with a modular architecture that separates concerns and promotes reusability and extensibility.

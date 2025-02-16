@@ -50,9 +50,11 @@ class LunaClassificationLauncher:
         profile: bool = False,
     ) -> dto.Scores:
         module = modules.LunaModel()
+        _sgd = torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum)
+        _adam = torch.optim.Adam(module.parameters(), lr=lr)
         model = models.NoduleClassificationModel(
             module=module,
-            optimizer=torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum),
+            optimizer=_adam,
             batch_iterator=self.batch_iterator,
             logger=self.logger,
             validation_cadence=self.validation_cadence,

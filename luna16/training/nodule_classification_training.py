@@ -47,11 +47,14 @@ class LunaClassificationLauncher:
         lr: float,
         momentum: float,
         log_every_n_examples: int,
+        weight_decay: float = 1e-2,
         profile: bool = False,
     ) -> dto.Scores:
         module = modules.LunaModel()
-        _sgd = torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum)
-        _adam = torch.optim.Adam(module.parameters(), lr=lr)
+        _sgd = torch.optim.SGD(
+            module.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay
+        )
+        _adam = torch.optim.Adam(module.parameters(), lr=lr, weight_decay=weight_decay)
         model = models.NoduleClassificationModel(
             module=module,
             optimizer=_adam,

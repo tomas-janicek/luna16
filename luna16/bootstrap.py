@@ -109,7 +109,7 @@ def create_registry(
             )
         case enums.SchedulerType.SLOWER_STEP:
             lr_scheduler = torch.optim.lr_scheduler.StepLR(
-                optimizer, step_size=1, gamma=0.70
+                optimizer, step_size=1, gamma=0.1
             )
 
     registry.register_service(services.ClassificationScheduler, lr_scheduler)

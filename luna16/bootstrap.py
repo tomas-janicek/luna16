@@ -97,7 +97,7 @@ def create_registry(
             )
         case enums.OptimizerType.SLOWER_ADAM:
             optimizer = torch.optim.AdamW(
-                module.parameters(), lr=1e-3, weight_decay=1e-4, betas=(0.95, 0.9999)
+                module.parameters(), lr=1e-3, weight_decay=1e-4, betas=(0.9, 0.9999)
             )
 
     registry.register_service(services.ClassificationOptimizer, optimizer)

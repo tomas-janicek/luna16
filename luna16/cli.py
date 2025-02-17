@@ -49,6 +49,35 @@ def train_luna_classification(
     registry.close_all_services()
 
 
+@cli.command(name="train_luna_classification_slower")
+def train_luna_classification_slower(
+    version: str,
+    epochs: int = 1,
+    batch_size: int = 64,
+    validation_stride: int = 5,
+    profile: bool = False,
+) -> None:
+    training_name = "Classification"
+    registry = bootstrap.create_registry(
+        enums.ConvModel(),
+        enums.OptimizerType.SLOWER_ADAM,
+        enums.SchedulerType.SLOWER_STEP,
+    )
+    training.LunaClassificationLauncher(
+        registry=registry,
+        validation_stride=validation_stride,
+        training_name=training_name,
+        validation_cadence=5,
+    ).fit(
+        epochs=epochs,
+        batch_size=batch_size,
+        profile=profile,
+        version=version,
+        log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
+    )
+    registry.close_all_services()
+
+
 @cli.command(name="load_train_luna_classification")
 def load_train_luna_classification(
     version: str,

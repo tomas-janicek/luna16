@@ -87,6 +87,10 @@ def create_registry(
             optimizer = torch.optim.AdamW(
                 module.parameters(), lr=1e-3, weight_decay=1e-2, betas=(0.9, 0.999)
             )
+        case enums.OptimizerType.SLOWER_ADAM:
+            optimizer = torch.optim.AdamW(
+                module.parameters(), lr=1e-3, weight_decay=1e-2, betas=(0.95, 0.9999)
+            )
 
     registry.register_service(services.ClassificationOptimizer, optimizer)
 
@@ -94,6 +98,10 @@ def create_registry(
         case enums.SchedulerType.STEP:
             lr_scheduler = torch.optim.lr_scheduler.StepLR(
                 optimizer, step_size=1, gamma=0.90
+            )
+        case enums.SchedulerType.SLOWER_STEP:
+            lr_scheduler = torch.optim.lr_scheduler.StepLR(
+                optimizer, step_size=1, gamma=0.70
             )
 
     registry.register_service(services.ClassificationScheduler, lr_scheduler)

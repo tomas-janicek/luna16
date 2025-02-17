@@ -37,10 +37,12 @@ class ModelLoader(enum.Enum):
 
 class OptimizerType(enum.Enum):
     ADAM = enum.auto()
+    SLOWER_ADAM = enum.auto()
 
 
 class SchedulerType(enum.Enum):
     STEP = enum.auto()
+    SLOWER_STEP = enum.auto()
 
 
 class ModelType(pydantic.BaseModel): ...

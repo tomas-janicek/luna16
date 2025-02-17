@@ -3,6 +3,7 @@ import tempfile
 import typing
 
 import mlflow
+import pydantic
 import torch
 import torch.optim
 from mlflow.pytorch import ModelSignature
@@ -18,7 +19,12 @@ ModuleT = typing.TypeVar("ModuleT", bound=nn.Module)
 
 class BaseModelSaver(typing.Protocol):
     def load_model(
-        self, *, name: str, module_class: type[ModuleT], version: str
+        self,
+        *,
+        name: str,
+        module_class: type[ModuleT],
+        version: str,
+        module_params: pydantic.BaseModel,
     ) -> ModuleT: ...
 
 
@@ -52,10 +58,15 @@ class ModelSaver(BaseModelSaver):
         _log.debug(f"Saved model params to {models_path}.")
 
     def load_model(
-        self, *, name: str, module_class: type[ModuleT], version: str
+        self,
+        *,
+        name: str,
+        module_class: type[ModuleT],
+        version: str,
+        module_params: pydantic.BaseModel,
     ) -> ModuleT:
         state_dict = self.load_state_dict(name, version)
-        module = module_class()
+        module = module_class(**module_params.model_dump())
         module.load_state_dict(
             state_dict=state_dict,
             # Strict is set to False because we are not providing state dict with the same
@@ -101,7 +112,12 @@ class MLFlowModelSaver(BaseModelSaver):
         _log.debug(f"Saved model params to MLFLow under '{name}' name.")
 
     def load_model(
-        self, *, name: str, module_class: type[ModuleT], version: str
+        self,
+        *,
+        name: str,
+        module_class: type[ModuleT],
+        version: str,
+        module_params: pydantic.BaseModel,
     ) -> ModuleT:
         # Version used here is not the same version that we manually define (like in ModelSaver above).
         # This version is defined by MLFlow automatically. This process can not be overridden.

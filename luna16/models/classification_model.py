@@ -16,6 +16,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         self,
         module: nn.Module,
         optimizer: torch.optim.Optimizer,
+        lr_scheduler: torch.optim.lr_scheduler.LRScheduler,
         batch_iterator: batch_iterators.BatchIteratorProvider,
         logger: message_handler.MessageHandler,
         log_every_n_examples: int,
@@ -27,6 +28,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
             self.module = nn.DataParallel(module=self.module)
         self.module = self.module.to(self.device)
         self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
         self.validation_cadence = validation_cadence
         self.batch_iterator = batch_iterator
         self.logger = logger
@@ -37,7 +39,7 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         # initialized model would have us begin with (almost) all nodules
         # labeled as malignant, because that output means “nodule” in the
         # classifier we start from.
-        self.module.luna_head = modules.LunaHead()
+        self.module.luna_head = modules.LunaHead(in_features=1152, out_features=2)
 
         finetune_blocks = ("luna_head",)
 
@@ -57,6 +59,8 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
 
         if epoch == 1 or epoch % self.validation_cadence:
             score = self.do_validation(epoch=epoch, validation_dataloader=validation_dl)
+
+        self.lr_scheduler.step()
 
         return {"score": score}
 

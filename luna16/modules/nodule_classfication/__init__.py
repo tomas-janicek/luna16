@@ -1,3 +1,3 @@
-from .modules import LunaHead, LunaModel
+from .modules import LunaHead, LunaModel, LunaParameters
 
-__all__ = ["LunaHead", "LunaModel"]
+__all__ = ["LunaHead", "LunaModel", "LunaParameters"]

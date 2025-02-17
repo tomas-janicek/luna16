@@ -1,12 +1,26 @@
 import math
 
+import pydantic
 import torch
 from torch import nn
 
 
+class LunaParameters(pydantic.BaseModel):
+    in_channels: int
+    conv_channels: int
+    out_features: int
+    n_blocks: int
+    input_dim: tuple[int, int, int]
+
+
 class LunaModel(nn.Module):
     def __init__(
-        self, in_channels: int = 1, conv_channels: int = 8, out_features: int = 2
+        self,
+        in_channels: int,
+        conv_channels: int,
+        out_features: int,
+        n_blocks: int,
+        input_dim: tuple[int, int, int],
     ) -> None:
         super().__init__()
 
@@ -14,25 +28,45 @@ class LunaModel(nn.Module):
         self.tail_batchnorm = nn.BatchNorm3d(1)
 
         # Backbone
-        self.block1 = LunaBlock(
-            in_channels=in_channels,
-            conv_channels=conv_channels,
+        self.luna_blocks = nn.ModuleList(
+            [
+                LunaBlock(
+                    in_channels=in_channels,
+                    conv_channels=conv_channels,
+                )
+            ]
         )
-        self.block2 = LunaBlock(
-            in_channels=conv_channels,
-            conv_channels=conv_channels * 2,
+        out_conv_channels = conv_channels
+        for _ in range(1, n_blocks):
+            block = LunaBlock(
+                in_channels=out_conv_channels,
+                conv_channels=out_conv_channels * 2,
+            )
+            self.luna_blocks.append(block)
+            out_conv_channels *= 2
+
+        # Calculate output features of network backbone.
+        # For input dimension (32, 48, 48) and 4 blocks, the output dimensions are (1, 3, 3).
+        output_dimensions: tuple[int, int, int] = (
+            input_dim[0] // 2**n_blocks,
+            input_dim[1] // 2**n_blocks,
+            input_dim[2] // 2**n_blocks,
         )
-        self.block3 = LunaBlock(
-            in_channels=conv_channels * 2,
-            conv_channels=conv_channels * 4,
-        )
-        self.block4 = LunaBlock(
-            in_channels=conv_channels * 4,
-            conv_channels=conv_channels * 8,
+
+        # Calculate in_features dynamically
+        # It takes output dimensions of the last block and multiplies it by the number of channels in the last block.
+        # If conv_channels = 8, then out_conv_channels = 64
+        block_output_len = (
+            out_conv_channels
+            * output_dimensions[0]
+            * output_dimensions[1]
+            * output_dimensions[2]
         )
 
         # Head
-        self.luna_head = LunaHead(in_features=1152, out_features=out_features)
+        self.luna_head = LunaHead(
+            in_features=block_output_len, out_features=out_features
+        )
 
         self._init_weights()
 
@@ -65,12 +99,10 @@ class LunaModel(nn.Module):
                     )
 
     def forward(self, input_batch: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        bn_output = self.tail_batchnorm(input_batch)
+        block_out = self.tail_batchnorm(input_batch)
 
-        block_out = self.block1(bn_output)
-        block_out = self.block2(block_out)
-        block_out = self.block3(block_out)
-        block_out = self.block4(block_out)
+        for block in self.luna_blocks:
+            block_out = block(block_out)
 
         return self.luna_head(block_out)
 
@@ -111,7 +143,7 @@ class LunaBlock(nn.Module):
 
 
 class LunaHead(nn.Module):
-    def __init__(self, in_features: int = 1152, out_features: int = 2) -> None:
+    def __init__(self, in_features: int, out_features: int) -> None:
         super().__init__()
 
         self.head_linear = nn.Linear(in_features=in_features, out_features=out_features)

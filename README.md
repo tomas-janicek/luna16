@@ -397,6 +397,18 @@ PYTHONPATH=. uv run python -m luna16.cli \
 
 Hyperparameter tuning using Ray is not yet fully functional.
 
+In this project, I can optimize several hyperparameters. 
+
+Here are some key hyperparameters:
+
+- **Learning Rate:** The step size used by the optimizer to update the model weights.
+- **Batch Size**: The number of samples processed before the model is updated.
+- **Number of Epochs**: The number of times the entire dataset is passed through the model.
+- **Number of Convolutional Blocks (n_blocks)**: The number of LunaBlock layers in the model.
+- **Number of Convolutional Channels (conv_channels)**: The number of output channels for the convolutional layers.
+- **Dropout Rate**: The probability of dropping out neurons during training to prevent overfitting.
+- **Optimizer Type**: The type of optimizer used (e.g., Adam, SGD).
+
 ## ☁️ Cloud Experiment
 
 TBD: Write notes on experiment running on RunPod.

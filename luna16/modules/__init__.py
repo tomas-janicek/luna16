@@ -1,3 +1,3 @@
-from .nodule_classfication import LunaHead, LunaModel
+from .nodule_classfication import LunaHead, LunaModel, LunaParameters
 
-__all__ = ["LunaHead", "LunaModel"]
+__all__ = ["LunaHead", "LunaModel", "LunaParameters"]

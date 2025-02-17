@@ -19,3 +19,4 @@ cp .env.example .env
 echo -e "NUM_WORKERS=32" >> .env
 echo -e "CACHE_DIR=/workspace/cache" >> .env
 echo -e "DATA_DOWNLOADED_DIR=/workspace" >> .env
+echo -e "LOG_EVERY_N_EXAMPLES=3000" >> .env

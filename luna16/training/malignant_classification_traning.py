@@ -39,15 +39,26 @@ class LunaMalignantClassificationLauncher:
         version: str,
         epochs: int,
         batch_size: int,
-        lr: float,
-        momentum: float,
         log_every_n_examples: int,
         profile: bool = False,
     ) -> dto.Scores:
-        module = modules.LunaModel()
+        module = modules.LunaModel(
+            in_channels=1,
+            conv_channels=8,
+            out_features=2,
+            n_blocks=4,
+            input_dim=(32, 48, 48),
+        )
+        optimizer = torch.optim.AdamW(
+            module.parameters(), lr=1e-3, weight_decay=1e-2, betas=(0.9, 0.999)
+        )
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(
+            optimizer, step_size=1, gamma=0.90
+        )
         model = models.NoduleClassificationModel(
             module=module,
-            optimizer=torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum),
+            optimizer=optimizer,
+            lr_scheduler=lr_scheduler,
             batch_iterator=self.batch_iterator,
             logger=self.logger,
             validation_cadence=self.validation_cadence,
@@ -85,8 +96,6 @@ class LunaMalignantClassificationLauncher:
         from_saver: enums.ModelLoader,
         from_name: str,
         from_version: str,
-        lr: float,
-        momentum: float,
         profile: bool = False,
         log_every_n_examples: int,
         finetune: bool = False,
@@ -97,10 +106,24 @@ class LunaMalignantClassificationLauncher:
             name=from_name,
             version=from_version,
             module_class=modules.LunaModel,
+            module_params=modules.LunaParameters(
+                in_channels=1,
+                conv_channels=8,
+                out_features=2,
+                n_blocks=4,
+                input_dim=(32, 48, 48),
+            ),
+        )
+        optimizer = torch.optim.AdamW(
+            module.parameters(), lr=1e-3, weight_decay=1e-2, betas=(0.9, 0.999)
+        )
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(
+            optimizer, step_size=1, gamma=0.90
         )
         model = models.NoduleClassificationModel(
             module=module,
-            optimizer=torch.optim.SGD(module.parameters(), lr=lr, momentum=momentum),
+            optimizer=optimizer,
+            lr_scheduler=lr_scheduler,
             batch_iterator=self.batch_iterator,
             logger=self.logger,
             log_every_n_examples=log_every_n_examples,

@@ -2,6 +2,7 @@ import time
 import typing
 from datetime import datetime
 
+import pydantic
 import torch
 from torch.profiler import profile
 
@@ -180,6 +181,7 @@ def load_module(
     name: str,
     version: str,
     module_class: type[torch.nn.Module],
+    module_params: pydantic.BaseModel,
 ) -> torch.nn.Module:
     match loader:
         case enums.ModelLoader.ML_FLOW:
@@ -188,6 +190,9 @@ def load_module(
             model_loader = registry.get_service(services.ModelSaver)
 
     module = model_loader.load_model(
-        name=name, version=version, module_class=module_class
+        name=name,
+        version=version,
+        module_class=module_class,
+        module_params=module_params,
     )
     return module

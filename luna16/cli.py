@@ -42,8 +42,6 @@ def train_luna_classification(
     ).fit(
         epochs=epochs,
         batch_size=batch_size,
-        lr=0.001,
-        momentum=0.99,
         profile=profile,
         version=version,
         log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
@@ -76,8 +74,6 @@ def load_train_luna_classification(
         from_saver=from_saver,
         from_name=from_name,
         from_version=from_version,
-        lr=0.001,
-        momentum=0.99,
         profile=profile,
         log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )
@@ -119,8 +115,6 @@ def train_luna_malignant_classification(
         version=version,
         epochs=epochs,
         batch_size=batch_size,
-        lr=0.001,
-        momentum=0.99,
         profile=profile,
         log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )
@@ -152,8 +146,6 @@ def load_train_luna_malignant_classification(
         from_saver=from_saver,
         from_name=from_name,
         from_version=from_version,
-        lr=0.001,
-        momentum=0.99,
         profile=profile,
         log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )

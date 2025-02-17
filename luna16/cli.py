@@ -59,7 +59,7 @@ def train_luna_classification_slower(
 ) -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        enums.ConvModel(),
+        enums.DropoutModel(),
         enums.OptimizerType.SLOWER_ADAM,
         enums.SchedulerType.SLOWER_STEP,
     )

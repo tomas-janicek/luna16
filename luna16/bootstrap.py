@@ -54,6 +54,14 @@ def create_registry(
                 n_blocks=4,
                 input_dim=(32, 48, 48),
             )
+        case enums.DropoutModel():
+            module = modules.LunaDropoutModel(
+                in_channels=1,
+                conv_channels=8,
+                out_features=2,
+                n_blocks=4,
+                input_dim=(32, 48, 48),
+            )
         case enums.ConvLoadedModel(
             name=from_name,
             version=from_version,

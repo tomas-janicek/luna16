@@ -51,6 +51,9 @@ class ModelType(pydantic.BaseModel): ...
 class ConvModel(ModelType): ...
 
 
+class DropoutModel(ModelType): ...
+
+
 class ConvLoadedModel(ModelType):
     name: str
     version: str

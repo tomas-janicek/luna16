@@ -100,7 +100,7 @@ class LunaDropoutModel(nn.Module):
 
 class LunaBlock(nn.Module):
     def __init__(
-        self, in_channels: int, conv_channels: int, dropout_rate: float = 0.5
+        self, in_channels: int, conv_channels: int, dropout_rate: float = 0.3
     ) -> None:
         super().__init__()
 
@@ -111,6 +111,7 @@ class LunaBlock(nn.Module):
             padding=1,
             bias=True,
         )
+        self.bn1 = nn.BatchNorm3d(conv_channels)
         self.relu1 = nn.ReLU(inplace=True)
         self.dropout1 = nn.Dropout3d(p=dropout_rate)
 
@@ -121,6 +122,7 @@ class LunaBlock(nn.Module):
             padding=1,
             bias=True,
         )
+        self.bn2 = nn.BatchNorm3d(conv_channels)
         self.relu2 = nn.ReLU(inplace=True)
         self.dropout2 = nn.Dropout3d(p=dropout_rate)
 
@@ -130,9 +132,11 @@ class LunaBlock(nn.Module):
 
     def forward(self, input_batch: torch.Tensor) -> torch.Tensor:
         block_out = self.conv1(input_batch)
+        block_out = self.bn1(block_out)
         block_out = self.relu1(block_out)
         block_out = self.dropout1(block_out)
         block_out = self.conv2(block_out)
+        block_out = self.bn2(block_out)
         block_out = self.relu2(block_out)
         block_out = self.dropout2(block_out)
 

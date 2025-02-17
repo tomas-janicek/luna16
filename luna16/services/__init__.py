@@ -1,6 +1,7 @@
 import typing
 
 import mlflow
+import torch
 from torch.utils.tensorboard.writer import SummaryWriter
 
 from .creators import (
@@ -18,6 +19,14 @@ from .service_container import (
 TrainingWriter = typing.NewType("TrainingWriter", SummaryWriter)
 ValidationWriter = typing.NewType("ValidationWriter", SummaryWriter)
 MlFlowRun = typing.NewType("MlFlowRun", mlflow.ActiveRun)
+
+ClassificationModel = typing.NewType("ClassificationModel", torch.nn.Module)
+ClassificationOptimizer = typing.NewType(
+    "ClassificationOptimizer", torch.optim.Optimizer
+)
+ClassificationScheduler = typing.NewType(
+    "ClassificationScheduler", torch.optim.lr_scheduler.LRScheduler
+)
 
 
 __all__ = [

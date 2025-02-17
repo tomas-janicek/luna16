@@ -33,7 +33,7 @@ def train_luna_classification(
     profile: bool = False,
 ) -> None:
     training_name = "Classification"
-    registry = bootstrap.create_registry()
+    registry = bootstrap.create_registry(enums.ConvModel())
     training.LunaClassificationLauncher(
         registry=registry,
         validation_stride=validation_stride,
@@ -52,7 +52,7 @@ def train_luna_classification(
 @cli.command(name="load_train_luna_classification")
 def load_train_luna_classification(
     version: str,
-    from_saver: enums.ModelLoader,
+    model_loader: enums.ModelLoader,
     from_name: str,
     from_version: str,
     epochs: int = 1,
@@ -61,19 +61,23 @@ def load_train_luna_classification(
     profile: bool = False,
 ) -> None:
     training_name = "Classification"
-    registry = bootstrap.create_registry()
+    registry = bootstrap.create_registry(
+        enums.ConvLoadedModel(
+            name=from_name,
+            version=from_version,
+            finetune=False,
+            model_loader=model_loader,
+        )
+    )
     training.LunaClassificationLauncher(
         registry=registry,
         validation_stride=validation_stride,
         training_name=training_name,
         validation_cadence=5,
-    ).load_fit(
+    ).fit(
         version=version,
         epochs=epochs,
         batch_size=batch_size,
-        from_saver=from_saver,
-        from_name=from_name,
-        from_version=from_version,
         profile=profile,
         log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )
@@ -86,7 +90,7 @@ def tune_luna_classification(
     validation_stride: int = 5,
 ) -> None:
     training_name = "Classification"
-    registry = bootstrap.create_registry()
+    registry = bootstrap.create_registry(enums.ConvModel())
     training.LunaClassificationLauncher(
         registry=registry,
         validation_stride=validation_stride,
@@ -105,7 +109,7 @@ def train_luna_malignant_classification(
     profile: bool = False,
 ) -> None:
     training_name = "Malignant Classification"
-    registry = bootstrap.create_registry()
+    registry = bootstrap.create_registry(enums.ConvModel())
     training.LunaMalignantClassificationLauncher(
         registry=registry,
         validation_stride=validation_stride,
@@ -124,7 +128,7 @@ def train_luna_malignant_classification(
 @cli.command(name="load_train_luna_malignant_classification")
 def load_train_luna_malignant_classification(
     version: str,
-    from_saver: enums.ModelLoader,
+    model_loader: enums.ModelLoader,
     from_name: str,
     from_version: str,
     epochs: int = 1,
@@ -133,19 +137,23 @@ def load_train_luna_malignant_classification(
     profile: bool = False,
 ) -> None:
     training_name = "Malignant Classification"
-    registry = bootstrap.create_registry()
+    registry = bootstrap.create_registry(
+        enums.ConvLoadedModel(
+            name=from_name,
+            version=from_version,
+            finetune=True,
+            model_loader=model_loader,
+        )
+    )
     training.LunaMalignantClassificationLauncher(
         registry=registry,
         validation_stride=validation_stride,
         training_name=training_name,
         validation_cadence=5,
-    ).load_fit(
+    ).fit(
         version=version,
         epochs=epochs,
         batch_size=batch_size,
-        from_saver=from_saver,
-        from_name=from_name,
-        from_version=from_version,
         profile=profile,
         log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )

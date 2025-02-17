@@ -296,7 +296,7 @@ PYTHONPATH=. uv run python -m luna16.cli \
                 train_luna_classification \
                 0.0.1 \
                 --epochs=5 \
-                --batch-size=256
+                --batch-size=64
 ```
 
 The same variant can be used for malignant classification:
@@ -306,7 +306,7 @@ PYTHONPATH=. uv run python -m luna16.cli \
                 train_luna_malignant_classification \
                 0.0.1 \
                 --epochs=5 \
-                --batch-size=256
+                --batch-size=64
 ```
 
 #### 🏋️ Continuing Training
@@ -321,7 +321,7 @@ PYTHONPATH=. uv run python -m luna16.cli \
                 classification \
                 0.0.1 \
                 --epochs=5 \
-                --batch-size=256
+                --batch-size=64
 ```
 
 The same variant can be used for malignant classification:
@@ -334,7 +334,7 @@ PYTHONPATH=. uv run python -m luna16.cli \
                 classification \
                 0.0.1 \
                 --epochs=5 \
-                --batch-size=256
+                --batch-size=64
 ```
 
 
@@ -378,7 +378,7 @@ PYTHONPATH=. uv run python -m luna16.cli \
                 train_luna_classification \
                 0.0.0-profile \
                 --epochs=10 \
-                --batch-size=256 \
+                --batch-size=64 \
                 --profile
 ```
 
@@ -389,7 +389,7 @@ PYTHONPATH=. uv run python -m luna16.cli \
                 train_luna_malignant_classification \
                 0.0.0-profile \
                 --epochs=10 \
-                --batch-size=256 \
+                --batch-size=64 \
                 --profile
 ```
 

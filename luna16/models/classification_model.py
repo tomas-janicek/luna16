@@ -5,7 +5,7 @@ from mlflow.pytorch import ModelSignature
 from torch import nn
 from torch.utils import data as data_utils
 
-from luna16 import batch_iterators, message_handler, modules, utils
+from luna16 import batch_iterators, message_handler, utils
 
 from .. import dto, enums
 from . import base
@@ -33,21 +33,6 @@ class NoduleClassificationModel(base.BaseModel[dto.LunaClassificationCandidate])
         self.batch_iterator = batch_iterator
         self.logger = logger
         self.log_every_n_examples = log_every_n_examples
-
-    def prepare_for_fine_tuning_head(self) -> None:
-        # Replace only luna head. Starting from a fully
-        # initialized model would have us begin with (almost) all nodules
-        # labeled as malignant, because that output means “nodule” in the
-        # classifier we start from.
-        self.module.luna_head = modules.LunaHead(in_features=1152, out_features=2)
-
-        finetune_blocks = ("luna_head",)
-
-        # We to gather gradient only for blocks we will be fine-tuning.
-        # This results in training only modifying parameters of finetune blocks.
-        for name, parameter in self.module.named_parameters():
-            if name.split(".")[0] not in finetune_blocks:
-                parameter.requires_grad_(False)
 
     def fit_epoch(
         self,

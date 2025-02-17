@@ -1,5 +1,7 @@
 import enum
 
+import pydantic
+
 
 class DimensionIRC(enum.IntEnum):
     INDEX = 0
@@ -31,3 +33,24 @@ class CandidateClass(enum.IntEnum):
 class ModelLoader(enum.Enum):
     ML_FLOW = "mlflow"
     FILE = "file"
+
+
+class OptimizerType(enum.Enum):
+    ADAM = enum.auto()
+
+
+class SchedulerType(enum.Enum):
+    STEP = enum.auto()
+
+
+class ModelType(pydantic.BaseModel): ...
+
+
+class ConvModel(ModelType): ...
+
+
+class ConvLoadedModel(ModelType):
+    name: str
+    version: str
+    finetune: bool
+    model_loader: ModelLoader

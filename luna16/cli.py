@@ -28,7 +28,7 @@ def get_recommended_num_workers() -> None:
 def train_luna_classification(
     version: str,
     epochs: int = 1,
-    batch_size: int = 32,
+    batch_size: int = 64,
     validation_stride: int = 5,
     profile: bool = False,
 ) -> None:
@@ -56,7 +56,7 @@ def load_train_luna_classification(
     from_name: str,
     from_version: str,
     epochs: int = 1,
-    batch_size: int = 32,
+    batch_size: int = 64,
     validation_stride: int = 5,
     profile: bool = False,
 ) -> None:
@@ -104,7 +104,7 @@ def tune_luna_classification(
 def train_luna_malignant_classification(
     version: str,
     epochs: int = 1,
-    batch_size: int = 32,
+    batch_size: int = 64,
     validation_stride: int = 5,
     profile: bool = False,
 ) -> None:
@@ -132,7 +132,7 @@ def load_train_luna_malignant_classification(
     from_name: str,
     from_version: str,
     epochs: int = 1,
-    batch_size: int = 32,
+    batch_size: int = 64,
     validation_stride: int = 5,
     profile: bool = False,
 ) -> None:

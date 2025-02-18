@@ -75,7 +75,7 @@ class LogResult(Message):
 
 @dataclass
 class LogParams(Message):
-    params: dict[str, typing.Any]
+    pass
 
 
 @dataclass

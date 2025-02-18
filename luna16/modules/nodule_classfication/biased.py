@@ -1,8 +1,17 @@
+import pydantic
 import torch
 from torch import nn
 
 
-class LunaDropoutModel(nn.Module):
+class LunaParameters(pydantic.BaseModel):
+    in_channels: int
+    conv_channels: int
+    out_features: int
+    n_blocks: int
+    input_dim: tuple[int, int, int]
+
+
+class LunaModel(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -10,7 +19,6 @@ class LunaDropoutModel(nn.Module):
         out_features: int,
         n_blocks: int,
         input_dim: tuple[int, int, int],
-        dropout_rate: float,
     ) -> None:
         super().__init__()
 
@@ -23,7 +31,6 @@ class LunaDropoutModel(nn.Module):
                 LunaBlock(
                     in_channels=in_channels,
                     conv_channels=conv_channels,
-                    dropout_rate=dropout_rate,
                 )
             ]
         )
@@ -32,7 +39,6 @@ class LunaDropoutModel(nn.Module):
             block = LunaBlock(
                 in_channels=out_conv_channels,
                 conv_channels=out_conv_channels * 2,
-                dropout_rate=dropout_rate,
             )
             self.luna_blocks.append(block)
             out_conv_channels *= 2
@@ -92,9 +98,7 @@ class LunaDropoutModel(nn.Module):
 
 
 class LunaBlock(nn.Module):
-    def __init__(
-        self, in_channels: int, conv_channels: int, dropout_rate: float
-    ) -> None:
+    def __init__(self, in_channels: int, conv_channels: int) -> None:
         super().__init__()
 
         self.conv1 = nn.Conv3d(
@@ -102,24 +106,18 @@ class LunaBlock(nn.Module):
             out_channels=conv_channels,
             kernel_size=3,
             padding=1,
-            bias=False,
+            bias=True,
         )
-        self.bn1 = nn.BatchNorm3d(conv_channels)
         self.relu1 = nn.ReLU(inplace=True)
-        # Changed from Dropout3d to Dropout for small feature maps
-        self.dropout1 = nn.Dropout(p=dropout_rate)
 
         self.conv2 = nn.Conv3d(
             in_channels=conv_channels,
             out_channels=conv_channels,
             kernel_size=3,
             padding=1,
-            bias=False,
+            bias=True,
         )
-        self.bn2 = nn.BatchNorm3d(conv_channels)
         self.relu2 = nn.ReLU(inplace=True)
-        # Changed from Dropout3d to Dropout for small feature maps
-        self.dropout2 = nn.Dropout(p=dropout_rate)
 
         self.maxpool = nn.MaxPool3d(kernel_size=2, stride=2)
 
@@ -127,13 +125,9 @@ class LunaBlock(nn.Module):
 
     def forward(self, input_batch: torch.Tensor) -> torch.Tensor:
         block_out = self.conv1(input_batch)
-        block_out = self.bn1(block_out)
         block_out = self.relu1(block_out)
-        block_out = self.dropout1(block_out)
         block_out = self.conv2(block_out)
-        block_out = self.bn2(block_out)
         block_out = self.relu2(block_out)
-        block_out = self.dropout2(block_out)
 
         return self.maxpool(block_out)
 
@@ -148,7 +142,10 @@ class LunaHead(nn.Module):
         # TODO: Add initialization
 
     def forward(self, input_batch: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        conv_flat = torch.flatten(input_batch, start_dim=1)
+        conv_flat = input_batch.view(
+            input_batch.size(0),
+            -1,
+        )
         linear_output = self.head_linear(conv_flat)
 
         return linear_output, self.head_softmax(linear_output)

@@ -44,6 +44,9 @@ class LunaClassificationLauncher:
         log_every_n_examples: int,
         profile: bool = False,
     ) -> dto.Scores:
+        self.hyperparameters.add_hyperparameter("epochs", epochs)
+        self.hyperparameters.add_hyperparameter("batch_size", batch_size)
+
         module = self.registry.get_service(services.ClassificationModel)
         optimizer = self.registry.get_service(services.ClassificationOptimizer)
         lr_scheduler = self.registry.get_service(services.ClassificationScheduler)

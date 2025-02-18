@@ -13,3 +13,6 @@ class HyperparameterContainer:
 
     def get_hyperparameter(self, name: str) -> typing.Any:
         return self.hyperparameters[name]
+
+    def get_hyperparameters(self) -> dict[str, typing.Any]:
+        return self.hyperparameters

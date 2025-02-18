@@ -6,6 +6,7 @@ import typing
 import mlflow
 
 from luna16 import dto, services
+from luna16.hyperparameters_container import HyperparameterContainer
 
 from .. import messages
 from .. import utils as message_utils
@@ -171,7 +172,9 @@ def log_params_to_mlflow(
     message: messages.LogParams,
     registry: "services.ServiceContainer",
 ) -> None:
-    mlflow.log_params(message.params)
+    hyperparameters = registry.get_service(HyperparameterContainer)
+    params = hyperparameters.get_hyperparameters()
+    mlflow.log_params(params)
 
 
 def save_model(

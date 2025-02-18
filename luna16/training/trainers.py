@@ -57,6 +57,7 @@ class Trainer(BaseTrainer[CandidateT]):
         self.message_handler.registry.call_all_creators(
             training_name=self.name, training_start_time=training_start_time
         )
+        self.message_handler.handle_message(message_handler.LogParams())
         log_start_training = message_handler.LogStart(training_description=str(model))
         self.message_handler.handle_message(log_start_training)
 

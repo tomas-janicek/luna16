@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class LunaDropoutModel(nn.Module):
+class LunaBNModel(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -10,7 +10,6 @@ class LunaDropoutModel(nn.Module):
         out_features: int,
         n_blocks: int,
         input_dim: tuple[int, int, int],
-        dropout_rate: float,
     ) -> None:
         super().__init__()
 
@@ -23,7 +22,6 @@ class LunaDropoutModel(nn.Module):
                 LunaBlock(
                     in_channels=in_channels,
                     conv_channels=conv_channels,
-                    dropout_rate=dropout_rate,
                 )
             ]
         )
@@ -32,7 +30,6 @@ class LunaDropoutModel(nn.Module):
             block = LunaBlock(
                 in_channels=out_conv_channels,
                 conv_channels=out_conv_channels * 2,
-                dropout_rate=dropout_rate,
             )
             self.luna_blocks.append(block)
             out_conv_channels *= 2
@@ -92,9 +89,7 @@ class LunaDropoutModel(nn.Module):
 
 
 class LunaBlock(nn.Module):
-    def __init__(
-        self, in_channels: int, conv_channels: int, dropout_rate: float
-    ) -> None:
+    def __init__(self, in_channels: int, conv_channels: int) -> None:
         super().__init__()
 
         self.conv1 = nn.Conv3d(
@@ -106,8 +101,6 @@ class LunaBlock(nn.Module):
         )
         self.bn1 = nn.BatchNorm3d(conv_channels)
         self.relu1 = nn.ReLU(inplace=True)
-        # Changed from Dropout3d to Dropout for small feature maps
-        self.dropout1 = nn.Dropout(p=dropout_rate)
 
         self.conv2 = nn.Conv3d(
             in_channels=conv_channels,
@@ -118,8 +111,6 @@ class LunaBlock(nn.Module):
         )
         self.bn2 = nn.BatchNorm3d(conv_channels)
         self.relu2 = nn.ReLU(inplace=True)
-        # Changed from Dropout3d to Dropout for small feature maps
-        self.dropout2 = nn.Dropout(p=dropout_rate)
 
         self.maxpool = nn.MaxPool3d(kernel_size=2, stride=2)
 
@@ -129,11 +120,9 @@ class LunaBlock(nn.Module):
         block_out = self.conv1(input_batch)
         block_out = self.bn1(block_out)
         block_out = self.relu1(block_out)
-        block_out = self.dropout1(block_out)
         block_out = self.conv2(block_out)
         block_out = self.bn2(block_out)
         block_out = self.relu2(block_out)
-        block_out = self.dropout2(block_out)
 
         return self.maxpool(block_out)
 

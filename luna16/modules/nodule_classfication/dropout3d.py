@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class LunaDropoutModel(nn.Module):
+class LunaDropout3DModel(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -106,8 +106,7 @@ class LunaBlock(nn.Module):
         )
         self.bn1 = nn.BatchNorm3d(conv_channels)
         self.relu1 = nn.ReLU(inplace=True)
-        # Changed from Dropout3d to Dropout for small feature maps
-        self.dropout1 = nn.Dropout(p=dropout_rate)
+        self.dropout1 = nn.Dropout3d(p=dropout_rate)
 
         self.conv2 = nn.Conv3d(
             in_channels=conv_channels,
@@ -118,8 +117,7 @@ class LunaBlock(nn.Module):
         )
         self.bn2 = nn.BatchNorm3d(conv_channels)
         self.relu2 = nn.ReLU(inplace=True)
-        # Changed from Dropout3d to Dropout for small feature maps
-        self.dropout2 = nn.Dropout(p=dropout_rate)
+        self.dropout2 = nn.Dropout3d(p=dropout_rate)
 
         self.maxpool = nn.MaxPool3d(kernel_size=2, stride=2)
 

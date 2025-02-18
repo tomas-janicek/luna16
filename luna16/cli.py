@@ -1,8 +1,12 @@
 import os
+import typing
 
+import numpy as np
 import typer
+from ray import tune
 
 from luna16 import bootstrap, data_processing, enums, settings, training
+from luna16.bootstrap import configurations
 
 cli = typer.Typer()
 
@@ -33,7 +37,11 @@ def train_luna_classification(
     profile: bool = False,
 ) -> None:
     training_name = "Classification"
-    registry = bootstrap.create_registry(enums.ConvModel())
+    registry = bootstrap.create_registry(
+        configurations.BestCnnModel(n_blocks=4, dropout_rate=0.15),
+        configurations.BestOptimizer(lr=0.001, weight_decay=0.0001, betas=(0.9, 0.999)),
+        configurations.BestScheduler(gamma=0.1),
+    )
     training.LunaClassificationLauncher(
         registry=registry,
         validation_stride=validation_stride,
@@ -59,9 +67,9 @@ def train_luna_classification_slower(
 ) -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        enums.DropoutModel(),
-        enums.OptimizerType.SLOWER_ADAM,
-        enums.SchedulerType.SLOWER_STEP,
+        configurations.BestCnnModel(n_blocks=4, dropout_rate=0.5),
+        configurations.BestOptimizer(lr=0.001, weight_decay=0.0001, betas=(0.9, 0.999)),
+        configurations.BestScheduler(gamma=0.1),
     )
     training.LunaClassificationLauncher(
         registry=registry,
@@ -91,12 +99,15 @@ def load_train_luna_classification(
 ) -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        enums.ConvLoadedModel(
+        configurations.BestCnnLoadedModel(
+            n_blocks=4,
             name=from_name,
             version=from_version,
             finetune=False,
             model_loader=model_loader,
-        )
+        ),
+        configurations.BestOptimizer(lr=0.001, weight_decay=0.0001, betas=(0.9, 0.999)),
+        configurations.BestScheduler(gamma=0.1),
     )
     training.LunaClassificationLauncher(
         registry=registry,
@@ -115,18 +126,51 @@ def load_train_luna_classification(
 
 @cli.command(name="tune_luna_classification")
 def tune_luna_classification(
-    epochs: int = 1,
+    epochs: int = 10,
     validation_stride: int = 5,
 ) -> None:
     training_name = "Classification"
-    registry = bootstrap.create_registry(enums.ConvModel())
-    training.LunaClassificationLauncher(
-        registry=registry,
-        validation_stride=validation_stride,
-        training_name=training_name,
-        validation_cadence=5,
-    ).tune_parameters(epochs=epochs)
-    registry.close_all_services()
+
+    hyperparameters: dict[str, typing.Any] = {
+        "batch_size": tune.grid_search([64, 128, 256]),
+        "learning_rate": tune.grid_search([0.00001, 0.0001, 0.001]),
+        "scheduler_gamma": tune.grid_search([0.1, 0.5, 0.9]),
+        # "weight_decay": tune.grid_search([0.0001, 0.001, 0.01]),
+        "weight_decay": tune.grid_search([0.001]),
+        # "luna_blocks": tune.grid_search([4, 8, 16]),
+        "luna_blocks": tune.grid_search([4]),
+        # "dropout_rate": tune.grid_search([0.1, 0.25, 0.3, 0.35, 0.4]),
+        "dropout_rate": tune.grid_search([0.3]),
+    }
+
+    def classification_tunning(config: dict[str, typing.Any]) -> float | np.float32:
+        registry = bootstrap.create_tunning_registry(
+            configurations.BestCnnModel(
+                n_blocks=config["luna_blocks"], dropout_rate=config["dropout_rate"]
+            ),
+            configurations.BestOptimizer(
+                lr=config["learning_rate"],
+                weight_decay=config["weight_decay"],
+                betas=(0.9, 0.999),
+            ),
+            configurations.BestScheduler(gamma=config["scheduler_gamma"]),
+        )
+        scores = training.LunaClassificationLauncher(
+            registry=registry,
+            validation_stride=validation_stride,
+            training_name=training_name,
+            validation_cadence=5,
+        ).fit(
+            version="tune",
+            epochs=epochs,
+            batch_size=config["batch_size"],
+            log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
+        )
+        registry.close_all_services()
+        return scores["score"]
+
+    tuner = tune.Tuner(classification_tunning, param_space=hyperparameters)
+    tuner.fit()
 
 
 @cli.command(name="train_luna_malignant_classification")
@@ -138,7 +182,11 @@ def train_luna_malignant_classification(
     profile: bool = False,
 ) -> None:
     training_name = "Malignant Classification"
-    registry = bootstrap.create_registry(enums.ConvModel())
+    registry = bootstrap.create_registry(
+        configurations.BestCnnModel(n_blocks=4, dropout_rate=0.5),
+        configurations.BestOptimizer(lr=0.001, weight_decay=0.0001, betas=(0.9, 0.999)),
+        configurations.BestScheduler(gamma=0.1),
+    )
     training.LunaMalignantClassificationLauncher(
         registry=registry,
         validation_stride=validation_stride,
@@ -167,12 +215,15 @@ def load_train_luna_malignant_classification(
 ) -> None:
     training_name = "Malignant Classification"
     registry = bootstrap.create_registry(
-        enums.ConvLoadedModel(
+        configurations.BestCnnLoadedModel(
+            n_blocks=4,
             name=from_name,
             version=from_version,
             finetune=True,
             model_loader=model_loader,
-        )
+        ),
+        configurations.BestOptimizer(lr=0.001, weight_decay=0.0001, betas=(0.9, 0.999)),
+        configurations.BestScheduler(gamma=0.1),
     )
     training.LunaMalignantClassificationLauncher(
         registry=registry,

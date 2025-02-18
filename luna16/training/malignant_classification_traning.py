@@ -1,7 +1,3 @@
-import typing
-from functools import partial
-
-from ray import tune
 from torch.profiler import schedule
 
 from luna16 import (
@@ -73,19 +69,3 @@ class LunaMalignantClassificationLauncher:
                 tracing_schedule=tracing_schedule,
             )
         return trainer.fit(model=model, epochs=epochs, data_module=data_module)
-
-    def tune_parameters(
-        self,
-        epochs: int,
-    ) -> tune.ResultGrid:
-        hyperparameters: dict[str, typing.Any] = {
-            "batch_size": tune.grid_search([16, 32, 64]),
-            "learning_rate": tune.grid_search([0.0001, 0.001, 0.01]),
-            "momentum": tune.grid_search([0.97, 0.98, 0.99]),
-        }
-        self.tunable_fit = partial(
-            self.fit,
-            epochs=epochs,
-        )
-        tuner = tune.Tuner(self.tunable_fit, param_space=hyperparameters)
-        return tuner.fit()

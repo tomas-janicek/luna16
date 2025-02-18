@@ -53,3 +53,12 @@ class ServiceFactory:
             message_handler.MessageHandler, log_message_handler
         )
         return self
+
+    def add_empty_message_handler(self) -> typing.Self:
+        log_message_handler = message_handler.MessageHandler(
+            registry=self.registry, messages={}
+        )
+        self.registry.register_service(
+            message_handler.MessageHandler, log_message_handler
+        )
+        return self

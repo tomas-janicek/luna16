@@ -66,8 +66,8 @@ LOGGING = {
     },
 }
 
-
-logging.config.dictConfig(config=LOGGING)
+if settings.LOGGING_LEVEL != "NONE":
+    logging.config.dictConfig(config=LOGGING)
 
 
 __all__ = ["settings"]

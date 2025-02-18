@@ -5,18 +5,19 @@ import torch
 
 from luna16 import enums, hyperparameters_container, modules, services
 
+from . import configurations
+
 
 class ModelFactory:
     def __init__(self, registry: services.ServiceContainer) -> None:
         self.registry = registry
 
-    def add_model(self, model_type: enums.ModelType) -> typing.Self:
+    def add_model(self, model_type: configurations.ModelType) -> typing.Self:
         hyperparameters = self.registry.get_service(
             hyperparameters_container.HyperparameterContainer
         )
         match model_type:
-            case enums.ConvModel():
-                n_blocks = 4
+            case configurations.BiasesModel(n_blocks=n_blocks):
                 module = modules.LunaModel(
                     in_channels=1,
                     conv_channels=8,
@@ -25,9 +26,9 @@ class ModelFactory:
                     input_dim=(32, 48, 48),
                 )
                 hyperparameters.add_hyperparameter("model/n_block", n_blocks)
-            case enums.DropoutModel():
-                n_blocks = 4
-                dropout_rate = 0.15
+            case configurations.DropoutModel(
+                n_blocks=n_blocks, dropout_rate=dropout_rate
+            ):
                 module = modules.LunaDropoutModel(
                     in_channels=1,
                     conv_channels=8,
@@ -38,13 +39,13 @@ class ModelFactory:
                 )
                 hyperparameters.add_hyperparameter("model/n_block", n_blocks)
                 hyperparameters.add_hyperparameter("model/dropout_rate", dropout_rate)
-            case enums.ConvLoadedModel(
+            case configurations.CnnLoadedModel(
+                n_blocks=n_blocks,
                 name=from_name,
                 version=from_version,
                 finetune=finetune,
                 model_loader=model_loader,
             ):
-                n_blocks = 4
                 module = self.load_module(
                     loader=model_loader,
                     name=from_name,
@@ -70,17 +71,16 @@ class ModelFactory:
 
     def add_optimizer(
         self,
-        optimizer_type: enums.OptimizerType,
+        optimizer_type: configurations.OptimizerType,
     ) -> typing.Self:
         hyperparameters = self.registry.get_service(
             hyperparameters_container.HyperparameterContainer
         )
         module = self.registry.get_service(services.ClassificationModel)
         match optimizer_type:
-            case enums.OptimizerType.ADAM:
-                lr = 1e-3
-                weight_decay = 1e-2
-                betas = (0.9, 0.999)
+            case configurations.AdamOptimizer(
+                lr=lr, weight_decay=weight_decay, betas=betas
+            ):
                 optimizer = torch.optim.AdamW(
                     module.parameters(), lr=lr, weight_decay=weight_decay, betas=betas
                 )
@@ -89,41 +89,42 @@ class ModelFactory:
                     "optimizer/weight_decay", weight_decay
                 )
                 hyperparameters.add_hyperparameter("optimizer/betas", betas)
-            case enums.OptimizerType.SLOWER_ADAM:
-                lr = 1e-3
-                weight_decay = 1e-4
-                betas = (0.9, 0.999)
-                optimizer = torch.optim.AdamW(
-                    module.parameters(), lr=lr, weight_decay=weight_decay, betas=betas
+            case configurations.SgdOptimizer(
+                lr=lr, weight_decay=weight_decay, momentum=momentum
+            ):
+                optimizer = torch.optim.SGD(
+                    module.parameters(),
+                    lr=lr,
+                    weight_decay=weight_decay,
+                    momentum=momentum,
                 )
                 hyperparameters.add_hyperparameter("optimizer/lr", lr)
                 hyperparameters.add_hyperparameter(
                     "optimizer/weight_decay", weight_decay
                 )
-                hyperparameters.add_hyperparameter("optimizer/betas", betas)
+                hyperparameters.add_hyperparameter("optimizer/momentum", momentum)
+            case _:
+                raise ValueError(f"Optimizer type {optimizer_type} not supported")
 
         hyperparameters.add_hyperparameter("optimizer", optimizer.__class__.__name__)
         self.registry.register_service(services.ClassificationOptimizer, optimizer)
         return self
 
-    def add_scheduler(self, scheduler_type: enums.SchedulerType) -> typing.Self:
+    def add_scheduler(
+        self, scheduler_type: configurations.SchedulerType
+    ) -> typing.Self:
         hyperparameters = self.registry.get_service(
             hyperparameters_container.HyperparameterContainer
         )
         optimizer = self.registry.get_service(services.ClassificationOptimizer)
         match scheduler_type:
-            case enums.SchedulerType.STEP:
-                gamma = 0.90
+            case configurations.StepScheduler(gamma=gamma):
                 lr_scheduler = torch.optim.lr_scheduler.StepLR(
                     optimizer, step_size=1, gamma=gamma
                 )
                 hyperparameters.add_hyperparameter("lr_scheduler/gamma", gamma)
-            case enums.SchedulerType.SLOWER_STEP:
-                gamma = 0.1
-                lr_scheduler = torch.optim.lr_scheduler.StepLR(
-                    optimizer, step_size=1, gamma=gamma
-                )
-                hyperparameters.add_hyperparameter("lr_scheduler/gamma", gamma)
+            case _:
+                raise ValueError(f"Scheduler type {scheduler_type} not supported")
 
         hyperparameters.add_hyperparameter(
             "lr_scheduler", lr_scheduler.__class__.__name__

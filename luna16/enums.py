@@ -1,7 +1,5 @@
 import enum
 
-import pydantic
-
 
 class DimensionIRC(enum.IntEnum):
     INDEX = 0
@@ -35,28 +33,6 @@ class ModelLoader(enum.Enum):
     FILE = "file"
 
 
-class OptimizerType(enum.Enum):
-    ADAM = enum.auto()
-    SLOWER_ADAM = enum.auto()
-
-
 class SchedulerType(enum.Enum):
     STEP = enum.auto()
     SLOWER_STEP = enum.auto()
-
-
-# TODO: Move this to a separate file under bootstrap named configuration
-class ModelType(pydantic.BaseModel): ...
-
-
-class ConvModel(ModelType): ...
-
-
-class DropoutModel(ModelType): ...
-
-
-class ConvLoadedModel(ModelType):
-    name: str
-    version: str
-    finetune: bool
-    model_loader: ModelLoader

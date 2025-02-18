@@ -79,14 +79,18 @@ class LunaClassificationLauncher:
             )
         return trainer.fit(model=model, epochs=epochs, data_module=data_module)
 
+    # TODO: move this to CLI and connect it to custom bootstrap
     def tune_parameters(
         self,
         epochs: int,
     ) -> tune.ResultGrid:
         hyperparameters: dict[str, typing.Any] = {
-            "batch_size": tune.grid_search([16, 32, 64]),
-            "learning_rate": tune.grid_search([0.0001, 0.001, 0.01]),
-            "momentum": tune.grid_search([0.97, 0.98, 0.99]),
+            "batch_size": tune.grid_search([64, 128, 256]),
+            "learning_rate": tune.grid_search([0.00001, 0.0001, 0.001]),
+            "scheduler_gamma": tune.grid_search([0.1, 0.5, 0.9]),
+            "weight_decay": tune.grid_search([0.0001, 0.001, 0.01]),
+            "luna_blocks": tune.grid_search([4, 8, 16]),
+            "dropout_rate": tune.grid_search([0.1, 0.25, 0.3, 0.35, 0.4]),
         }
         self.tunable_fit = partial(
             self.fit,

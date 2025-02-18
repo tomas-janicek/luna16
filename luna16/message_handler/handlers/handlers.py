@@ -167,6 +167,13 @@ def log_model_to_mlflow(
     )
 
 
+def log_params_to_mlflow(
+    message: messages.LogParams,
+    registry: "services.ServiceContainer",
+) -> None:
+    mlflow.log_params(message.params)
+
+
 def save_model(
     message: messages.LogModel,
     registry: "services.ServiceContainer",

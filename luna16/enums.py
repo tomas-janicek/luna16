@@ -45,6 +45,7 @@ class SchedulerType(enum.Enum):
     SLOWER_STEP = enum.auto()
 
 
+# TODO: Move this to a separate file under bootstrap named configuration
 class ModelType(pydantic.BaseModel): ...
 
 

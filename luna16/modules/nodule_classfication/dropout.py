@@ -100,7 +100,7 @@ class LunaDropoutModel(nn.Module):
 
 class LunaBlock(nn.Module):
     def __init__(
-        self, in_channels: int, conv_channels: int, dropout_rate: float = 0.3
+        self, in_channels: int, conv_channels: int, dropout_rate: float = 0.15
     ) -> None:
         super().__init__()
 

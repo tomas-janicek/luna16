@@ -3,7 +3,7 @@ import typing
 import pydantic
 import torch
 
-from luna16 import enums, hyperparameters_container, modules, services
+from luna16 import dto, enums, hyperparameters_container, modules, services
 
 from . import configurations
 
@@ -17,8 +17,17 @@ class ModelFactory:
             hyperparameters_container.HyperparameterContainer
         )
         match model_type:
-            case configurations.BiasesModel(n_blocks=n_blocks):
-                module = modules.LunaModel(
+            case configurations.BiasedModel(n_blocks=n_blocks):
+                module = modules.BiasedModel(
+                    in_channels=1,
+                    conv_channels=8,
+                    out_features=2,
+                    n_blocks=n_blocks,
+                    input_dim=(32, 48, 48),
+                )
+                hyperparameters.add_hyperparameter("model/n_block", n_blocks)
+            case configurations.BatchNormalizationModel(n_blocks=n_blocks):
+                module = modules.BNModel(
                     in_channels=1,
                     conv_channels=8,
                     out_features=2,
@@ -39,6 +48,32 @@ class ModelFactory:
                 )
                 hyperparameters.add_hyperparameter("model/n_block", n_blocks)
                 hyperparameters.add_hyperparameter("model/dropout_rate", dropout_rate)
+            case configurations.Dropout3DModel(
+                n_blocks=n_blocks, dropout_rate=dropout_rate
+            ):
+                module = modules.Dropout3DModel(
+                    in_channels=1,
+                    conv_channels=8,
+                    out_features=2,
+                    n_blocks=n_blocks,
+                    input_dim=(32, 48, 48),
+                    dropout_rate=dropout_rate,
+                )
+                hyperparameters.add_hyperparameter("model/n_block", n_blocks)
+                hyperparameters.add_hyperparameter("model/dropout_rate", dropout_rate)
+            case configurations.DropoutOnlyModel(
+                n_blocks=n_blocks, dropout_rate=dropout_rate
+            ):
+                module = modules.DropoutOnlyModel(
+                    in_channels=1,
+                    conv_channels=8,
+                    out_features=2,
+                    n_blocks=n_blocks,
+                    input_dim=(32, 48, 48),
+                    dropout_rate=dropout_rate,
+                )
+                hyperparameters.add_hyperparameter("model/n_block", n_blocks)
+                hyperparameters.add_hyperparameter("model/dropout_rate", dropout_rate)
             case configurations.CnnLoadedModel(
                 n_blocks=n_blocks,
                 name=from_name,
@@ -46,11 +81,11 @@ class ModelFactory:
                 finetune=finetune,
                 model_loader=model_loader,
             ):
-                module = self.load_module(
+                module = self._load_module(
                     loader=model_loader,
                     name=from_name,
                     version=from_version,
-                    module_class=modules.LunaModel,
+                    module_class=modules.BiasedModel,
                     module_params=modules.LunaParameters(
                         in_channels=1,
                         conv_channels=8,
@@ -60,7 +95,7 @@ class ModelFactory:
                     ),
                 )
                 if finetune:
-                    self.prepare_for_fine_tuning_head(module)
+                    self._prepare_for_fine_tuning_head(module)
             case _:
                 raise ValueError(f"Model type {model_type} not supported")
 
@@ -132,7 +167,30 @@ class ModelFactory:
         self.registry.register_service(services.ClassificationScheduler, lr_scheduler)
         return self
 
-    def load_module(
+    def add_ratio(self, ratio: dto.Ratio) -> typing.Self:
+        hyperparameters = self.registry.get_service(
+            hyperparameters_container.HyperparameterContainer
+        )
+
+        match ratio:
+            case dto.NoduleRatio():
+                self.registry.register_service(dto.NoduleRatio, ratio)
+                hyperparameters.add_hyperparameter(
+                    "nodule/ratio",
+                    f"positive={ratio.ratios[0]}, negative={ratio.ratios[1]}",
+                )
+            case dto.MalignantRatio():
+                self.registry.register_service(dto.MalignantRatio, ratio)
+                hyperparameters.add_hyperparameter(
+                    "malignant/ratio",
+                    f"malignant={ratio.ratios[0]}, benign={ratio.ratios[1]}, not_module={ratio.ratios[2]}",
+                )
+            case _:
+                raise ValueError(f"Ratio type {type(ratio)} not supported")
+
+        return self
+
+    def _load_module(
         self,
         loader: enums.ModelLoader,
         name: str,
@@ -154,7 +212,7 @@ class ModelFactory:
         )
         return module
 
-    def prepare_for_fine_tuning_head(self, module: torch.nn.Module) -> None:
+    def _prepare_for_fine_tuning_head(self, module: torch.nn.Module) -> None:
         # Replace only luna head. Starting from a fully
         # initialized model would have us begin with (almost) all nodules
         # labeled as malignant, because that output means “nodule” in the

@@ -16,7 +16,7 @@ clim = (-1000.0, 300)
 
 
 def show_positive_candidate() -> None:
-    ratio = dto.LunaClassificationRatio(positive=1, negative=1)
+    ratio = dto.NoduleRatio(positive=1, negative=1)
     luna = datasets.CutoutsDataset(ratio=ratio)
 
     # When ration is 1/1, first candidate is always positive

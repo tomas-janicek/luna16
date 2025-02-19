@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class LunaDropout3DModel(nn.Module):
+class Dropout3DModel(nn.Module):
     def __init__(
         self,
         in_channels: int,

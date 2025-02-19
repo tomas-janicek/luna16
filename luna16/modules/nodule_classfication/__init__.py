@@ -1,15 +1,15 @@
-from .biased import LunaHead, LunaModel, LunaParameters
-from .bn import LunaBNModel
+from .biased import BiasedModel, LunaHead, LunaParameters
+from .bn import BNModel
 from .dropout import LunaDropoutModel
-from .dropout3d import LunaDropout3DModel
-from .dropout_only import LunaDropoutOnlyModel
+from .dropout3d import Dropout3DModel
+from .dropout_only import DropoutOnlyModel
 
 __all__ = [
-    "LunaBNModel",
-    "LunaDropout3DModel",
+    "BNModel",
+    "BiasedModel",
+    "Dropout3DModel",
+    "DropoutOnlyModel",
     "LunaDropoutModel",
-    "LunaDropoutOnlyModel",
     "LunaHead",
-    "LunaModel",
     "LunaParameters",
 ]

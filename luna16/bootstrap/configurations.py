@@ -14,11 +14,22 @@ class CnnModel(ModelType):
     n_blocks: int
 
 
-class BiasesModel(ModelType): ...
+class BiasedModel(ModelType): ...
 
 
 class DropoutModel(CnnModel):
     dropout_rate: float
+
+
+class Dropout3DModel(CnnModel):
+    dropout_rate: float
+
+
+class DropoutOnlyModel(CnnModel):
+    dropout_rate: float
+
+
+class BatchNormalizationModel(CnnModel): ...
 
 
 class CnnLoadedModel(CnnModel):

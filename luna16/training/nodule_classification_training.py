@@ -13,7 +13,7 @@ from luna16 import (
 from . import trainers
 
 
-class LunaClassificationLauncher:
+class NoduleClassificationLauncher:
     def __init__(
         self,
         training_name: str,
@@ -46,6 +46,8 @@ class LunaClassificationLauncher:
         module = self.registry.get_service(services.ClassificationModel)
         optimizer = self.registry.get_service(services.ClassificationOptimizer)
         lr_scheduler = self.registry.get_service(services.ClassificationScheduler)
+        ratio = self.registry.get_service(dto.NoduleRatio)
+
         model = models.NoduleClassificationModel(
             module=module,
             optimizer=optimizer,
@@ -59,7 +61,7 @@ class LunaClassificationLauncher:
             name=self.training_name, version=version, logger=self.logger
         )
         train, validation = datasets.create_pre_configured_luna_cutouts(
-            validation_stride=self.validation_stride
+            validation_stride=self.validation_stride, ratio=ratio
         )
         data_module = datasets.DataModule(
             batch_size=batch_size,

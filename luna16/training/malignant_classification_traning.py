@@ -12,7 +12,7 @@ from luna16 import (
 from . import trainers
 
 
-class LunaMalignantClassificationLauncher:
+class MalignantClassificationLauncher:
     def __init__(
         self,
         validation_stride: int,
@@ -38,6 +38,8 @@ class LunaMalignantClassificationLauncher:
         module = self.registry.get_service(services.ClassificationModel)
         optimizer = self.registry.get_service(services.ClassificationOptimizer)
         lr_scheduler = self.registry.get_service(services.ClassificationScheduler)
+        ratio = self.registry.get_service(dto.MalignantRatio)
+
         model = models.NoduleClassificationModel(
             module=module,
             optimizer=optimizer,
@@ -51,7 +53,7 @@ class LunaMalignantClassificationLauncher:
             name=self.training_name, version=version, logger=self.logger
         )
         train, validation = datasets.create_pre_configured_luna_malignant(
-            validation_stride=self.validation_stride,
+            validation_stride=self.validation_stride, ratio=ratio
         )
         data_module = datasets.DataModule(
             batch_size=batch_size,

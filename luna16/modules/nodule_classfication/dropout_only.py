@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class LunaDropoutOnlyModel(nn.Module):
+class DropoutOnlyModel(nn.Module):
     def __init__(
         self,
         in_channels: int,

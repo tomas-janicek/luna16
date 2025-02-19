@@ -11,7 +11,7 @@ class LunaParameters(pydantic.BaseModel):
     input_dim: tuple[int, int, int]
 
 
-class LunaModel(nn.Module):
+class BiasedModel(nn.Module):
     def __init__(
         self,
         in_channels: int,

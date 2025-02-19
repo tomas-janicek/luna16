@@ -5,7 +5,7 @@ from .nodule_cutouts import CutoutsDataset
 
 
 def create_pre_configured_luna_cutouts(
-    validation_stride: int,
+    validation_stride: int, ratio: dto.NoduleRatio
 ) -> tuple[CutoutsDataset, CutoutsDataset]:
     transformations: list[augmentations.Transformation] = [
         augmentations.Flip(),
@@ -16,7 +16,6 @@ def create_pre_configured_luna_cutouts(
     filters: list[augmentations.Filter] = [
         augmentations.Noise(noise=25.0),
     ]
-    ratio = dto.LunaClassificationRatio(positive=1, negative=1)
     train = CutoutsDataset(
         ratio=ratio,
         train=True,
@@ -35,7 +34,7 @@ def create_pre_configured_luna_cutouts(
 
 
 def create_pre_configured_luna_malignant(
-    validation_stride: int,
+    validation_stride: int, ratio: dto.MalignantRatio
 ) -> tuple[MalignantCutoutsDataset, MalignantCutoutsDataset]:
     transformations: list[augmentations.Transformation] = [
         augmentations.Flip(),
@@ -46,7 +45,6 @@ def create_pre_configured_luna_malignant(
     filters: list[augmentations.Filter] = [
         augmentations.Noise(noise=25.0),
     ]
-    ratio = dto.LunaMalignantRatio(benign=1, malignant=1, not_module=1)
     train = MalignantCutoutsDataset(
         ratio=ratio,
         train=True,

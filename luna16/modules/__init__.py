@@ -1,3 +1,19 @@
-from .nodule_classfication import LunaDropoutModel, LunaHead, LunaModel, LunaParameters
+from .nodule_classfication import (
+    BiasedModel,
+    BNModel,
+    Dropout3DModel,
+    DropoutOnlyModel,
+    LunaDropoutModel,
+    LunaHead,
+    LunaParameters,
+)
 
-__all__ = ["LunaDropoutModel", "LunaHead", "LunaModel", "LunaParameters"]
+__all__ = [
+    "BNModel",
+    "BiasedModel",
+    "Dropout3DModel",
+    "DropoutOnlyModel",
+    "LunaDropoutModel",
+    "LunaHead",
+    "LunaParameters",
+]

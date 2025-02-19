@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class LunaBNModel(nn.Module):
+class BNModel(nn.Module):
     def __init__(
         self,
         in_channels: int,

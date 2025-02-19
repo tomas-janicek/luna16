@@ -176,12 +176,12 @@ class Ratio:
                 raise ValueError("Ratio must be positive number or zero.")
 
 
-class LunaClassificationRatio(Ratio):
+class NoduleRatio(Ratio):
     def __init__(self, positive: int, negative: int) -> None:
         super().__init__([positive, negative])
 
 
-class LunaMalignantRatio(Ratio):
+class MalignantRatio(Ratio):
     def __init__(self, malignant: int, benign: int, not_module: int) -> None:
         super().__init__([malignant, benign, not_module])
 

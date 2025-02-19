@@ -122,8 +122,6 @@ class CtCutoutService:
             file_name = f"{series_uid}_{center_string}.npz"
             file_path = self.luna_cache_dir / file_name
 
-            # Should I lock before editing candidates_info or it
-            # can not be shared anyway and I must do this after
             with lock:
                 _log.debug("File %s is being added to DF.", str(file_path))
                 candidates_info.at[df_index, "file_path"] = str(file_path)
@@ -134,7 +132,7 @@ class CtCutoutService:
                 center_irc=center_irc.get_array(),
             )
 
-        # Update present candidatas CSV file after every new CT scan iteration
+        # Update present candidates CSV file after every new CT scan iteration
         _log.debug(
             "Present candidates are being updated after processing series uid %s.",
             series_uid,

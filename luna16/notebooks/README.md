@@ -23,7 +23,7 @@ TODO:
 - Compare how many duplicates are between annotations nodules and nodules in candidates.
 
 
-### Processed Data & Datasets (`processed_data.ipynb`)
+### Processed Data & Datasets (`processing_data.ipynb`)
 
 This notebook describes the processed data and datasets used for training.
 

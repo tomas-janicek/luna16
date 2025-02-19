@@ -20,7 +20,23 @@ def show_positive_candidate() -> None:
     luna = datasets.CutoutsDataset(ratio=ratio)
 
     # When ration is 1/1, first candidate is always positive
-    slice_of_ct, is_nodule_tensor, series_uid, center_irc = luna[0]
+    positive_candidate = luna[0]
+    show_nodule_visualization(positive_candidate)
+
+
+def show_negative_candidate() -> None:
+    ratio = dto.NoduleRatio(positive=1, negative=1)
+    luna = datasets.CutoutsDataset(ratio=ratio)
+
+    # When ration is 1/1, second candidate is always negative
+    negative_candidate = luna[1]
+    show_nodule_visualization(negative_candidate)
+
+
+def show_nodule_visualization(  # noqa: C901
+    candidate: dto.LunaClassificationCandidate,
+) -> None:
+    slice_of_ct, is_nodule_tensor, series_uid, center_irc = candidate
     one_ct_image = slice_of_ct[0].numpy()
     entire_ct_scan = data_processing.Ct.read_and_create_from_image(
         series_uid=series_uid
@@ -83,8 +99,6 @@ def show_positive_candidate() -> None:
     plt.imshow(one_ct_image[:, :, one_ct_image.shape[2] // 2], clim=clim, cmap="gray")
     plt.gca().invert_yaxis()
 
-    # No idea what this does
-
     for row, index_list in enumerate(group_list):
         for col, index in enumerate(index_list):
             subplot = fig.add_subplot(len(group_list) + 2, 3, row * 3 + col + 7)
@@ -93,4 +107,7 @@ def show_positive_candidate() -> None:
                 label.set_fontsize(20)
             plt.imshow(one_ct_image[index], clim=clim, cmap="gray")
 
-    print(series_uid, 0, bool(is_nodule_tensor[0]))
+    if is_nodule_tensor[1]:
+        print(f"Showing nodule with series UID {series_uid}")
+    else:
+        print(f"Showing CT scan with series UID {series_uid} without nodule.")

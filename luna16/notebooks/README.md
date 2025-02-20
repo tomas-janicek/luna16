@@ -30,7 +30,3 @@ This notebook describes the processed data and datasets used for training.
 ### Model Architecture and Training (`training.ipynb`)
 
 This notebook describes the model architecture and training.
-
-### Evaluation, Regularization Techniques (`improving_training.ipynb`)
-
-This notebook describes the evaluation and regularization techniques used to improve the model.

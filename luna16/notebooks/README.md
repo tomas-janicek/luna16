@@ -17,12 +17,6 @@ This notebook provides an overview of the LuNA 16 dataset.
 
 This notebook provides an analysis of the dataset.
 
-TODO: 
-- Plot diameters, distribution of series UIDs, etc.
-- Does it matter that some CTs have much more candidates than others?
-- Compare how many duplicates are between annotations nodules and nodules in candidates.
-
-
 ### Processed Data & Datasets (`processing_data.ipynb`)
 
 This notebook describes the processed data and datasets used for training.

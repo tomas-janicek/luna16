@@ -5,6 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Experiment",
+            "consoleTitle": "Experiment",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "experiment"
+            ],
+            "justMyCode": false,
+        },
+        {
             "name": "LuNA Classification Training",
             "consoleTitle": "LuNA Classification Training",
             "type": "debugpy",
@@ -17,7 +32,7 @@
             "args": [
                 "train_luna_classification",
                 "0.0.1", // model version
-                "--epochs=5",
+                "--epochs=1",
                 "--batch-size=128",
             ],
             "justMyCode": false,
@@ -121,6 +136,22 @@
             "justMyCode": false,
         },
         {
+            "name": "Tuning LuNA Classification",
+            "consoleTitle": "Tuning LuNA Classification",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/luna16/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "tune_luna_classification",
+                "--epochs=1"
+            ],
+            "justMyCode": false,
+        },
+        {
             "name": "PyTest",
             "consoleTitle": "PyTest",
             "type": "debugpy",
@@ -147,7 +178,7 @@
             },
             "args": [
                 "create_cutouts",
-                "--training-length=8000",
+                "--training-length=50000",
             ],
             "justMyCode": false
         },

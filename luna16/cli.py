@@ -32,7 +32,7 @@ def get_recommended_num_workers() -> None:
 def experiment() -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        configurations.Dropout3DModel(n_blocks=4, dropout_rate=0.2),
+        configurations.DropoutModel(n_blocks=4, dropout_rate=0.2),
         configurations.BestOptimizer(lr=1e-3, weight_decay=1e-4, betas=(0.9, 0.999)),
         configurations.BestScheduler(gamma=0.1),
         dto.NoduleRatio(positive=1, negative=5),

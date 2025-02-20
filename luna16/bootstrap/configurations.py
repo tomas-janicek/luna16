@@ -14,7 +14,7 @@ class CnnModel(ModelType):
     n_blocks: int
 
 
-class BiasedModel(ModelType): ...
+class BiasedModel(CnnModel): ...
 
 
 class DropoutModel(CnnModel):
@@ -32,6 +32,9 @@ class DropoutOnlyModel(CnnModel):
 class BatchNormalizationModel(CnnModel): ...
 
 
+class BestCnnModel(DropoutModel): ...
+
+
 class CnnLoadedModel(CnnModel):
     name: str
     version: str
@@ -39,7 +42,7 @@ class CnnLoadedModel(CnnModel):
     model_loader: enums.ModelLoader
 
 
-class BestCnnModel(DropoutModel): ...
+class BiasedLoadedModel(CnnLoadedModel): ...
 
 
 class BestCnnLoadedModel(CnnLoadedModel): ...

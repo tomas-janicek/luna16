@@ -1,4 +1,5 @@
 import typing
+from functools import partial
 
 import pydantic
 import torch
@@ -18,75 +19,88 @@ class ModelFactory:
         )
         match model_type:
             case configurations.BiasedModel(n_blocks=n_blocks):
-                module = modules.BiasedModel(
+                module = modules.CnnModel(
+                    name="BiasedModel",
                     in_channels=1,
                     conv_channels=8,
                     out_features=2,
                     n_blocks=n_blocks,
                     input_dim=(32, 48, 48),
+                    block_class=modules.BiasedBlock,
                 )
                 hyperparameters.add_hyperparameter("model/n_block", n_blocks)
             case configurations.BatchNormalizationModel(n_blocks=n_blocks):
-                module = modules.BNModel(
+                module = modules.CnnModel(
+                    name="BatchNormalizationModel",
                     in_channels=1,
                     conv_channels=8,
                     out_features=2,
                     n_blocks=n_blocks,
                     input_dim=(32, 48, 48),
+                    block_class=modules.BNBlock,
                 )
                 hyperparameters.add_hyperparameter("model/n_block", n_blocks)
             case configurations.DropoutModel(
                 n_blocks=n_blocks, dropout_rate=dropout_rate
             ):
-                module = modules.LunaDropoutModel(
+                module = modules.CnnModel(
+                    name="DropoutModel",
                     in_channels=1,
                     conv_channels=8,
                     out_features=2,
                     n_blocks=n_blocks,
                     input_dim=(32, 48, 48),
                     dropout_rate=dropout_rate,
+                    block_class=modules.DropoutBlock,
                 )
                 hyperparameters.add_hyperparameter("model/n_block", n_blocks)
                 hyperparameters.add_hyperparameter("model/dropout_rate", dropout_rate)
             case configurations.Dropout3DModel(
                 n_blocks=n_blocks, dropout_rate=dropout_rate
             ):
-                module = modules.Dropout3DModel(
+                module = modules.CnnModel(
+                    name="Dropout3DModel",
                     in_channels=1,
                     conv_channels=8,
                     out_features=2,
                     n_blocks=n_blocks,
                     input_dim=(32, 48, 48),
                     dropout_rate=dropout_rate,
+                    block_class=modules.Dropout3DBlock,
                 )
                 hyperparameters.add_hyperparameter("model/n_block", n_blocks)
                 hyperparameters.add_hyperparameter("model/dropout_rate", dropout_rate)
             case configurations.DropoutOnlyModel(
                 n_blocks=n_blocks, dropout_rate=dropout_rate
             ):
-                module = modules.DropoutOnlyModel(
+                module = modules.CnnModel(
+                    name="DropoutOnlyModel",
                     in_channels=1,
                     conv_channels=8,
                     out_features=2,
                     n_blocks=n_blocks,
                     input_dim=(32, 48, 48),
                     dropout_rate=dropout_rate,
+                    block_class=modules.DropoutOnlyBlock,
                 )
                 hyperparameters.add_hyperparameter("model/n_block", n_blocks)
                 hyperparameters.add_hyperparameter("model/dropout_rate", dropout_rate)
-            case configurations.CnnLoadedModel(
+            case configurations.BiasedLoadedModel(
                 n_blocks=n_blocks,
                 name=from_name,
                 version=from_version,
                 finetune=finetune,
                 model_loader=model_loader,
             ):
+                BiasedModel: type[modules.CnnModel] = partial(
+                    modules.CnnModel, block_class=modules.BiasedBlock
+                )  # type: ignore
                 module = self._load_module(
                     loader=model_loader,
                     name=from_name,
                     version=from_version,
-                    module_class=modules.BiasedModel,
-                    module_params=modules.LunaParameters(
+                    module_class=BiasedModel,
+                    module_params=modules.CnnParameters(
                         in_channels=1,
                         conv_channels=8,
                         out_features=2,
@@ -99,7 +113,7 @@ class ModelFactory:
             case _:
                 raise ValueError(f"Model type {model_type} not supported")
 
-        hyperparameters.add_hyperparameter("model", module.__class__.__name__)
+        hyperparameters.add_hyperparameter("model", module.name)
 
         self.registry.register_service(services.ClassificationModel, module)
         return self
@@ -217,7 +231,7 @@ class ModelFactory:
         # initialized model would have us begin with (almost) all nodules
         # labeled as malignant, because that output means “nodule” in the
         # classifier we start from.
-        module.luna_head = modules.LunaHead(in_features=1152, out_features=2)
+        module.luna_head = modules.CnnHead(in_features=1152, out_features=2)
 
         finetune_blocks = ("luna_head",)
 

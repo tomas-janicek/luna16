@@ -180,10 +180,16 @@ class NoduleRatio(Ratio):
     def __init__(self, positive: int, negative: int) -> None:
         super().__init__([positive, negative])
 
+    def __repr__(self) -> str:
+        return f"Positive: {self.ratios[0]}, Negative: {self.ratios[1]}"
+
 
 class MalignantRatio(Ratio):
     def __init__(self, malignant: int, benign: int, not_module: int) -> None:
         super().__init__([malignant, benign, not_module])
+
+    def __repr__(self) -> str:
+        return f"Malignant: {self.ratios[0]}, Benign: {self.ratios[1]}, Not module: {self.ratios[2]}"
 
 
 class ClassificationMetrics:

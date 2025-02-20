@@ -29,7 +29,7 @@ class MessageHandler:
         if message_type is None:
             _log.warning(
                 "Message %s was not precess because it is not configured in handlers.",
-                message_type,
+                message.__class__.__name__,
             )
             return
         for handler in message_type:

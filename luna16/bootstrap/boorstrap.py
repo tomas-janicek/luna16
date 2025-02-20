@@ -38,7 +38,7 @@ def create_tunning_registry(
     model_factory = model_factories.ModelFactory(registry)
 
     service_factory.add_hyperparameters()
-    service_factory.add_message_handler()
+    service_factory.add_empty_message_handler()
 
     model_factory.add_model(model_type)
     model_factory.add_optimizer(optimizer_type)

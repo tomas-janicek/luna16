@@ -2,6 +2,7 @@ import logging.config
 from pathlib import Path
 
 import mlflow
+from pydantic import computed_field
 import pydantic_settings
 
 
@@ -18,6 +19,11 @@ class Settings(pydantic_settings.BaseSettings):
     MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: bool = True
 
     LOGGING_LEVEL: str = "DEBUG"
+
+    @computed_field
+    @property
+    def DISABLE_TQDM(self) -> bool:
+        return True if self.LOGGING_LEVEL == "NONE" else False
 
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     CACHE_DIR: Path = BASE_DIR / "cache"

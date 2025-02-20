@@ -4,7 +4,7 @@ import typing
 from torch.utils import data as data_utils
 from tqdm import tqdm
 
-from luna16 import enums, message_handler
+from luna16 import enums, message_handler, settings
 
 from . import base
 
@@ -39,6 +39,7 @@ class BatchIteratorProvider(base.BaseIteratorProvider):
         for current_index, item in tqdm(
             enumerate(enumerable),
             total=batch_size,
+            disable=settings.DISABLE_TQDM,
         ):
             yield (current_index, item)
             if current_index % self.logging_backoff == 0:

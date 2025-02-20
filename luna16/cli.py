@@ -1,9 +1,9 @@
 import os
 import typing
 
-import numpy as np
+from torchinfo import Verbosity
 import typer
-from ray import tune
+from ray import train, tune
 
 from luna16 import bootstrap, data_processing, dto, enums, settings, training
 from luna16.bootstrap import configurations
@@ -197,27 +197,17 @@ def tune_luna_classification(
     training_name = "Classification"
 
     hyperparameters: dict[str, typing.Any] = {
-        "batch_size": tune.grid_search([64, 128, 256]),
-        "learning_rate": tune.grid_search([0.00001, 0.0001, 0.001]),
-        "scheduler_gamma": tune.grid_search([0.1, 0.5, 0.9]),
-        # "weight_decay": tune.grid_search([0.0001, 0.001, 0.01]),
-        "weight_decay": tune.grid_search([0.001]),
-        # "luna_blocks": tune.grid_search([4, 8, 16]),
-        "luna_blocks": tune.grid_search([4]),
-        # "dropout_rate": tune.grid_search([0.1, 0.25, 0.3, 0.35, 0.4]),
-        "dropout_rate": tune.grid_search([0.3]),
-        "classification_ratio": tune.grid_search(
-            [
-                dto.NoduleRatio(positive=1, negative=5),
-                dto.NoduleRatio(positive=1, negative=1),
-            ]
-        ),
+        "batch_size": tune.grid_search([64, 256]),
+        "learning_rate": tune.grid_search([0.0001, 0.001]),
+        "scheduler_gamma": tune.grid_search([0.1, 0.5]),
+        "weight_decay": tune.grid_search([0.0001, 0.01]),
+        "dropout_rate": tune.grid_search([0.2, 0.4]),
     }
 
-    def classification_tunning(config: dict[str, typing.Any]) -> float | np.float32:
+    def classification_tunning(config: dict[str, typing.Any]) -> None:
         registry = bootstrap.create_tunning_registry(
             configurations.BestCnnModel(
-                n_blocks=config["luna_blocks"], dropout_rate=config["dropout_rate"]
+                n_blocks=4, dropout_rate=config["dropout_rate"]
             ),
             configurations.BestOptimizer(
                 lr=config["learning_rate"],
@@ -225,7 +215,7 @@ def tune_luna_classification(
                 betas=(0.9, 0.999),
             ),
             configurations.BestScheduler(gamma=config["scheduler_gamma"]),
-            config["classification_ratio"],
+            dto.NoduleRatio(positive=1, negative=5),
         )
         scores = training.NoduleClassificationLauncher(
             registry=registry,
@@ -233,16 +223,35 @@ def tune_luna_classification(
             training_name=training_name,
             validation_cadence=5,
         ).fit(
-            version="tune",
+            version="0.0.0-tune",
             epochs=epochs,
             batch_size=config["batch_size"],
             log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
         )
         registry.close_all_services()
-        return scores["score"]
+        score = scores["score"]
+        train.report({"score": score})
 
-    tuner = tune.Tuner(classification_tunning, param_space=hyperparameters)
-    tuner.fit()
+    tuner = tune.Tuner(
+        tune.with_resources(classification_tunning, {"cpu": 1, "gpu": 0.25}),
+        tune_config=tune.TuneConfig(
+            metric="score",
+            mode="max",
+            max_concurrent_trials=4,
+        ),
+        param_space=hyperparameters,
+        run_config=tune.RunConfig(
+            verbose=Verbosity.QUIET,
+        ),
+    )
+    result_grid = tuner.fit()
+
+    result_df = result_grid.get_dataframe()
+    result_grid_path = settings.DATA_DIR / "result_grid.csv"
+    result_df.to_csv(result_grid_path, index=False)
+
+    best_config = result_grid.get_best_result().config
+    print(f"The best config is: {best_config}")
 
 
 if __name__ == "__main__":

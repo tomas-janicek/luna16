@@ -32,7 +32,7 @@ def get_recommended_num_workers() -> None:
 def experiment() -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        configurations.DropoutModel(n_blocks=4, dropout_rate=0.2),
+        configurations.BiasedModel(n_blocks=4),
         configurations.BestOptimizer(lr=1e-3, weight_decay=1e-4, betas=(0.9, 0.999)),
         configurations.BestScheduler(gamma=0.1),
         dto.NoduleRatio(positive=1, negative=5),
@@ -225,6 +225,7 @@ def tune_luna_classification(
                 betas=(0.9, 0.999),
             ),
             configurations.BestScheduler(gamma=config["scheduler_gamma"]),
+            config["classification_ratio"],
         )
         scores = training.NoduleClassificationLauncher(
             registry=registry,

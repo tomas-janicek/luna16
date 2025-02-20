@@ -31,6 +31,7 @@ def create_tunning_registry(
     model_type: configurations.ModelType,
     optimizer_type: configurations.OptimizerType,
     scheduler_type: configurations.SchedulerType,
+    ratio: dto.Ratio,
 ) -> services.ServiceContainer:
     registry = services.ServiceContainer()
     service_factory = service_factories.ServiceFactory(registry)
@@ -42,5 +43,6 @@ def create_tunning_registry(
     model_factory.add_model(model_type)
     model_factory.add_optimizer(optimizer_type)
     model_factory.add_scheduler(scheduler_type)
+    model_factory.add_ratio(ratio)
 
     return registry

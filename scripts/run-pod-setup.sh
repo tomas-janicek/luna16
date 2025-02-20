@@ -20,3 +20,8 @@ echo -e "NUM_WORKERS=32" >> .env
 echo -e "CACHE_DIR=/workspace/cache" >> .env
 echo -e "DATA_DOWNLOADED_DIR=/workspace" >> .env
 echo -e "LOG_EVERY_N_EXAMPLES=3000" >> .env
+
+cp .env.tune.example .env.tune
+echo -e "NUM_WORKERS=32" >> .env.tune
+echo -e "CACHE_DIR=/workspace/cache" >> .env.tune
+echo -e "DATA_DOWNLOADED_DIR=/workspace" >> .env.tune

@@ -1,9 +1,9 @@
 import os
 import typing
 
-from torchinfo import Verbosity
 import typer
 from ray import train, tune
+from torchinfo import Verbosity
 
 from luna16 import bootstrap, data_processing, dto, enums, settings, training
 from luna16.bootstrap import configurations
@@ -61,7 +61,7 @@ def train_luna_classification(
 ) -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        configurations.BestCnnModel(n_blocks=4, dropout_rate=0.2),
+        configurations.BestCnnModel(n_blocks=4, dropout_rate=0.4),
         configurations.BestOptimizer(lr=1e-3, weight_decay=1e-4, betas=(0.9, 0.999)),
         configurations.BestScheduler(gamma=0.1),
         dto.NoduleRatio(positive=1, negative=5),
@@ -196,6 +196,7 @@ def tune_luna_classification(
 ) -> None:
     training_name = "Classification"
 
+    # TODO: Add classification threshold as hyperparameter
     hyperparameters: dict[str, typing.Any] = {
         "batch_size": tune.grid_search([64, 256]),
         "learning_rate": tune.grid_search([0.0001, 0.001]),
@@ -217,7 +218,7 @@ def tune_luna_classification(
             configurations.BestScheduler(gamma=config["scheduler_gamma"]),
             dto.NoduleRatio(positive=1, negative=5),
         )
-        scores = training.NoduleClassificationLauncher(
+        performance_scores = training.NoduleClassificationLauncher(
             registry=registry,
             validation_stride=validation_stride,
             training_name=training_name,
@@ -229,13 +230,12 @@ def tune_luna_classification(
             log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
         )
         registry.close_all_services()
-        score = scores["score"]
-        train.report({"score": score})
+        train.report({"f1_score": performance_scores.f1_score})
 
     tuner = tune.Tuner(
         tune.with_resources(classification_tunning, {"cpu": 1, "gpu": 0.25}),
         tune_config=tune.TuneConfig(
-            metric="score",
+            metric="f1_score",
             mode="max",
             max_concurrent_trials=4,
         ),

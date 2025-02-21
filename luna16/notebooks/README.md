@@ -24,3 +24,11 @@ This notebook describes the processed data and datasets used for training.
 ### Model Architecture and Training (`training.ipynb`)
 
 This notebook describes the model architecture and training.
+
+### Hyperparameter Tuning (`hyperparameter_tuning.ipynb`)
+
+This notebook describes the hyperparameter tuning process.
+
+### Cloud Training (`cloud_training.ipynb`)
+
+This notebook describes the process of training the model on the RunPod platform and results of this training.

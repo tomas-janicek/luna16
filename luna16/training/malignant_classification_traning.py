@@ -6,6 +6,7 @@ from luna16 import (
     dto,
     message_handler,
     models,
+    scoring,
     services,
 )
 
@@ -34,7 +35,7 @@ class MalignantClassificationLauncher:
         batch_size: int,
         log_every_n_examples: int,
         profile: bool = False,
-    ) -> dto.Scores:
+    ) -> scoring.PerformanceMetrics:
         module = self.registry.get_service(services.ClassificationModel)
         optimizer = self.registry.get_service(services.ClassificationOptimizer)
         lr_scheduler = self.registry.get_service(services.ClassificationScheduler)

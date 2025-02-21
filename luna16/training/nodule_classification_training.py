@@ -7,6 +7,7 @@ from luna16 import (
     hyperparameters_container,
     message_handler,
     models,
+    scoring,
     services,
 )
 
@@ -39,7 +40,7 @@ class NoduleClassificationLauncher:
         batch_size: int,
         log_every_n_examples: int,
         profile: bool = False,
-    ) -> dto.Scores:
+    ) -> scoring.PerformanceMetrics:
         self.hyperparameters.add_hyperparameter("epochs", epochs)
         self.hyperparameters.add_hyperparameter("batch_size", batch_size)
 

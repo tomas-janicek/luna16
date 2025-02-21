@@ -6,7 +6,7 @@ from mlflow.pytorch import ModelSignature
 from torch import nn
 from torch.utils import data as data_utils
 
-from luna16 import dto, message_handler, models, services
+from luna16 import message_handler, models, scoring, services
 
 
 class SimpleCandidate(typing.NamedTuple):
@@ -46,9 +46,15 @@ class FakeModel(models.BaseModel[SimpleCandidate]):
         epoch: int,
         train_dl: data_utils.DataLoader[SimpleCandidate],
         validation_dl: data_utils.DataLoader[SimpleCandidate],
-    ) -> dto.Scores:
+    ) -> scoring.PerformanceMetrics:
         self.requested_training_params.append((epoch, train_dl, validation_dl))
-        return dto.Scores()
+        return scoring.PerformanceMetrics(
+            precision=0.0,
+            recall=0.0,
+            f1_score=0.0,
+            accuracy=0.0,
+            specificity=0.0,
+        )
 
     def get_module(self) -> torch.nn.Module: ...
 

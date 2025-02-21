@@ -18,7 +18,7 @@ T = typing.TypeVar("T")
 
 
 def log_metrics_to_console(
-    message: messages.LogMetrics["dto.NumberValue"],
+    message: messages.LogMetrics["dto.NumberMetric"],
     registry: "services.ServiceContainer",
 ) -> None:
     formatted_values = ", ".join(
@@ -91,7 +91,7 @@ def log_batch_end_to_console(
 
 
 def log_metrics_to_tensorboard(
-    message: messages.LogMetrics["dto.NumberValue"],
+    message: messages.LogMetrics["dto.NumberMetric"],
     registry: "services.ServiceContainer",
 ) -> None:
     tensorboard_writer = message_utils.get_tensortboard_writer(
@@ -147,7 +147,7 @@ def log_results_to_tensorboard(
 
 
 def log_metrics_to_mlflow(
-    message: messages.LogMetrics["dto.NumberValue"],
+    message: messages.LogMetrics["dto.NumberMetric"],
     registry: "services.ServiceContainer",
 ) -> None:
     for codename, value in message.values.items():

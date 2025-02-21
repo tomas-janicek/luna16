@@ -6,6 +6,6 @@ export PYTHONPATH=.
 
 uv run python luna16/cli.py \
               train_luna_classification \
-              0.0.1 \
-              --epochs=5 \
-              --batch-size=128
+              1.0.0 \
+              --epochs=10 \
+              --batch-size=64

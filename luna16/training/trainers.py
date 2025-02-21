@@ -6,9 +6,9 @@ from torch.profiler import profile
 
 from luna16 import (
     datasets,
-    dto,
     message_handler,
     models,
+    scoring,
     settings,
     utils,
 )
@@ -23,7 +23,7 @@ class BaseTrainer(typing.Protocol[CandidateT]):
         model: models.BaseModel[CandidateT],
         epochs: int,
         data_module: datasets.DataModule[CandidateT],
-    ) -> dto.Scores: ...
+    ) -> scoring.PerformanceMetrics: ...
 
     def fit_epoch(
         self,
@@ -32,7 +32,7 @@ class BaseTrainer(typing.Protocol[CandidateT]):
         epochs: int,
         model: models.BaseModel[CandidateT],
         data_module: datasets.DataModule[CandidateT],
-    ) -> dto.Scores: ...
+    ) -> scoring.PerformanceMetrics: ...
 
 
 class Trainer(BaseTrainer[CandidateT]):
@@ -52,7 +52,7 @@ class Trainer(BaseTrainer[CandidateT]):
         model: models.BaseModel[CandidateT],
         epochs: int,
         data_module: datasets.DataModule[CandidateT],
-    ) -> dto.Scores:
+    ) -> scoring.PerformanceMetrics:
         training_start_time = datetime.now()
         self.message_handler.registry.call_all_creators(
             training_name=self.name, training_start_time=training_start_time
@@ -61,7 +61,7 @@ class Trainer(BaseTrainer[CandidateT]):
         log_start_training = message_handler.LogStart(training_description=str(model))
         self.message_handler.handle_message(log_start_training)
 
-        score = {}
+        score = None
         start_time = time.time()
         for epoch in range(1, epochs + 1):
             score = self.fit_epoch(
@@ -70,6 +70,9 @@ class Trainer(BaseTrainer[CandidateT]):
                 model=model,
                 data_module=data_module,
             )
+
+        if score is None:
+            raise ValueError("No score was returned from training loop!")
 
         end_time = time.time()
         print(f"Training time: {end_time - start_time} seconds.")
@@ -92,7 +95,7 @@ class Trainer(BaseTrainer[CandidateT]):
         epochs: int,
         data_module: datasets.DataModule[CandidateT],
         tracing_schedule: typing.Callable[..., typing.Any],
-    ) -> dto.Scores:
+    ) -> scoring.PerformanceMetrics:
         if epochs < 2:
             raise ValueError("Profiling requires at least two epochs!")
 
@@ -103,13 +106,13 @@ class Trainer(BaseTrainer[CandidateT]):
         log_start_training = message_handler.LogStart(training_description=str(model))
         self.message_handler.handle_message(log_start_training)
 
+        score = None
         with profile(
             schedule=tracing_schedule,
             record_shapes=True,
             profile_memory=True,
             with_modules=True,
         ) as prof:
-            score = {}
             start_time = time.time()
             for epoch in range(1, epochs + 1):
                 score = self.fit_epoch(
@@ -120,6 +123,9 @@ class Trainer(BaseTrainer[CandidateT]):
                 )
                 prof.step()
             end_time = time.time()
+
+        if score is None:
+            raise ValueError("No score was returned from training loop!")
 
         print(f"Training time: {end_time - start_time} seconds.")
         prof.export_chrome_trace(
@@ -147,7 +153,7 @@ class Trainer(BaseTrainer[CandidateT]):
         epochs: int,
         model: models.BaseModel[CandidateT],
         data_module: datasets.DataModule[CandidateT],
-    ) -> dto.Scores:
+    ) -> scoring.PerformanceMetrics:
         log_epoch = message_handler.LogEpoch(
             epoch=epoch,
             n_epochs=epochs,

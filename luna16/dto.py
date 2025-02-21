@@ -9,6 +9,8 @@ from numpy import typing as np_typing
 
 from luna16 import enums
 
+FloatType = float | np.floating
+
 
 class CoordinatesXYZ(pydantic.BaseModel):
     x: float
@@ -192,55 +194,14 @@ class MalignantRatio(Ratio):
         return f"Malignant: {self.ratios[0]}, Benign: {self.ratios[1]}, Not module: {self.ratios[2]}"
 
 
-class ClassificationMetrics:
-    def __init__(
-        self,
-        loss: torch.Tensor,
-        labels: torch.Tensor,
-        predictions: torch.Tensor,
-        device: torch.device,
-    ) -> None:
-        self.loss = loss
-        self.labels = labels
-        self.predictions = predictions
-        self.device = device
-
-    @classmethod
-    def create_empty(
-        cls, dataset_len: int, device: torch.device
-    ) -> "ClassificationMetrics":
-        return cls(
-            loss=torch.tensor([]).to(device),
-            labels=torch.tensor([]).to(device),
-            predictions=torch.tensor([]).to(device),
-            device=device,
-        )
-
-    def add_batch_metrics(
-        self,
-        loss: torch.Tensor | None = None,
-        labels: torch.Tensor | None = None,
-        predictions: torch.Tensor | None = None,
-    ) -> None:
-        if loss is not None:
-            self.loss = torch.cat((self.loss, loss), dim=0)
-        if labels is not None:
-            self.labels = torch.cat((self.labels, labels), dim=0)
-        if predictions is not None:
-            self.predictions = torch.cat((self.predictions, predictions), dim=0)
-
-    def dataset_length(self) -> int:
-        return self.labels.shape[0]
-
-
 @dataclass
-class Value:
+class Metric:
     name: str
     value: typing.Any
 
 
 @dataclass
-class NumberValue(Value):
+class NumberMetric(Metric):
     name: str
     value: float | np.float32 | floating
     formatted_value: str

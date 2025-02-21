@@ -2,8 +2,8 @@ import logging.config
 from pathlib import Path
 
 import mlflow
-from pydantic import computed_field
 import pydantic_settings
+from pydantic import computed_field
 
 
 class Settings(pydantic_settings.BaseSettings):

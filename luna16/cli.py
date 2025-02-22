@@ -44,7 +44,7 @@ def experiment() -> None:
         validation_cadence=5,
     ).fit(
         epochs=1,
-        batch_size=128,
+        batch_size=64,
         version="0.0.0-experiment",
         log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
     )
@@ -61,7 +61,7 @@ def train_luna_classification(
 ) -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        configurations.BestCnnModel(n_blocks=4, dropout_rate=0.4),
+        configurations.BestCnnModel(n_blocks=4, dropout_rate=0.2),
         configurations.BestOptimizer(lr=1e-3, weight_decay=1e-4, betas=(0.9, 0.999)),
         configurations.BestScheduler(gamma=0.1),
         dto.NoduleRatio(positive=1, negative=5),
@@ -203,6 +203,7 @@ def tune_luna_classification(
         "scheduler_gamma": tune.grid_search([0.1, 0.5]),
         "weight_decay": tune.grid_search([0.0001, 0.01]),
         "dropout_rate": tune.grid_search([0.2, 0.4]),
+        "classification_threshold": tune.grid_search([0.5]),
     }
 
     def classification_tunning(config: dict[str, typing.Any]) -> None:

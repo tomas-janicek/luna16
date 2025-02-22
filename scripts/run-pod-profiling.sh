@@ -8,5 +8,5 @@ uv run python luna16/cli.py \
               train_luna_classification \
               0.0.1-profile \
               --epochs=10 \
-              --batch-size=512 \
+              --batch-size=64 \
               --profile 

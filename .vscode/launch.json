@@ -32,8 +32,8 @@
             "args": [
                 "train_luna_classification",
                 "0.0.1", // model version
-                "--epochs=1",
-                "--batch-size=128",
+                "--epochs=10",
+                "--batch-size=64",
             ],
             "justMyCode": false,
         },
@@ -53,8 +53,8 @@
                 "file", // model loader
                 "classification", // start form model name
                 "0.0.1", // start form model version
-                "--epochs=5",
-                "--batch-size=128",
+                "--epochs=10",
+                "--batch-size=64",
             ],
             "justMyCode": false,
         },
@@ -72,7 +72,7 @@
                 "train_luna_classification",
                 "0.0.0-profile", // model version
                 "--epochs=10",
-                "--batch-size=128",
+                "--batch-size=64",
                 "--profile",
             ],
             "justMyCode": false,
@@ -90,8 +90,8 @@
             "args": [
                 "train_luna_malignant_classification",
                 "0.0.1", // model version
-                "--epochs=5",
-                "--batch-size=128",
+                "--epochs=10",
+                "--batch-size=64",
             ],
             "justMyCode": false,
         },
@@ -111,8 +111,8 @@
                 "file", // model loader
                 "classification", // start form model name
                 "0.0.1", // start form model name
-                "--epochs=5",
-                "--batch-size=128",
+                "--epochs=10",
+                "--batch-size=64",
             ],
             "justMyCode": false,
         },
@@ -130,7 +130,7 @@
                 "train_luna_malignant_classification",
                 "0.0.0-profile", // model version
                 "--epochs=10",
-                "--batch-size=128",
+                "--batch-size=64",
                 "--profile",
             ],
             "justMyCode": false,

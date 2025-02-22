@@ -6,11 +6,13 @@ from torch import nn
 
 
 class CnnParameters(pydantic.BaseModel):
+    name: str
     in_channels: int
     conv_channels: int
     out_features: int
     n_blocks: int
     input_dim: tuple[int, int, int]
+    block_class: type[nn.Module]
 
 
 class CnnModel(nn.Module):

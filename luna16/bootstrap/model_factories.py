@@ -101,11 +101,13 @@ class ModelFactory:
                     version=from_version,
                     module_class=BiasedModel,
                     module_params=modules.CnnParameters(
+                        name="BiasedModel",
                         in_channels=1,
                         conv_channels=8,
                         out_features=2,
                         n_blocks=n_blocks,
                         input_dim=(32, 48, 48),
+                        block_class=modules.BiasedBlock,
                     ),
                 )
                 if finetune:

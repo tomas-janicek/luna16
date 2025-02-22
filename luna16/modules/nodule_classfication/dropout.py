@@ -3,6 +3,12 @@ import typing
 import torch
 from torch import nn
 
+from . import base
+
+
+class DropoutParameters(base.CnnParameters):
+    dropout_rate: float
+
 
 class DropoutBlock(nn.Module):
     def __init__(

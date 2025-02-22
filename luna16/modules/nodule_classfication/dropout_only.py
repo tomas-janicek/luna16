@@ -1,6 +1,12 @@
 import torch
 from torch import nn
 
+from . import base
+
+
+class DropoutOnlyParameters(base.CnnParameters):
+    dropout_rate: float
+
 
 class DropoutOnlyBlock(nn.Module):
     def __init__(

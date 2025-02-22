@@ -1,6 +1,12 @@
 import torch
 from torch import nn
 
+from . import base
+
+
+class Dropout3DParameters(base.CnnParameters):
+    dropout_rate: float
+
 
 class Dropout3DBlock(nn.Module):
     def __init__(

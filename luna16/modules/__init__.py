@@ -5,8 +5,11 @@ from .nodule_classfication import (
     CnnModel,
     CnnParameters,
     Dropout3DBlock,
+    Dropout3DParameters,
     DropoutBlock,
     DropoutOnlyBlock,
+    DropoutOnlyParameters,
+    DropoutParameters,
 )
 
 __all__ = [
@@ -16,6 +19,9 @@ __all__ = [
     "CnnModel",
     "CnnParameters",
     "Dropout3DBlock",
+    "Dropout3DParameters",
     "DropoutBlock",
     "DropoutOnlyBlock",
+    "DropoutOnlyParameters",
+    "DropoutParameters",
 ]

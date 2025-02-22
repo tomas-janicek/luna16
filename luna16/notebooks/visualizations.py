@@ -1,17 +1,16 @@
 import logging
 
 import matplotlib
-
-from luna16 import data_processing
-
-matplotlib.use("nbagg")
-
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from numpy import typing as np_typing
 
-from luna16 import datasets, dto
+from luna16 import data_processing, datasets, dto
 
 _log = logging.getLogger(__name__)
 
+matplotlib.use("nbagg")
 clim = (-1000.0, 300)
 
 
@@ -111,3 +110,24 @@ def show_nodule_visualization(  # noqa: C901
         print(f"Showing nodule with series UID {series_uid}")
     else:
         print(f"Showing CT scan with series UID {series_uid} without nodule.")
+
+
+def plot_cutout(
+    center_irc: torch.Tensor, one_ct_image: np_typing.NDArray[np.floating]
+) -> None:
+    _fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 8))
+
+    ax1.set_title(f"Index {int(center_irc[0])}", fontsize=30)
+    for label in ax1.get_xticklabels() + ax1.get_yticklabels():
+        label.set_fontsize(20)
+    ax1.imshow(one_ct_image[one_ct_image.shape[0] // 2], clim=clim, cmap="gray")
+
+    ax2.set_title(f"Row {int(center_irc[1])}", fontsize=30)
+    for label in ax2.get_xticklabels() + ax2.get_yticklabels():
+        label.set_fontsize(20)
+    ax2.imshow(one_ct_image[:, one_ct_image.shape[1] // 2], clim=clim, cmap="gray")
+
+    ax3.set_title(f"Col {int(center_irc[2])}", fontsize=30)
+    for label in ax3.get_xticklabels() + ax3.get_yticklabels():
+        label.set_fontsize(20)
+    ax3.imshow(one_ct_image[:, :, one_ct_image.shape[2] // 2], clim=clim, cmap="gray")

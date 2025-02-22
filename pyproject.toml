@@ -29,6 +29,7 @@ dependencies = [
   "torchinfo>=1.8.0",
   "tqdm>=4.66.5",
   "typer>=0.12.5",
+  "onnx>=1.17.0",
 ]
 
 [tool.uv]
@@ -41,8 +42,8 @@ dev-dependencies = [
 conflicts = [[{ extra = "cpu" }, { extra = "cu124" }]]
 
 [project.optional-dependencies]
-cpu = ["torch>=2.6.0", "torchvision>=0.21.0"]
-cu124 = ["torch>=2.6.0", "torchvision>=0.21.0"]
+cpu = ["torch>=2.6.0", "torchvision>=0.21.0", "onnxruntime>=1.20.1"]
+cu124 = ["torch>=2.6.0", "torchvision>=0.21.0", "onnxruntime-gpu>=1.20.1"]
 
 
 [tool.uv.sources]

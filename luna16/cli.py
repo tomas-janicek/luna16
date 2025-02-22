@@ -32,7 +32,7 @@ def get_recommended_num_workers() -> None:
 def experiment() -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        configurations.BiasedModel(n_blocks=4),
+        configurations.Dropout3DModel(n_blocks=4, dropout_rate=0.2),
         configurations.BestOptimizer(lr=1e-3, weight_decay=1e-4, betas=(0.9, 0.999)),
         configurations.BestScheduler(gamma=0.1),
         dto.NoduleRatio(positive=1, negative=5),
@@ -43,7 +43,7 @@ def experiment() -> None:
         training_name=training_name,
         validation_cadence=5,
     ).fit(
-        epochs=1,
+        epochs=3,
         batch_size=64,
         version="0.0.0-experiment",
         log_every_n_examples=settings.LOG_EVERY_N_EXAMPLES,
@@ -61,7 +61,7 @@ def train_luna_classification(
 ) -> None:
     training_name = "Classification"
     registry = bootstrap.create_registry(
-        configurations.BestCnnModel(n_blocks=4, dropout_rate=0.2),
+        configurations.Dropout3DModel(n_blocks=4, dropout_rate=0.2),
         configurations.BestOptimizer(lr=1e-3, weight_decay=1e-4, betas=(0.9, 0.999)),
         configurations.BestScheduler(gamma=0.1),
         dto.NoduleRatio(positive=1, negative=5),

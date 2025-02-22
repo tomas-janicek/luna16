@@ -2,9 +2,6 @@
 
 This directory contains the Jupyter Notebooks used to analyze the LuNA 16 dataset, design the model architecture and train the model.
 
-TODO: 
-- Look into notes from designong ML systems and implement the model development cycle here.
-
 ## Notebooks
 
 The following notebooks are included in this directory.

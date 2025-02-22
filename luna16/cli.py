@@ -196,7 +196,6 @@ def tune_luna_classification(
 ) -> None:
     training_name = "Classification"
 
-    # TODO: Add classification threshold as hyperparameter
     hyperparameters: dict[str, typing.Any] = {
         "batch_size": tune.grid_search([64, 256]),
         "learning_rate": tune.grid_search([0.0001, 0.001]),

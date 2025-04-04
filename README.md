@@ -32,14 +32,13 @@ This project primarily serves educational purposes, guiding users through the en
 
 This project is still in progress and was initially prepared for experimenting with different models. Currently, it only implements the most basic "real" model. Several key components are missing, including:
 
-- Segmentation of CT scans. The project currently focuses on classification tasks, using cutouts of CT scans. However, adding segmentation capabilities to extract nodules from CT scans directly is planned.
-- Baseline and other models. I would particularly like to add a Zero Rule Baseline and non-neural network models. Additionally, incorporating other neural network models with different architectures and convolution techniques is planned.
-- Hyperparameter tuning. The project aims to integrate Ray for distributed hyperparameter tuning to optimize model performance.
-- Cloud deployment. The project will include tools and scripts for deploying models to cloud platforms for inference and production use.
-- Additional datasets. The project will include more datasets for training and validation, covering a wider range of medical imaging tasks and modalities.
-
-Current model improvements:
-- Add gradient clipping.
+- **Segmentation of CT scans.** The project currently focuses on classification tasks, using cutouts of CT scans. However, adding segmentation capabilities to extract nodules from CT scans directly is planned.
+- **Baseline and other models.** I would particularly like to add a Zero Rule Baseline and non-neural network models. Additionally, incorporating other neural network models with different architectures and convolution techniques is planned.
+- **Hyperparameter tuning.** The project aims to integrate Ray for distributed hyperparameter tuning to optimize model performance.
+- **Cloud deployment.** The project will include tools and scripts for deploying models to cloud platforms for inference and production use.
+- **Additional datasets.** The project will include more datasets for training and validation, covering a wider range of medical imaging tasks and modalities.
+- **Try Torchrun.** Use `torchrun` to run training scripts.
+- **Add gradient clipping.**
 
 
 ## 🏛️ Architecture
@@ -158,6 +157,7 @@ These augmentations help ensure that the models trained in Luna 16 are more resi
 The `BaseIteratorProvider` class defines the interface for batch iterators in the Luna 16 project.
 
 Key method:
+
 - `enumerate_batches`: An abstract method that must be implemented by any subclass to iterate over batches of data, providing the necessary logging and handling during the iteration process.
 
 #### 🔄 BatchIteratorProvider
